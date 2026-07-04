@@ -33,6 +33,7 @@
                 @if ($canViewRecommendation)
                     <a href="{{ route('companies.recommendations.show', [$company, $project]) }}" class="ui-button ui-button-secondary">System Recommendation</a>
                 @endif
+                <a href="{{ route('companies.projects.report.pdf', [$company, $project]) }}" class="ui-button ui-button-secondary">Download Report PDF</a>
                 @if ($canUpdateProject && ! $project->isArchived())
                     <a href="{{ route('companies.projects.edit', [$company, $project]) }}" class="ui-button ui-button-primary">Edit Project</a>
                 @endif

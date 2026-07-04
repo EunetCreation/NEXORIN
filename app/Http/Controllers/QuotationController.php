@@ -8,12 +8,14 @@ use App\Models\Company;
 use App\Models\Project;
 use App\Models\Quotation;
 use App\Services\Quotation\QuotationEngine;
+use App\Services\Quotation\QuotationPdfRenderer;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\Response;
 
 class QuotationController extends Controller
 {
@@ -255,6 +257,43 @@ class QuotationController extends Controller
         return redirect()
             ->route('companies.quotations.show', [$company, $project])
             ->with('success', 'Quotation draft has been generated.');
+    }
+
+
+    public function pdf(Request $request, Company $company, Project $project, QuotationPdfRenderer $pdfRenderer): Response
+    {
+        $this->authorizeProjectResource(
+            $request,
+            $company,
+            $project,
+            ['quotation.view', 'quotation.create', 'quotation.update', 'quotation.send'],
+            ['quotation.view_own']
+        );
+
+        $project->load([
+            'customer:id,name,customer_number,email,phone,address,city,province',
+            'quotation.items',
+            'quotation.project.customer',
+            'quotation.preparer:id,name',
+            'quotation.issuer:id,name',
+        ]);
+
+        $quotation = $project->quotation;
+
+        if (! $quotation) {
+            throw ValidationException::withMessages([
+                'quotation' => 'Generate quotation before downloading the PDF.',
+            ]);
+        }
+
+        $pdf = $pdfRenderer->render($quotation);
+        $filename = $pdfRenderer->filename($quotation);
+
+        return response($pdf, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
+            'Cache-Control' => 'private, max-age=0, must-revalidate',
+        ]);
     }
 
     public function issue(Request $request, Company $company, Project $project): RedirectResponse

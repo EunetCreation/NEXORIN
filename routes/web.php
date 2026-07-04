@@ -9,6 +9,7 @@ use App\Http\Controllers\LoadAnalysisController;
 use App\Http\Controllers\LoadApplianceController;
 use App\Http\Controllers\LocationSolarController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\ProjectReportController;
 use App\Http\Controllers\QuotationController;
 use App\Http\Controllers\RoofSiteSurveyController;
 use App\Http\Controllers\RoofSiteSurveyPhotoController;
@@ -270,6 +271,14 @@ Route::middleware(['auth', 'user.active'])->group(function () {
             Route::get('/projects/{project}/quotation', [QuotationController::class, 'show'])
                 ->middleware('company.permission:quotation.view,quotation.create,quotation.update,quotation.send,quotation.view_own')
                 ->name('quotations.show');
+
+            Route::get('/projects/{project}/quotation/pdf', [QuotationController::class, 'pdf'])
+                ->middleware('company.permission:quotation.view,quotation.create,quotation.update,quotation.send,quotation.view_own')
+                ->name('quotations.pdf');
+
+            Route::get('/projects/{project}/report/pdf', [ProjectReportController::class, 'pdf'])
+                ->middleware('company.permission:project.view,project.view_own,calculation.view,calculation.view_own,price.selling.view,quotation.view,quotation.view_own')
+                ->name('projects.report.pdf');
 
             Route::post('/projects/{project}/quotation/generate', [QuotationController::class, 'generate'])
                 ->middleware('company.permission:quotation.create,quotation.update')

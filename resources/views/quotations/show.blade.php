@@ -31,6 +31,10 @@
             <p>Customer-facing quotation generated from the priced BOQ and financial analysis. Cost price, gross margin, and internal pricing assumptions are not shown here.</p>
         </div>
         <div class="quote-actions">
+            @if ($quotation)
+                <a class="ui-button ui-button-secondary" href="{{ route('companies.quotations.pdf', [$company, $project]) }}">Download PDF</a>
+            @endif
+            <a class="ui-button ui-button-secondary" href="{{ route('companies.projects.report.pdf', [$company, $project]) }}">Project Report PDF</a>
             <a class="ui-button ui-button-secondary" href="{{ route('companies.financial-analyses.show', [$company, $project]) }}">Financial Analysis</a>
             <a class="ui-button ui-button-secondary" href="{{ route('companies.quotations.index', $company) }}">Back to list</a>
         </div>
