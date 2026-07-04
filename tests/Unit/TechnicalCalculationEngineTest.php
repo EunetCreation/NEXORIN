@@ -4,6 +4,7 @@ namespace Tests\Unit;
 
 use App\Models\Project;
 use App\Services\Calculation\TechnicalCalculationEngine;
+use App\Support\CalculationWarning;
 use Tests\TestCase;
 
 class TechnicalCalculationEngineTest extends TestCase
@@ -29,6 +30,9 @@ class TechnicalCalculationEngineTest extends TestCase
 
         $this->assertSame('detailed', $result['result_status']);
         $this->assertSame('on_grid', $result['assumptions']['system_type']);
+        $this->assertArrayHasKey('assumption_snapshot', $result);
+        $this->assertSame(TechnicalCalculationEngine::VERSION, $result['assumption_snapshot']['engine_version']['value']);
+        $this->assertSame('load_analysis', $result['assumption_snapshot']['daily_load_kwh']['source']);
 
         $this->assertGreaterThan(6.0, $result['required_pv_kw']);
         $this->assertGreaterThan(6.0, $result['installed_pv_kw']);
@@ -102,7 +106,9 @@ class TechnicalCalculationEngineTest extends TestCase
 
         $this->assertSame('preliminary', $result['result_status']);
 
-        $this->assertContains(
+        $this->assertWarningCode('STRING_MPPT_INCOMPATIBLE', $result['warnings']);
+        $this->assertWarningSeverity('critical', $result['warnings']);
+        $this->assertWarningMessageContains(
             'Selected module and inverter are not compatible within the MPPT and maximum DC voltage window.',
             $result['warnings']
         );
@@ -125,15 +131,8 @@ class TechnicalCalculationEngineTest extends TestCase
         $this->assertGreaterThan(1, $result['dc_voltage_drop_percent']);
         $this->assertGreaterThan(1, $result['ac_voltage_drop_percent']);
 
-        $this->assertContains(
-            'DC voltage drop exceeds the selected maximum design limit.',
-            $result['warnings']
-        );
-
-        $this->assertContains(
-            'AC voltage drop exceeds the selected maximum design limit.',
-            $result['warnings']
-        );
+        $this->assertWarningCode('DC_VOLTAGE_DROP_EXCEEDS_LIMIT', $result['warnings']);
+        $this->assertWarningCode('AC_VOLTAGE_DROP_EXCEEDS_LIMIT', $result['warnings']);
     }
 
     public function test_it_warns_when_dc_ac_ratio_is_low(): void
@@ -147,7 +146,9 @@ class TechnicalCalculationEngineTest extends TestCase
         );
 
         $this->assertLessThan(0.95, $result['dc_ac_ratio']);
-        $this->assertContains(
+        $this->assertWarningCode('DC_AC_RATIO_LOW', $result['warnings']);
+        $this->assertWarningSeverity('caution', $result['warnings']);
+        $this->assertWarningMessageContains(
             'DC/AC ratio is low. The inverter capacity may be oversized relative to the installed PV array, reducing utilization and financial performance.',
             $result['warnings']
         );
@@ -163,17 +164,53 @@ class TechnicalCalculationEngineTest extends TestCase
 
         $this->assertSame('preliminary', $result['result_status']);
         $this->assertSame(0, $result['module_count']);
-        $this->assertContains(
-            'Load source is missing or has zero daily energy. PV sizing result is therefore limited.',
-            $result['warnings']
+        $this->assertWarningCode('LOAD_SOURCE_MISSING', $result['warnings']);
+        $this->assertWarningCode('SOLAR_PROFILE_FALLBACK', $result['warnings']);
+        $this->assertWarningCode('ROOF_AREA_MISSING', $result['warnings']);
+    }
+
+
+    public function test_it_returns_structured_warning_records_and_assumption_snapshot(): void
+    {
+        $result = $this->engine->calculate(
+            new Project(),
+            $this->baseInput([
+                'inverter_ac_power_kw' => 20,
+            ]),
+            $this->baseSources()
         );
-        $this->assertContains(
-            'Solar profile is missing. The calculation used a fallback peak sun hour value of 4.5 h/day.',
-            $result['warnings']
-        );
-        $this->assertContains(
-            'Usable roof area is missing. Roof limitation was not applied.',
-            $result['warnings']
+
+        $this->assertIsArray($result['warnings'][0]);
+        $this->assertArrayHasKey('code', $result['warnings'][0]);
+        $this->assertArrayHasKey('severity', $result['warnings'][0]);
+        $this->assertArrayHasKey('recommendation', $result['warnings'][0]);
+        $this->assertWarningCode('DC_AC_RATIO_LOW', $result['warnings']);
+        $this->assertSame('calculation_input', $result['assumption_snapshot']['desired_dc_ac_ratio']['source']);
+        $this->assertSame('Maximum voltage drop', $result['assumption_snapshot']['maximum_voltage_drop_percent']['label']);
+    }
+
+
+    /** @param array<int, mixed> $warnings */
+    private function assertWarningCode(string $code, array $warnings): void
+    {
+        $codes = array_map(fn ($warning) => CalculationWarning::code($warning), $warnings);
+        $this->assertContains($code, $codes);
+    }
+
+    /** @param array<int, mixed> $warnings */
+    private function assertWarningSeverity(string $severity, array $warnings): void
+    {
+        $severities = array_map(fn ($warning) => CalculationWarning::severity($warning), $warnings);
+        $this->assertContains($severity, $severities);
+    }
+
+    /** @param array<int, mixed> $warnings */
+    private function assertWarningMessageContains(string $message, array $warnings): void
+    {
+        $messages = array_map(fn ($warning) => CalculationWarning::message($warning), $warnings);
+        $this->assertTrue(
+            collect($messages)->contains(fn (string $item) => str_contains($item, $message)),
+            'Expected warning message was not found.'
         );
     }
 

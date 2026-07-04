@@ -58,8 +58,33 @@ class ProjectReportPdfRendererTest extends TestCase
                 'string_count' => 2,
                 'dc_voltage_drop_percent' => 1.1,
                 'ac_voltage_drop_percent' => 0.8,
+                'assumption_snapshot' => [
+                    'performance_ratio' => [
+                        'label' => 'Base performance ratio',
+                        'value' => 0.78,
+                        'unit' => '',
+                        'source' => 'calculation_input',
+                        'description' => 'Base performance ratio before shading adjustment.',
+                    ],
+                    'average_psh' => [
+                        'label' => 'Average peak sun hour',
+                        'value' => 4.7,
+                        'unit' => 'h/day',
+                        'source' => 'solar_profile',
+                        'description' => 'Average daily solar resource used in preliminary energy production estimation.',
+                    ],
+                ],
             ],
-            'warnings' => [],
+            'warnings' => [
+                [
+                    'code' => 'DC_AC_RATIO_LOW',
+                    'severity' => 'caution',
+                    'title' => 'Low DC/AC Ratio',
+                    'message' => 'DC/AC ratio is low. The inverter capacity may be oversized relative to the installed PV array.',
+                    'recommendation' => 'Review inverter capacity or increase PV array size.',
+                    'source' => 'technical_calculation',
+                ],
+            ],
         ]));
 
         $bom = new BillOfMaterial([
@@ -158,6 +183,10 @@ class ProjectReportPdfRendererTest extends TestCase
         $this->assertStringContainsString('Surya', $pdf);
 
         $this->assertStringContainsString('IDR 10,600,000', $pdf);
+        $this->assertStringContainsString('Engineering assumptions', $pdf);
+        $this->assertStringContainsString('Base performance ratio', $pdf);
+        $this->assertStringContainsString('Low DC/AC Ratio', $pdf);
+        $this->assertStringContainsString('Recommendation:', $pdf);
         $this->assertStringNotContainsString('...', $pdf);
         $this->assertStringEndsWith("%%EOF\n", $pdf);
         $this->assertSame('PRJ-TEST-001-project-report.pdf', $renderer->filename($project));

@@ -52,6 +52,21 @@
     .tc-warning-list li,.tc-history li{padding:13px 14px;border:1px solid var(--slate-200);border-radius:15px;background:var(--slate-50);line-height:1.45}
     .tc-warning-list li{border-color:#fed7aa;background:#fff7ed;color:#9a3412}
     .tc-warning-list .tc-no-warning{border-color:#99f6e4;background:#ecfdf9;color:#087a70}
+    .tc-warning-card{display:grid;gap:7px;padding:14px 15px;border-radius:16px;border:1px solid var(--slate-200);background:#fff}
+    .tc-warning-card strong{color:var(--navy-900)}
+    .tc-warning-meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .tc-warning-pill{display:inline-flex;width:max-content;padding:3px 8px;border-radius:999px;font-size:.67rem;font-weight:900;text-transform:uppercase;letter-spacing:.06em}
+    .tc-warning-code{color:var(--slate-500);font-size:.72rem;font-weight:800;letter-spacing:.05em}
+    .tc-warning-message,.tc-warning-recommendation{margin:0;color:var(--slate-650);font-size:.84rem;line-height:1.5}
+    .tc-warning-critical{border-color:#fecaca;background:#fef2f2}.tc-warning-critical .tc-warning-pill{background:#fee2e2;color:#991b1b}
+    .tc-warning-warning{border-color:#fed7aa;background:#fff7ed}.tc-warning-warning .tc-warning-pill{background:#ffedd5;color:#9a3412}
+    .tc-warning-caution{border-color:#fde68a;background:#fffbeb}.tc-warning-caution .tc-warning-pill{background:#fef3c7;color:#92400e}
+    .tc-warning-info{border-color:#bae6fd;background:#f0f9ff}.tc-warning-info .tc-warning-pill{background:#e0f2fe;color:#075985}
+    .tc-assumption-table{width:100%;border-collapse:collapse;background:#fff}
+    .tc-assumption-table th,.tc-assumption-table td{padding:12px 14px;border-bottom:1px solid var(--slate-200);text-align:left;vertical-align:top;font-size:.84rem}
+    .tc-assumption-table th{background:var(--slate-50);color:var(--slate-600);font-size:.72rem;text-transform:uppercase;letter-spacing:.05em}
+    .tc-assumption-table tr:last-child td{border-bottom:0}
+    .tc-assumption-desc{color:var(--slate-600);line-height:1.45}
     .tc-override-badge{display:inline-flex;align-items:center;width:max-content;margin-top:8px;padding:4px 8px;border-radius:999px;background:#fef3c7;color:#92400e;font-size:.68rem;font-weight:850;letter-spacing:.05em;text-transform:uppercase}
     .tc-override-table{width:100%;border-collapse:collapse;background:#fff}
     .tc-override-table th,.tc-override-table td{padding:12px 14px;border-bottom:1px solid var(--slate-200);text-align:left;vertical-align:top;font-size:.84rem}
@@ -117,6 +132,20 @@
         $results['protection'] = array_replace($resultDefaults['protection'], $results['protection'] ?? []);
         $activeOverrides = $calculation->relationLoaded('activeOverrides') ? $calculation->activeOverrides : collect();
         $overrideMap = $activeOverrides->keyBy('field');
+        $warningRecords = $calculation->exists ? \App\Support\CalculationWarning::normalizeList($calculation->warnings ?? [], 'technical_calculation') : [];
+        $warningCounts = collect($warningRecords)->countBy(fn ($warning) => $warning['severity'] ?? 'info');
+        $assumptionSnapshot = $results['assumption_snapshot'] ?? [];
+        $assumptionSnapshot = is_array($assumptionSnapshot) ? $assumptionSnapshot : [];
+        $formatAssumptionValue = function ($assumption) {
+            $value = $assumption['value'] ?? '-';
+            $unit = $assumption['unit'] ?? '';
+            if (is_numeric($value)) {
+                $formatted = rtrim(rtrim(number_format((float) $value, 4), '0'), '.');
+            } else {
+                $formatted = (string) $value;
+            }
+            return trim($formatted.' '.($unit ?: ''));
+        };
         $formatOverrideValue = function ($value, $unit = '', $type = 'numeric') {
             if ($value === null || $value === '') {
                 return '-';
@@ -297,7 +326,7 @@
                 @if ($hasResults)
                     <section class="tc-card">
                         <div class="tc-card-head">
-                            <div><h3>Calculation Results</h3><p class="tc-card-subtitle">Traceable outputs generated from the current source snapshot and engineering inputs.</p></div>
+                            <div><h3>Calculation Results</h3><p class="tc-card-subtitle">Traceable outputs generated from the current source snapshot, engineering inputs, warning severity, and assumption snapshot.</p></div>
                         </div>
 
                         <div class="tc-result-grid">
@@ -349,6 +378,34 @@
                                 </div>
                             </article>
                         </div>
+
+                        @if ($assumptionSnapshot !== [])
+                            <article class="tc-result-panel tc-result-panel-wide" style="margin-top:16px">
+                                <h4>Engineering Assumption Snapshot</h4>
+                                <div class="tc-table-wrap">
+                                    <table class="tc-assumption-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Assumption</th>
+                                                <th>Value</th>
+                                                <th>Source</th>
+                                                <th>Description</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (array_slice($assumptionSnapshot, 0, 12, true) as $assumption)
+                                                <tr>
+                                                    <td><strong>{{ $assumption['label'] ?? 'Assumption' }}</strong></td>
+                                                    <td>{{ $formatAssumptionValue($assumption) }}</td>
+                                                    <td>{{ ucwords(str_replace('_', ' ', $assumption['source'] ?? 'system')) }}</td>
+                                                    <td class="tc-assumption-desc">{{ $assumption['description'] ?? '-' }}</td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </article>
+                        @endif
 
                         @if ($activeOverrides->isNotEmpty())
                             <div class="tc-override-note">
@@ -449,10 +506,27 @@
                 @endif
 
                 <section class="tc-card">
-                    <div class="tc-card-head"><div><h3>Warnings</h3><p class="tc-card-subtitle">Compatibility and source-data issues detected by the engine.</p></div></div>
+                    <div class="tc-card-head"><div><h3>Warnings</h3><p class="tc-card-subtitle">Structured severity, source, and recommended engineering action.</p></div></div>
+                    @if ($warningRecords !== [])
+                        <div class="tc-source-grid" style="margin-bottom:14px">
+                            <div class="tc-source"><span>Critical</span><strong>{{ $warningCounts->get('critical', 0) }}</strong></div>
+                            <div class="tc-source"><span>Warning</span><strong>{{ $warningCounts->get('warning', 0) }}</strong></div>
+                            <div class="tc-source"><span>Caution</span><strong>{{ $warningCounts->get('caution', 0) }}</strong></div>
+                            <div class="tc-source"><span>Info</span><strong>{{ $warningCounts->get('info', 0) }}</strong></div>
+                        </div>
+                    @endif
                     <ul class="tc-warning-list">
-                        @forelse (($calculation->warnings ?? []) as $warning)
-                            <li>{{ $warning }}</li>
+                        @forelse ($warningRecords as $warning)
+                            @php($severity = $warning['severity'] ?? 'info')
+                            <li class="tc-warning-card tc-warning-{{ $severity }}">
+                                <div class="tc-warning-meta">
+                                    <span class="tc-warning-pill">{{ $severity }}</span>
+                                    <span class="tc-warning-code">{{ $warning['code'] ?? 'WARNING' }}</span>
+                                </div>
+                                <strong>{{ $warning['title'] ?? 'Calculation warning' }}</strong>
+                                <p class="tc-warning-message">{{ $warning['message'] ?? '-' }}</p>
+                                <p class="tc-warning-recommendation"><strong>Recommendation:</strong> {{ $warning['recommendation'] ?? 'Review this warning before using the result.' }}</p>
+                            </li>
                         @empty
                             <li class="tc-no-warning">No active calculation warnings.</li>
                         @endforelse

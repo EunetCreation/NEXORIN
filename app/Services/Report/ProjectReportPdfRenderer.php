@@ -4,6 +4,7 @@ namespace App\Services\Report;
 
 use App\Models\BillOfMaterialItem;
 use App\Models\Project;
+use App\Support\CalculationWarning;
 use App\Support\PhoneFormatter;
 use DateTimeInterface;
 use Illuminate\Support\Collection;
@@ -225,6 +226,8 @@ class ProjectReportPdfRenderer
             ['Calculated at', $this->dateTime($calculation->calculated_at)],
         ]);
 
+        $this->drawEngineeringAssumptions($result['assumption_snapshot'] ?? []);
+
         $overrides = $calculation->relationLoaded('activeOverrides')
             ? $calculation->activeOverrides
             : collect();
@@ -262,10 +265,63 @@ class ProjectReportPdfRenderer
 
         if (! empty($calculation->warnings)) {
             $this->miniTitle('Technical warnings');
-            foreach (array_slice($calculation->warnings, 0, 8) as $warning) {
-                $this->bullet((string) $warning);
+            foreach (array_slice(CalculationWarning::normalizeList($calculation->warnings, 'technical_calculation'), 0, 8) as $warning) {
+                $this->bullet(CalculationWarning::text($warning));
             }
         }
+    }
+
+    private function drawEngineeringAssumptions(mixed $assumptions): void
+    {
+        if (! is_array($assumptions) || $assumptions === []) {
+            return;
+        }
+
+        $rows = [];
+        foreach (array_slice($assumptions, 0, 10, true) as $assumption) {
+            if (! is_array($assumption)) {
+                continue;
+            }
+
+            $label = (string) ($assumption['label'] ?? 'Assumption');
+            $value = $this->formatAssumptionValue($assumption);
+            $source = $this->label($assumption['source'] ?? 'system');
+            $description = (string) ($assumption['description'] ?? '');
+            $rows[] = [
+                $label,
+                trim($value.' | '.$source),
+            ];
+
+            if ($description !== '') {
+                $rows[] = ['Basis', $description];
+            }
+        }
+
+        if ($rows === []) {
+            return;
+        }
+
+        $this->miniTitle('Engineering assumptions');
+        $this->twoColumnRows($rows);
+    }
+
+    /** @param array<string, mixed> $assumption */
+    private function formatAssumptionValue(array $assumption): string
+    {
+        $value = $assumption['value'] ?? null;
+        $unit = (string) ($assumption['unit'] ?? '');
+
+        if ($value === null || $value === '') {
+            return '-';
+        }
+
+        if (is_numeric($value)) {
+            $formatted = rtrim(rtrim(number_format((float) $value, 4, '.', ','), '0'), '.');
+        } else {
+            $formatted = (string) $value;
+        }
+
+        return trim($formatted.' '.$unit);
     }
 
     private function drawBomBoq(Project $project): void
@@ -579,7 +635,7 @@ class ProjectReportPdfRenderer
         ] as $group) {
             if (is_array($group)) {
                 foreach ($group as $warning) {
-                    $text = trim((string) $warning);
+                    $text = trim(CalculationWarning::text($warning));
                     if ($text !== '') {
                         $warnings[] = $text;
                     }

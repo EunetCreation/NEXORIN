@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Support\CalculationWarning;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
@@ -145,6 +146,46 @@ class TechnicalCalculation extends Model
         return is_array($summary) && $summary !== [];
     }
 
+
+
+    /**
+     * @return array<int, array<string, string>>
+     */
+    public function warningRecords(): array
+    {
+        return CalculationWarning::normalizeList($this->warnings ?? [], 'technical_calculation');
+    }
+
+    /**
+     * @return array<string, int>
+     */
+    public function warningSeverityCounts(): array
+    {
+        $counts = [
+            'critical' => 0,
+            'warning' => 0,
+            'caution' => 0,
+            'info' => 0,
+        ];
+
+        foreach ($this->warningRecords() as $warning) {
+            $severity = $warning['severity'] ?? 'info';
+            $counts[$severity] = ($counts[$severity] ?? 0) + 1;
+        }
+
+        return $counts;
+    }
+
+    /**
+     * @return array<string, array<string, mixed>>
+     */
+    public function assumptionSnapshot(): array
+    {
+        $results = $this->results ?? [];
+        $snapshot = $results['assumption_snapshot'] ?? [];
+
+        return is_array($snapshot) ? $snapshot : [];
+    }
 
     public function getResultStatusLabelAttribute(): string
     {

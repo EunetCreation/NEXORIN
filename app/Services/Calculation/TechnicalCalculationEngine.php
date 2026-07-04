@@ -3,10 +3,11 @@
 namespace App\Services\Calculation;
 
 use App\Models\Project;
+use App\Support\CalculationWarning;
 
 class TechnicalCalculationEngine
 {
-    public const VERSION = 'nexorin-technical-lv-v1.1.0';
+    public const VERSION = 'nexorin-technical-lv-v1.2.0';
 
     /**
      * Calculate preliminary low-voltage rooftop PV technical design values.
@@ -35,25 +36,49 @@ class TechnicalCalculationEngine
         $hasRoofSource = isset($roof['usable_area_m2']) && $usableRoofAreaM2 > 0;
 
         if ($dailyLoadKwh <= 0) {
-            $warnings[] = 'Load source is missing or has zero daily energy. PV sizing result is therefore limited.';
+            $warnings[] = CalculationWarning::make(
+                'LOAD_SOURCE_MISSING',
+                'critical',
+                'Load Source Missing',
+                'Load source is missing or has zero daily energy. PV sizing result is therefore limited.',
+                'Complete load analysis or enter a valid daily energy value before using the design result.'
+            );
         }
 
         if ($psh <= 0) {
             $psh = 4.5;
-            $warnings[] = 'Solar profile is missing. The calculation used a fallback peak sun hour value of 4.5 h/day.';
+            $warnings[] = CalculationWarning::make(
+                'SOLAR_PROFILE_FALLBACK',
+                'caution',
+                'Solar Profile Fallback',
+                'Solar profile is missing. The calculation used a fallback peak sun hour value of 4.5 h/day.',
+                'Provide a project solar profile from API data, measured data, or a documented manual value.'
+            );
         }
 
         if (! $hasRoofSource) {
-            $warnings[] = 'Usable roof area is missing. Roof limitation was not applied.';
+            $warnings[] = CalculationWarning::make(
+                'ROOF_AREA_MISSING',
+                'warning',
+                'Usable Roof Area Missing',
+                'Usable roof area is missing. Roof limitation was not applied.',
+                'Complete roof/site survey before finalizing module count and layout.'
+            );
         }
 
         if ($recommendation === []) {
-            $warnings[] = 'System recommendation source is missing. The selected system type only follows the calculation form input.';
+            $warnings[] = CalculationWarning::make(
+                'RECOMMENDATION_SOURCE_MISSING',
+                'info',
+                'Recommendation Source Missing',
+                'System recommendation source is missing. The selected system type only follows the calculation form input.',
+                'Generate a system recommendation to document why the selected topology is suitable.'
+            );
         }
 
         foreach (($roof['warnings'] ?? []) as $roofWarning) {
             if (is_string($roofWarning) && $roofWarning !== '') {
-                $warnings[] = $roofWarning;
+                $warnings[] = CalculationWarning::fromLegacy($roofWarning, 'roof_site_survey', 'ROOF_SITE_WARNING');
             }
         }
 
@@ -111,7 +136,13 @@ class TechnicalCalculationEngine
         $installedPvKw = $moduleWp > 0 ? ($moduleCount * $moduleWp) / 1000 : 0.0;
 
         if ($requiredModuleCount > 0 && $moduleCount < $requiredModuleCount) {
-            $warnings[] = 'PV array is roof limited. Installed PV capacity is lower than the target offset requirement.';
+            $warnings[] = CalculationWarning::make(
+                'PV_ARRAY_ROOF_LIMITED',
+                'warning',
+                'PV Array Roof Limited',
+                'PV array is roof limited. Installed PV capacity is lower than the target offset requirement.',
+                'Review available mounting area, module wattage, target offset, or layout constraints.'
+            );
         }
 
         $inverterCount = 0;
@@ -135,11 +166,23 @@ class TechnicalCalculationEngine
         $dcAcRatio = $totalInverterAcKw > 0 ? $installedPvKw / $totalInverterAcKw : 0.0;
 
         if ($dcAcRatio > 0 && $dcAcRatio < 0.95) {
-            $warnings[] = 'DC/AC ratio is low. The inverter capacity may be oversized relative to the installed PV array, reducing utilization and financial performance.';
+            $warnings[] = CalculationWarning::make(
+                'DC_AC_RATIO_LOW',
+                'caution',
+                'Low DC/AC Ratio',
+                'DC/AC ratio is low. The inverter capacity may be oversized relative to the installed PV array, reducing utilization and financial performance.',
+                'Review inverter capacity, increase PV array size, or document the reason for oversizing.'
+            );
         }
 
         if ($dcAcRatio > 0 && ($dcAcRatio < 0.75 || $dcAcRatio > 1.50)) {
-            $warnings[] = 'DC/AC ratio is outside the common preliminary design band of 0.75 to 1.50.';
+            $warnings[] = CalculationWarning::make(
+                'DC_AC_RATIO_OUTSIDE_BAND',
+                'warning',
+                'DC/AC Ratio Outside Design Band',
+                'DC/AC ratio is outside the common preliminary design band of 0.75 to 1.50.',
+                'Confirm inverter selection and PV array size against project objectives and manufacturer guidance.'
+            );
         }
 
         $moduleVocCold = $this->temperatureCorrectedVoltage(
@@ -176,12 +219,24 @@ class TechnicalCalculationEngine
         }
 
         if ($minimumModulesPerString > $maximumModulesPerString || $maximumModulesPerString === 0) {
-            $warnings[] = 'Selected module and inverter are not compatible within the MPPT and maximum DC voltage window.';
+            $warnings[] = CalculationWarning::make(
+                'STRING_MPPT_INCOMPATIBLE',
+                'critical',
+                'String and MPPT Incompatible',
+                'Selected module and inverter are not compatible within the MPPT and maximum DC voltage window.',
+                'Change module count per string, select another inverter, or verify datasheet voltage limits.'
+            );
         }
 
         $availableMpptInputs = $inverterCount * $inverterMpptCount;
         if ($stringCount > 0 && $availableMpptInputs > 0 && $stringCount > $availableMpptInputs) {
-            $warnings[] = 'String count exceeds the available MPPT inputs. Select a larger inverter set or adjust the module layout.';
+            $warnings[] = CalculationWarning::make(
+                'STRING_COUNT_EXCEEDS_MPPT',
+                'critical',
+                'String Count Exceeds MPPT Inputs',
+                'String count exceeds the available MPPT inputs. Select a larger inverter set or adjust the module layout.',
+                'Increase inverter or MPPT capacity, change string layout, or revise module count.'
+            );
         }
 
         $parallelStringsPerMppt = $availableMpptInputs > 0
@@ -190,7 +245,13 @@ class TechnicalCalculationEngine
         $dcInputCurrentA = $parallelStringsPerMppt * $moduleIsc * 1.25;
 
         if ($dcInputCurrentA > 0 && $inverterMaxInputCurrentA > 0 && $dcInputCurrentA > $inverterMaxInputCurrentA) {
-            $warnings[] = 'Calculated DC input current exceeds the inverter input-current limit per inverter.';
+            $warnings[] = CalculationWarning::make(
+                'DC_INPUT_CURRENT_EXCEEDS_LIMIT',
+                'critical',
+                'DC Input Current Exceeds Limit',
+                'Calculated DC input current exceeds the inverter input-current limit per inverter.',
+                'Reduce parallel strings per MPPT or select an inverter with a higher input current rating.'
+            );
         }
 
         $stringVocColdV = $modulesPerString * $moduleVocCold;
@@ -208,7 +269,13 @@ class TechnicalCalculationEngine
 
         if ($systemType === 'hybrid') {
             if ($backupHours <= 0) {
-                $warnings[] = 'Hybrid system is selected but backup duration is zero.';
+                $warnings[] = CalculationWarning::make(
+                    'HYBRID_BACKUP_DURATION_ZERO',
+                    'warning',
+                    'Hybrid Backup Duration Zero',
+                    'Hybrid system is selected but backup duration is zero.',
+                    'Enter required backup duration or switch the design to on-grid if backup is not needed.'
+                );
             }
 
             $criticalLoadBasisKwh = $criticalDailyLoadKwh > 0
@@ -241,11 +308,23 @@ class TechnicalCalculationEngine
         );
 
         if ($dcVoltageDropPercent > $maximumVoltageDropPercent) {
-            $warnings[] = 'DC voltage drop exceeds the selected maximum design limit.';
+            $warnings[] = CalculationWarning::make(
+                'DC_VOLTAGE_DROP_EXCEEDS_LIMIT',
+                'warning',
+                'DC Voltage Drop Exceeds Limit',
+                'DC voltage drop exceeds the selected maximum design limit.',
+                'Increase cable cross-section, shorten route length, or revise the voltage-drop limit with justification.'
+            );
         }
 
         if ($acVoltageDropPercent > $maximumVoltageDropPercent) {
-            $warnings[] = 'AC voltage drop exceeds the selected maximum design limit.';
+            $warnings[] = CalculationWarning::make(
+                'AC_VOLTAGE_DROP_EXCEEDS_LIMIT',
+                'warning',
+                'AC Voltage Drop Exceeds Limit',
+                'AC voltage drop exceeds the selected maximum design limit.',
+                'Increase cable cross-section, shorten route length, or revise AC routing assumptions.'
+            );
         }
 
         $protection = [
@@ -298,8 +377,184 @@ class TechnicalCalculationEngine
                 'supply_phase' => $supplyPhase,
                 'system_type' => $systemType,
             ],
-            'warnings' => array_values(array_unique($warnings)),
+            'assumption_snapshot' => $this->assumptionSnapshot([
+                'daily_load_kwh' => round($dailyLoadKwh, 3),
+                'critical_daily_load_kwh' => round($criticalDailyLoadKwh, 3),
+                'peak_demand_kw' => round($peakDemandKw, 3),
+                'average_psh' => round($psh, 3),
+                'usable_roof_area_m2' => round($usableRoofAreaM2, 3),
+                'weighted_shading_percent' => round($weightedShadingPercent, 3),
+                'energy_offset_target_percent' => round($offsetTarget * 100, 3),
+                'performance_ratio' => round($performanceRatio, 4),
+                'effective_performance_ratio' => round($effectivePerformanceRatio, 4),
+                'module_power_wp' => round($moduleWp, 3),
+                'module_area_m2' => round($moduleAreaM2, 3),
+                'module_voc_v' => round($moduleVoc, 3),
+                'module_vmp_v' => round($moduleVmp, 3),
+                'module_isc_a' => round($moduleIsc, 3),
+                'module_imp_a' => round($moduleImp, 3),
+                'inverter_ac_power_kw' => round($inverterAcPowerKw, 3),
+                'desired_dc_ac_ratio' => round($desiredDcAcRatio, 3),
+                'battery_backup_hours' => round($backupHours, 3),
+                'battery_dod_percent' => round($batteryDod * 100, 3),
+                'battery_efficiency_percent' => round($batteryEfficiency * 100, 3),
+                'maximum_voltage_drop_percent' => round($maximumVoltageDropPercent, 3),
+                'supply_phase' => $supplyPhase,
+                'system_type' => $systemType,
+                'cable_material' => $cableMaterial,
+            ]),
+            'warnings' => CalculationWarning::unique($warnings),
             'source_snapshot' => $sources,
+        ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $values
+     * @return array<string, array{label:string,value:mixed,unit:string,source:string,description:string}>
+     */
+    private function assumptionSnapshot(array $values): array
+    {
+        return [
+            'engine_version' => [
+                'label' => 'Calculation engine version',
+                'value' => self::VERSION,
+                'unit' => '',
+                'source' => 'system',
+                'description' => 'Version of the low-voltage rooftop PV technical calculation engine used for this result.',
+            ],
+            'system_type' => [
+                'label' => 'System type',
+                'value' => $values['system_type'] ?? '-',
+                'unit' => '',
+                'source' => 'calculation_input',
+                'description' => 'Selected PLTS configuration used by the sizing engine.',
+            ],
+            'daily_load_kwh' => [
+                'label' => 'Daily load energy',
+                'value' => $values['daily_load_kwh'] ?? 0,
+                'unit' => 'kWh/day',
+                'source' => 'load_analysis',
+                'description' => 'Daily energy demand used as the PV sizing basis.',
+            ],
+            'critical_daily_load_kwh' => [
+                'label' => 'Critical daily load',
+                'value' => $values['critical_daily_load_kwh'] ?? 0,
+                'unit' => 'kWh/day',
+                'source' => 'load_analysis',
+                'description' => 'Critical load energy used for hybrid backup sizing.',
+            ],
+            'peak_demand_kw' => [
+                'label' => 'Peak demand',
+                'value' => $values['peak_demand_kw'] ?? 0,
+                'unit' => 'kW',
+                'source' => 'load_analysis',
+                'description' => 'Peak load basis for inverter, battery power, and AC current checks.',
+            ],
+            'average_psh' => [
+                'label' => 'Average peak sun hour',
+                'value' => $values['average_psh'] ?? 0,
+                'unit' => 'h/day',
+                'source' => 'solar_profile',
+                'description' => 'Average daily solar resource used in preliminary energy production estimation.',
+            ],
+            'usable_roof_area_m2' => [
+                'label' => 'Usable roof area',
+                'value' => $values['usable_roof_area_m2'] ?? 0,
+                'unit' => 'm2',
+                'source' => 'roof_site_survey',
+                'description' => 'Available roof area after applying basic site limitations.',
+            ],
+            'weighted_shading_percent' => [
+                'label' => 'Weighted shading',
+                'value' => $values['weighted_shading_percent'] ?? 0,
+                'unit' => '%',
+                'source' => 'roof_site_survey',
+                'description' => 'Weighted shading percentage used to adjust the effective performance ratio.',
+            ],
+            'energy_offset_target_percent' => [
+                'label' => 'Energy offset target',
+                'value' => $values['energy_offset_target_percent'] ?? 0,
+                'unit' => '%',
+                'source' => 'calculation_input',
+                'description' => 'Target share of daily load to be offset by PV generation.',
+            ],
+            'performance_ratio' => [
+                'label' => 'Base performance ratio',
+                'value' => $values['performance_ratio'] ?? 0,
+                'unit' => '',
+                'source' => 'calculation_input',
+                'description' => 'Base performance ratio before shading adjustment.',
+            ],
+            'effective_performance_ratio' => [
+                'label' => 'Effective performance ratio',
+                'value' => $values['effective_performance_ratio'] ?? 0,
+                'unit' => '',
+                'source' => 'derived',
+                'description' => 'Performance ratio after applying the shading factor.',
+            ],
+            'module_power_wp' => [
+                'label' => 'Module power',
+                'value' => $values['module_power_wp'] ?? 0,
+                'unit' => 'Wp',
+                'source' => 'module_datasheet',
+                'description' => 'PV module rated power used to calculate module quantity.',
+            ],
+            'inverter_ac_power_kw' => [
+                'label' => 'Inverter AC power',
+                'value' => $values['inverter_ac_power_kw'] ?? 0,
+                'unit' => 'kW/unit',
+                'source' => 'inverter_datasheet',
+                'description' => 'Nominal AC capacity per inverter used for inverter count and DC/AC ratio.',
+            ],
+            'desired_dc_ac_ratio' => [
+                'label' => 'Desired DC/AC ratio',
+                'value' => $values['desired_dc_ac_ratio'] ?? 0,
+                'unit' => '',
+                'source' => 'calculation_input',
+                'description' => 'Target ratio used to choose the initial inverter count.',
+            ],
+            'maximum_voltage_drop_percent' => [
+                'label' => 'Maximum voltage drop',
+                'value' => $values['maximum_voltage_drop_percent'] ?? 0,
+                'unit' => '%',
+                'source' => 'calculation_input',
+                'description' => 'Maximum preliminary voltage-drop limit used for DC and AC cable checks.',
+            ],
+            'battery_backup_hours' => [
+                'label' => 'Battery backup duration',
+                'value' => $values['battery_backup_hours'] ?? 0,
+                'unit' => 'hours',
+                'source' => 'calculation_input',
+                'description' => 'Backup duration target used when the selected system is hybrid.',
+            ],
+            'battery_dod_percent' => [
+                'label' => 'Battery DoD',
+                'value' => $values['battery_dod_percent'] ?? 0,
+                'unit' => '%',
+                'source' => 'battery_datasheet',
+                'description' => 'Allowed battery depth of discharge used for nominal capacity sizing.',
+            ],
+            'battery_efficiency_percent' => [
+                'label' => 'Battery efficiency',
+                'value' => $values['battery_efficiency_percent'] ?? 0,
+                'unit' => '%',
+                'source' => 'battery_datasheet',
+                'description' => 'Battery round-trip efficiency assumption used for hybrid sizing.',
+            ],
+            'cable_material' => [
+                'label' => 'Cable material',
+                'value' => $values['cable_material'] ?? '-',
+                'unit' => '',
+                'source' => 'calculation_input',
+                'description' => 'Cable conductor material used to select resistivity for voltage-drop estimation.',
+            ],
+            'supply_phase' => [
+                'label' => 'Supply phase',
+                'value' => $values['supply_phase'] ?? '-',
+                'unit' => '',
+                'source' => 'load_analysis',
+                'description' => 'Electrical phase configuration used for AC current and voltage-drop calculations.',
+            ],
         ];
     }
 
@@ -317,7 +572,11 @@ class TechnicalCalculationEngine
         ];
 
         foreach ($warnings as $warning) {
-            $lower = strtolower((string) $warning);
+            if (CalculationWarning::severity($warning) === 'critical') {
+                return 'preliminary';
+            }
+
+            $lower = strtolower(CalculationWarning::message($warning));
 
             foreach ($blockingMarkers as $marker) {
                 if (str_contains($lower, $marker)) {
