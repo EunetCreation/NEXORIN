@@ -1,0 +1,15 @@
+<?php
+
+namespace App\Engine\Nexorin\V4;
+
+class WeatherEngine
+{
+    public function getMonthlyPSH(): array
+    {
+        return [
+            3.8, 4.2, 4.8, 5.1,
+            5.3, 5.5, 5.6, 5.4,
+            5.0, 4.6, 4.0, 3.7
+        ];
+    }
+}
