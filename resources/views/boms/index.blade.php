@@ -37,9 +37,9 @@
                 <span class="ui-stat-label">BOM/BOQ Drafts</span>
             </article>
             <article class="ui-stat-card">
-                <div class="ui-stat-head"><span class="ui-stat-icon">LK</span></div>
-                <strong class="ui-stat-value">{{ number_format($stats['locked']) }}</strong>
-                <span class="ui-stat-label">Locked Drafts</span>
+                <div class="ui-stat-head"><span class="ui-stat-icon">PR</span></div>
+                <strong class="ui-stat-value">{{ number_format($stats['priced'] ?? 0) }}</strong>
+                <span class="ui-stat-label">Priced BOQ</span>
             </article>
         </section>
 
@@ -64,6 +64,7 @@
                         <option value="not_generated" @selected($filters['status'] === 'not_generated')>Not generated</option>
                         <option value="draft" @selected($filters['status'] === 'draft')>Draft</option>
                         <option value="generated" @selected($filters['status'] === 'generated')>Generated</option>
+                        <option value="priced" @selected($filters['status'] === 'priced')>Priced</option>
                         <option value="locked" @selected($filters['status'] === 'locked')>Locked</option>
                     </select>
                 </div>
@@ -93,6 +94,7 @@
                                 <th>Customer</th>
                                 <th>Technical Calculation</th>
                                 <th>BOM/BOQ Status</th>
+                                <th>Pricing</th>
                                 <th>Generated At</th>
                                 <th aria-label="Actions"></th>
                             </tr>
@@ -126,6 +128,16 @@
                                             <span class="ui-status ui-status-active">Locked</span>
                                         @else
                                             <span class="ui-status ui-status-active">Generated</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if (! $bom)
+                                            —
+                                        @elseif ($bom->pricing_status === 'priced')
+                                            <span class="ui-status ui-status-active">Priced</span>
+                                            <div class="ui-table-secondary">IDR {{ number_format((float) $bom->grand_price_idr, 0, ',', '.') }}</div>
+                                        @else
+                                            <span class="ui-status ui-status-pending">Not Priced</span>
                                         @endif
                                     </td>
                                     <td>{{ $bom?->generated_at?->format('d M Y, H:i') ?? '—' }}</td>

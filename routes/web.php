@@ -244,6 +244,10 @@ Route::middleware(['auth', 'user.active'])->group(function () {
                 ->middleware('company.permission:calculation.run,calculation.revise')
                 ->name('boms.generate');
 
+            Route::post('/projects/{project}/bom/pricing', [BillOfMaterialController::class, 'price'])
+                ->middleware('company.permission:price.cost.update,price.selling.update')
+                ->name('boms.price');
+
             Route::get('/projects', [ProjectController::class, 'index'])
                 ->middleware('company.permission:project.view,project.view_own')
                 ->name('projects.index');
