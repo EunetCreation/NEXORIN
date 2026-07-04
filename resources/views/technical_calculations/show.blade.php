@@ -52,6 +52,15 @@
     .tc-warning-list li,.tc-history li{padding:13px 14px;border:1px solid var(--slate-200);border-radius:15px;background:var(--slate-50);line-height:1.45}
     .tc-warning-list li{border-color:#fed7aa;background:#fff7ed;color:#9a3412}
     .tc-warning-list .tc-no-warning{border-color:#99f6e4;background:#ecfdf9;color:#087a70}
+    .tc-override-badge{display:inline-flex;align-items:center;width:max-content;margin-top:8px;padding:4px 8px;border-radius:999px;background:#fef3c7;color:#92400e;font-size:.68rem;font-weight:850;letter-spacing:.05em;text-transform:uppercase}
+    .tc-override-table{width:100%;border-collapse:collapse;background:#fff}
+    .tc-override-table th,.tc-override-table td{padding:12px 14px;border-bottom:1px solid var(--slate-200);text-align:left;vertical-align:top;font-size:.84rem}
+    .tc-override-table th{background:var(--slate-50);color:var(--slate-600);font-size:.72rem;text-transform:uppercase;letter-spacing:.05em}
+    .tc-override-table tr:last-child td{border-bottom:0}
+    .tc-override-reason{max-width:320px;color:var(--slate-600);line-height:1.45}
+    .tc-inline-form{display:inline}
+    .tc-link-danger{border:0;background:transparent;color:#b42318;font-weight:800;cursor:pointer;padding:0;text-decoration:underline;text-underline-offset:3px}
+    .tc-override-note{margin-top:12px;padding:12px 14px;border-radius:15px;background:#fffbeb;border:1px solid #fde68a;color:#92400e;font-size:.84rem;line-height:1.5}
     .tc-history strong{color:var(--navy-900)}
     .tc-history small{display:block;margin-top:4px;color:var(--slate-500)}
     .tc-result-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
@@ -106,6 +115,20 @@
         ];
         $results = array_replace($resultDefaults, $calculation->results ?? []);
         $results['protection'] = array_replace($resultDefaults['protection'], $results['protection'] ?? []);
+        $activeOverrides = $calculation->relationLoaded('activeOverrides') ? $calculation->activeOverrides : collect();
+        $overrideMap = $activeOverrides->keyBy('field');
+        $formatOverrideValue = function ($value, $unit = '', $type = 'numeric') {
+            if ($value === null || $value === '') {
+                return '-';
+            }
+            if (is_numeric($value)) {
+                $decimals = $type === 'integer' ? 0 : 3;
+                $formatted = rtrim(rtrim(number_format((float) $value, $decimals), '0'), '.');
+            } else {
+                $formatted = (string) $value;
+            }
+            return trim($formatted.' '.($unit ?: ''));
+        };
     @endphp
 
     <div class="tc-page">
@@ -126,9 +149,13 @@
             <div class="ui-alert ui-alert-success">{{ session('success') }}</div>
         @endif
 
+        @if (session('error'))
+            <div class="ui-alert ui-alert-danger">{{ session('error') }}</div>
+        @endif
+
         @if ($errors->any())
             <div class="ui-alert ui-alert-danger">
-                <strong>The calculation was not run because some inputs are invalid.</strong>
+                <strong>Some inputs are invalid. Review the highlighted calculation or override fields.</strong>
                 <ul class="tc-alert-list">
                     @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>
@@ -277,22 +304,22 @@
                             <article class="tc-result-panel">
                                 <h4>PV and Inverter Sizing</h4>
                                 <div class="tc-metrics">
-                                    <div class="tc-metric"><span>Required PV</span><strong>{{ number_format((float) $results['required_pv_kw'], 3) }} kWp</strong></div>
-                                    <div class="tc-metric"><span>Installed PV</span><strong>{{ number_format((float) $results['installed_pv_kw'], 3) }} kWp</strong></div>
-                                    <div class="tc-metric"><span>Modules</span><strong>{{ $results['module_count'] }}</strong></div>
+                                    <div class="tc-metric"><span>Required PV</span><strong>{{ number_format((float) $results['required_pv_kw'], 3) }} kWp</strong>@if($overrideMap->has('required_pv_kw'))<em class="tc-override-badge">Overridden</em>@endif</div>
+                                    <div class="tc-metric"><span>Installed PV</span><strong>{{ number_format((float) $results['installed_pv_kw'], 3) }} kWp</strong>@if($overrideMap->has('installed_pv_kw'))<em class="tc-override-badge">Overridden</em>@endif</div>
+                                    <div class="tc-metric"><span>Modules</span><strong>{{ $results['module_count'] }}</strong>@if($overrideMap->has('module_count'))<em class="tc-override-badge">Overridden</em>@endif</div>
                                     <div class="tc-metric"><span>Roof Limit</span><strong>{{ $results['area_limited_module_count'] }}</strong></div>
-                                    <div class="tc-metric"><span>Inverters</span><strong>{{ $results['inverter_count'] }}</strong></div>
-                                    <div class="tc-metric"><span>DC/AC Ratio</span><strong>{{ number_format((float) $results['dc_ac_ratio'], 3) }}</strong></div>
+                                    <div class="tc-metric"><span>Inverters</span><strong>{{ $results['inverter_count'] }}</strong>@if($overrideMap->has('inverter_count'))<em class="tc-override-badge">Overridden</em>@endif</div>
+                                    <div class="tc-metric"><span>DC/AC Ratio</span><strong>{{ number_format((float) $results['dc_ac_ratio'], 3) }}</strong>@if($overrideMap->has('dc_ac_ratio'))<em class="tc-override-badge">Overridden</em>@endif</div>
                                 </div>
                             </article>
 
                             <article class="tc-result-panel">
                                 <h4>Battery and Energy</h4>
                                 <div class="tc-metrics">
-                                    <div class="tc-metric"><span>Battery Capacity</span><strong>{{ number_format((float) $results['battery_nominal_kwh'], 2) }} kWh</strong></div>
-                                    <div class="tc-metric"><span>Battery Power</span><strong>{{ number_format((float) $results['battery_minimum_power_kw'], 2) }} kW</strong></div>
-                                    <div class="tc-metric"><span>Daily Generation</span><strong>{{ number_format((float) $results['estimated_daily_generation_kwh'], 2) }} kWh</strong></div>
-                                    <div class="tc-metric"><span>Annual Energy</span><strong>{{ number_format((float) $results['annual_energy_kwh'], 0) }} kWh</strong></div>
+                                    <div class="tc-metric"><span>Battery Capacity</span><strong>{{ number_format((float) $results['battery_nominal_kwh'], 2) }} kWh</strong>@if($overrideMap->has('battery_nominal_kwh'))<em class="tc-override-badge">Overridden</em>@endif</div>
+                                    <div class="tc-metric"><span>Battery Power</span><strong>{{ number_format((float) $results['battery_minimum_power_kw'], 2) }} kW</strong>@if($overrideMap->has('battery_minimum_power_kw'))<em class="tc-override-badge">Overridden</em>@endif</div>
+                                    <div class="tc-metric"><span>Daily Generation</span><strong>{{ number_format((float) $results['estimated_daily_generation_kwh'], 2) }} kWh</strong>@if($overrideMap->has('estimated_daily_generation_kwh'))<em class="tc-override-badge">Overridden</em>@endif</div>
+                                    <div class="tc-metric"><span>Annual Energy</span><strong>{{ number_format((float) $results['annual_energy_kwh'], 0) }} kWh</strong>@if($overrideMap->has('annual_energy_kwh'))<em class="tc-override-badge">Overridden</em>@endif</div>
                                 </div>
                             </article>
 
@@ -322,6 +349,46 @@
                                 </div>
                             </article>
                         </div>
+
+                        @if ($activeOverrides->isNotEmpty())
+                            <div class="tc-override-note">
+                                <strong>Engineer override active.</strong> Effective result values below are used by downstream BOM, financial analysis, quotation, and PDF reports. Engine values remain stored for traceability.
+                            </div>
+                            <div class="tc-table-wrap" style="margin-top:14px">
+                                <table class="tc-override-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Field</th>
+                                            <th>Engine value</th>
+                                            <th>Effective value</th>
+                                            <th>Reason</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($activeOverrides as $override)
+                                            <tr>
+                                                <td><strong>{{ $override->label }}</strong><br><small>{{ $override->creator?->name ?? 'Engineer' }} · {{ $override->created_at?->format('d M Y H:i') }}</small></td>
+                                                <td>{{ $override->formattedEngineValue() }}</td>
+                                                <td><strong>{{ $override->formattedOverrideValue() }}</strong></td>
+                                                <td class="tc-override-reason">{{ $override->reason }}</td>
+                                                <td>
+                                                    @if ($canOverride)
+                                                        <form method="POST" action="{{ route('companies.technical-calculations.overrides.reset', [$company, $project, $override]) }}" class="tc-inline-form">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="tc-link-danger">Reset</button>
+                                                        </form>
+                                                    @else
+                                                        -
+                                                    @endif
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @endif
                     </section>
                 @endif
             </main>
@@ -348,6 +415,39 @@
                     @endif
                 </section>
 
+                @if ($canOverride)
+                    <section class="tc-card">
+                        <div class="tc-card-head"><div><h3>Engineer Override</h3><p class="tc-card-subtitle">Apply a documented field override when verified site or product data requires a manual engineering adjustment.</p></div></div>
+                        <form method="POST" action="{{ route('companies.technical-calculations.overrides.store', [$company, $project]) }}" class="tc-form">
+                            @csrf
+                            <div class="tc-field">
+                                <label for="field">Result field</label>
+                                <select id="field" name="field" class="@error('field') tc-input-error @enderror">
+                                    @foreach ($overrideFields as $field => $definition)
+                                        <option value="{{ $field }}" @selected(old('field') === $field)>{{ $definition['label'] }} @if($definition['unit'])({{ $definition['unit'] }})@endif</option>
+                                    @endforeach
+                                </select>
+                                @error('field')<span class="tc-field-error">{{ $message }}</span>@enderror
+                            </div>
+                            <div class="tc-field">
+                                <label for="override_value">New effective value</label>
+                                <input id="override_value" type="number" step="0.0001" min="0" name="override_value" value="{{ old('override_value') }}" class="@error('override_value') tc-input-error @enderror">
+                                @error('override_value')<span class="tc-field-error">{{ $message }}</span>@enderror
+                            </div>
+                            <div class="tc-field">
+                                <label for="reason">Engineering reason</label>
+                                <textarea id="reason" name="reason" class="@error('reason') tc-input-error @enderror" placeholder="Example: adjusted after verified roof layout and final inverter selection.">{{ old('reason') }}</textarea>
+                                @error('reason')<span class="tc-field-error">{{ $message }}</span>@enderror
+                            </div>
+                            <button class="ui-button ui-button-primary" type="submit">Save Override</button>
+                        </form>
+                    </section>
+                @elseif ($calculation->result_status === 'verified' && $calculation->calculated_at)
+                    <section class="tc-card">
+                        <div class="tc-card-head"><div><h3>Engineer Override</h3><p class="tc-card-subtitle">This calculation is verified and locked. Recalculate or create a revision before applying overrides.</p></div></div>
+                    </section>
+                @endif
+
                 <section class="tc-card">
                     <div class="tc-card-head"><div><h3>Warnings</h3><p class="tc-card-subtitle">Compatibility and source-data issues detected by the engine.</p></div></div>
                     <ul class="tc-warning-list">
@@ -363,7 +463,7 @@
                     <div class="tc-card-head"><div><h3>Change History</h3><p class="tc-card-subtitle">Calculation and verification events.</p></div></div>
                     <ul class="tc-history">
                         @forelse ($calculation->histories as $history)
-                            <li><strong>{{ ucfirst($history->event) }}</strong><small>{{ $history->user?->name ?? 'System' }} · {{ $history->changed_at?->format('d M Y H:i') }}</small></li>
+                            <li><strong>{{ ucfirst(str_replace('_', ' ', $history->event)) }}</strong><small>{{ $history->user?->name ?? 'System' }} · {{ $history->changed_at?->format('d M Y H:i') }}</small>@if($history->notes)<small>{{ $history->notes }}</small>@endif</li>
                         @empty
                             <li>No calculation history yet.</li>
                         @endforelse

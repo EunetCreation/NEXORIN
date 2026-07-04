@@ -33,7 +33,7 @@ class ProjectReportPdfRenderer
                 'solarProfile.monthlyData',
                 'roofSiteSurvey.surfaces',
                 'systemRecommendation.scores',
-                'technicalCalculation',
+                'technicalCalculation.activeOverrides.creator',
                 'billOfMaterial.items',
                 'financialAnalysis',
                 'quotation.items',
@@ -224,6 +224,41 @@ class ProjectReportPdfRenderer
             ['Battery capacity', $this->nullableNumber($result['battery_nominal_kwh'] ?? null, 2, ' kWh')],
             ['Calculated at', $this->dateTime($calculation->calculated_at)],
         ]);
+
+        $overrides = $calculation->relationLoaded('activeOverrides')
+            ? $calculation->activeOverrides
+            : collect();
+
+        if ($overrides->isNotEmpty()) {
+            $this->miniTitle('Engineer overrides');
+            foreach ($overrides->take(8) as $override) {
+                $this->bullet(sprintf(
+                    '%s changed from engine value %s to effective value %s. Reason: %s',
+                    $override->label,
+                    $override->formattedEngineValue(),
+                    $override->formattedOverrideValue(),
+                    $override->reason
+                ));
+            }
+        } elseif (is_array($calculation->override_summary ?? null) && $calculation->override_summary !== []) {
+            $this->miniTitle('Engineer overrides');
+            foreach (array_slice($calculation->override_summary, 0, 8) as $override) {
+                $label = $override['label'] ?? 'Calculation field';
+                $engineValue = $override['engine_value'] ?? '-';
+                $overrideValue = $override['override_value'] ?? '-';
+                $unit = $override['unit'] ?? '';
+                $reason = $override['reason'] ?? '-';
+                $this->bullet(sprintf(
+                    '%s changed from engine value %s %s to effective value %s %s. Reason: %s',
+                    $label,
+                    $engineValue,
+                    $unit,
+                    $overrideValue,
+                    $unit,
+                    $reason
+                ));
+            }
+        }
 
         if (! empty($calculation->warnings)) {
             $this->miniTitle('Technical warnings');

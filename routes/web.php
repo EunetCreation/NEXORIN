@@ -235,6 +235,14 @@ Route::middleware(['auth', 'user.active'])->group(function () {
                 ->middleware('company.permission:calculation.verify')
                 ->name('technical-calculations.verify');
 
+            Route::post('/projects/{project}/technical-calculation/overrides', [TechnicalCalculationController::class, 'storeOverride'])
+                ->middleware('company.permission:calculation.revise')
+                ->name('technical-calculations.overrides.store');
+
+            Route::delete('/projects/{project}/technical-calculation/overrides/{override}', [TechnicalCalculationController::class, 'resetOverride'])
+                ->middleware('company.permission:calculation.revise')
+                ->name('technical-calculations.overrides.reset');
+
             Route::get('/boms', [BillOfMaterialController::class, 'index'])
                 ->middleware('company.permission:calculation.view,calculation.view_own')
                 ->name('boms.index');

@@ -150,6 +150,12 @@ class Project extends Model
         return $this->hasOne(TechnicalCalculation::class);
     }
 
+    /** Get technical calculation overrides attached to this project. */
+    public function overrides(): HasMany
+    {
+        return $this->hasMany(TechnicalCalculationOverride::class);
+    }
+
     /** Get the project BOM/BOQ draft. */
     public function billOfMaterial(): HasOne
     {

@@ -42,6 +42,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'maximum_voltage_drop_percent',
     'result_status',
     'results',
+    'engine_results',
+    'override_summary',
     'warnings',
     'source_snapshot',
     'engineering_notes',
@@ -121,6 +123,29 @@ class TechnicalCalculation extends Model
             ->latest('id');
     }
 
+    public function overrides(): HasMany
+    {
+        return $this->hasMany(TechnicalCalculationOverride::class)
+            ->latest('created_at')
+            ->latest('id');
+    }
+
+    public function activeOverrides(): HasMany
+    {
+        return $this->hasMany(TechnicalCalculationOverride::class)
+            ->where('is_active', true)
+            ->latest('created_at')
+            ->latest('id');
+    }
+
+    public function hasActiveOverrides(): bool
+    {
+        $summary = $this->override_summary ?? [];
+
+        return is_array($summary) && $summary !== [];
+    }
+
+
     public function getResultStatusLabelAttribute(): string
     {
         return match ($this->result_status) {
@@ -151,6 +176,8 @@ class TechnicalCalculation extends Model
     {
         return [
             'results' => 'array',
+            'engine_results' => 'array',
+            'override_summary' => 'array',
             'warnings' => 'array',
             'source_snapshot' => 'array',
             'calculated_at' => 'datetime',

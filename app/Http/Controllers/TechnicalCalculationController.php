@@ -3,12 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Concerns\AuthorizesProjectResource;
+use App\Http\Requests\StoreTechnicalCalculationOverrideRequest;
 use App\Http\Requests\UpdateTechnicalCalculationRequest;
 use App\Models\Company;
 use App\Models\Project;
 use App\Models\SystemRecommendation;
 use App\Models\TechnicalCalculation;
 use App\Models\TechnicalCalculationHistory;
+use App\Models\TechnicalCalculationOverride;
 use App\Services\Calculation\TechnicalCalculationEngine;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
@@ -128,11 +130,13 @@ class TechnicalCalculationController extends Controller
         if ($calculation->exists) {
             $calculation->load([
                 'histories.user:id,name',
+                'activeOverrides.creator:id,name',
                 'calculator:id,name',
                 'verifier:id,name',
             ]);
         } else {
             $calculation->setRelation('histories', collect());
+            $calculation->setRelation('activeOverrides', collect());
         }
 
         $sources = $this->collectSources($project);
@@ -140,6 +144,12 @@ class TechnicalCalculationController extends Controller
             && ! $project->isArchived();
         $canVerify = $request->user()->hasCompanyPermission($company, 'calculation.verify')
             && ! $project->isArchived();
+        $canOverride = $request->user()->hasCompanyPermission($company, 'calculation.revise')
+            && ! $project->isArchived()
+            && $calculation->exists
+            && $calculation->calculated_at !== null
+            && $calculation->result_status !== 'verified';
+        $overrideFields = TechnicalCalculationOverride::fieldOptions();
 
         return view('technical_calculations.show', compact(
             'company',
@@ -147,7 +157,9 @@ class TechnicalCalculationController extends Controller
             'calculation',
             'sources',
             'canRun',
-            'canVerify'
+            'canVerify',
+            'canOverride',
+            'overrideFields'
         ));
     }
 
@@ -191,6 +203,8 @@ class TechnicalCalculationController extends Controller
                 ...$inputs,
                 'result_status' => $result['result_status'],
                 'results' => $this->resultPayload($result),
+                'engine_results' => $this->resultPayload($result),
+                'override_summary' => null,
                 'warnings' => $result['warnings'],
                 'source_snapshot' => $sources,
                 'calculated_by' => $request->user()->getKey(),
@@ -203,6 +217,15 @@ class TechnicalCalculationController extends Controller
                 'updated_by' => $request->user()->getKey(),
             ]);
             $calculation->save();
+
+            if (! $isNew) {
+                $calculation->activeOverrides()->update([
+                    'is_active' => false,
+                    'reset_reason' => 'Calculation was rerun. Previous overrides were superseded by a new engine result.',
+                    'reset_by' => $request->user()->getKey(),
+                    'reset_at' => now(),
+                ]);
+            }
 
             $this->recordHistory(
                 $request,
@@ -279,6 +302,177 @@ class TechnicalCalculationController extends Controller
             ->with('success', 'Technical calculation verified successfully.');
     }
 
+
+
+    public function storeOverride(
+        StoreTechnicalCalculationOverrideRequest $request,
+        Company $company,
+        Project $project
+    ): RedirectResponse {
+        $this->authorizeProjectResource(
+            $request,
+            $company,
+            $project,
+            ['calculation.revise'],
+            []
+        );
+
+        if ($project->isArchived()) {
+            return back()->with('error', 'Archived projects cannot be revised.');
+        }
+
+        $calculation = $project->technicalCalculation()->firstOrFail();
+
+        if (! $calculation->calculated_at || ! $calculation->results) {
+            throw ValidationException::withMessages([
+                'override_value' => 'Run the technical calculation before applying an override.',
+            ]);
+        }
+
+        if ($calculation->result_status === 'verified') {
+            return back()->with('error', 'Verified calculations are locked. Recalculate or create a revision before applying an override.');
+        }
+
+        $field = $request->validated('field');
+        $options = TechnicalCalculationOverride::fieldOptions();
+        $definition = $options[$field];
+        $overrideValue = $this->normalizeOverrideValue($request->validated('override_value'), $definition['type']);
+
+        DB::transaction(function () use ($request, $company, $project, $calculation, $field, $definition, $overrideValue): void {
+            $results = $calculation->results ?? [];
+            $engineResults = $calculation->engine_results ?: $results;
+            $previousValue = $results[$field] ?? null;
+            $engineValue = $engineResults[$field] ?? $previousValue;
+
+            $calculation->activeOverrides()
+                ->where('field', $field)
+                ->update([
+                    'is_active' => false,
+                    'reset_reason' => 'Replaced by a newer override for the same field.',
+                    'reset_by' => $request->user()->getKey(),
+                    'reset_at' => now(),
+                ]);
+
+            $override = TechnicalCalculationOverride::query()->create([
+                'company_id' => $company->getKey(),
+                'project_id' => $project->getKey(),
+                'technical_calculation_id' => $calculation->getKey(),
+                'field' => $field,
+                'label' => $definition['label'],
+                'unit' => $definition['unit'],
+                'value_type' => $definition['type'],
+                'engine_value' => $this->stringValue($engineValue),
+                'previous_value' => $this->stringValue($previousValue),
+                'override_value' => $this->stringValue($overrideValue),
+                'reason' => $request->validated('reason'),
+                'is_active' => true,
+                'created_by' => $request->user()->getKey(),
+            ]);
+
+            $results[$field] = $overrideValue;
+
+            $calculation->fill([
+                'results' => $results,
+                'engine_results' => $engineResults,
+                'override_summary' => $this->activeOverrideSummary($calculation),
+                'verified_by' => null,
+                'verified_at' => null,
+                'updated_by' => $request->user()->getKey(),
+            ]);
+            $calculation->save();
+
+            $this->recordHistory(
+                $request,
+                $calculation,
+                'overridden',
+                $calculation->result_status,
+                $calculation->result_status,
+                sprintf(
+                    '%s was overridden from %s to %s. Reason: %s',
+                    $override->label,
+                    $override->formattedPreviousValue(),
+                    $override->formattedOverrideValue(),
+                    $override->reason
+                )
+            );
+        });
+
+        return redirect()
+            ->route('companies.technical-calculations.show', [$company, $project])
+            ->with('success', 'Technical calculation override saved. Downstream BOM, financial analysis, quotation, and reports will use the effective overridden value.');
+    }
+
+    public function resetOverride(
+        Request $request,
+        Company $company,
+        Project $project,
+        TechnicalCalculationOverride $override
+    ): RedirectResponse {
+        $this->authorizeProjectResource(
+            $request,
+            $company,
+            $project,
+            ['calculation.revise'],
+            []
+        );
+
+        if ($project->isArchived()) {
+            return back()->with('error', 'Archived projects cannot be revised.');
+        }
+
+        $calculation = $project->technicalCalculation()->firstOrFail();
+
+        if ($calculation->result_status === 'verified') {
+            return back()->with('error', 'Verified calculations are locked. Recalculate or create a revision before resetting an override.');
+        }
+
+        if (
+            $override->company_id !== $company->getKey()
+            || $override->project_id !== $project->getKey()
+            || $override->technical_calculation_id !== $calculation->getKey()
+        ) {
+            abort(404);
+        }
+
+        DB::transaction(function () use ($request, $calculation, $override): void {
+            $results = $calculation->results ?? [];
+            $engineResults = $calculation->engine_results ?: $results;
+            $field = $override->field;
+            $engineValue = $engineResults[$field] ?? $override->engine_value;
+
+            if ($override->is_active) {
+                $override->update([
+                    'is_active' => false,
+                    'reset_reason' => 'Override reset by engineer. Effective value restored to engine result.',
+                    'reset_by' => $request->user()->getKey(),
+                    'reset_at' => now(),
+                ]);
+            }
+
+            $results[$field] = $this->normalizeOverrideValue($engineValue, $override->value_type);
+
+            $calculation->fill([
+                'results' => $results,
+                'override_summary' => $this->activeOverrideSummary($calculation),
+                'updated_by' => $request->user()->getKey(),
+            ]);
+            $calculation->save();
+
+            $this->recordHistory(
+                $request,
+                $calculation,
+                'override_reset',
+                $calculation->result_status,
+                $calculation->result_status,
+                sprintf('%s override was reset to the engine value.', $override->label)
+            );
+        });
+
+        return redirect()
+            ->route('companies.technical-calculations.show', [$company, $project])
+            ->with('success', 'Technical calculation override reset. The field now uses the engine value again.');
+    }
+
     /**
      * @return array<string, mixed>
      */
@@ -352,6 +546,56 @@ class TechnicalCalculationController extends Controller
         }
 
         return 'on_grid';
+    }
+
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    private function activeOverrideSummary(TechnicalCalculation $calculation): array
+    {
+        return $calculation->activeOverrides()
+            ->get()
+            ->map(fn (TechnicalCalculationOverride $override): array => [
+                'id' => $override->getKey(),
+                'field' => $override->field,
+                'label' => $override->label,
+                'unit' => $override->unit,
+                'engine_value' => $override->engine_value,
+                'previous_value' => $override->previous_value,
+                'override_value' => $override->override_value,
+                'reason' => $override->reason,
+                'created_by' => $override->created_by,
+                'created_at' => $override->created_at?->toISOString(),
+            ])
+            ->values()
+            ->all();
+    }
+
+    private function normalizeOverrideValue(mixed $value, string $type): int|float|string|null
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        if ($type === 'integer') {
+            return (int) round((float) $value);
+        }
+
+        if ($type === 'numeric') {
+            return round((float) $value, 6);
+        }
+
+        return (string) $value;
+    }
+
+    private function stringValue(mixed $value): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        return (string) $value;
     }
 
     private function recordHistory(
