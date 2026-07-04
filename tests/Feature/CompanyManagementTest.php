@@ -27,7 +27,10 @@ class CompanyManagementTest extends TestCase
             'is_active' => true,
         ]);
 
-        $this->superAdmin = User::factory()->create();
+        $this->superAdmin = User::factory()->create([
+            'status' => 'active',
+        ]);
+
         $this->superAdmin->systemRoles()->attach($role, [
             'assigned_by' => $this->superAdmin->getKey(),
         ]);
@@ -55,7 +58,9 @@ class CompanyManagementTest extends TestCase
 
     public function test_regular_user_cannot_open_company_directory(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create([
+            'status' => 'active',
+        ]);
 
         $this
             ->actingAs($user)
