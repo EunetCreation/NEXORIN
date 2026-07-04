@@ -4,6 +4,7 @@ namespace App\Services\Report;
 
 use App\Models\BillOfMaterialItem;
 use App\Models\Project;
+use App\Support\PhoneFormatter;
 use DateTimeInterface;
 use Illuminate\Support\Collection;
 
@@ -112,7 +113,7 @@ class ProjectReportPdfRenderer
             ['Customer name', $customer?->name],
             ['Customer number', $customer?->customer_number],
             ['Email', $customer?->email],
-            ['Phone', $customer?->phone],
+            ['Phone', $this->formatPhone($customer?->phone)],
             ['Project name', $project->name],
             ['Project number', $project->project_number],
             ['Address', $project->site_address],
@@ -294,6 +295,7 @@ class ProjectReportPdfRenderer
 
         $cashflows = is_array($analysis->cashflows) ? $analysis->cashflows : [];
         if ($cashflows !== []) {
+            $this->ensure(66);
             $this->miniTitle('Cashflow Snapshot');
             $this->drawCashflowRows(array_slice($cashflows, 0, 8));
         }
@@ -362,8 +364,8 @@ class ProjectReportPdfRenderer
             return;
         }
 
+        $this->ensure(66);
         $this->miniTitle('Major BOM items');
-        $this->ensure(42);
         $this->tableRow(['Item', 'Qty', 'Unit', 'Line Price'], true);
 
         foreach ($items->take(12) as $item) {
@@ -372,7 +374,7 @@ class ProjectReportPdfRenderer
             }
 
             $this->tableRow([
-                $this->truncate($item->item_name, 42),
+                (string) $item->item_name,
                 $this->number($item->quantity, 3),
                 (string) $item->unit,
                 $this->money($item->line_price_idr),
@@ -391,7 +393,7 @@ class ProjectReportPdfRenderer
         foreach ($cashflows as $row) {
             $this->tableRow([
                 (string) ($row['year'] ?? '-'),
-                $this->money($row['saving_idr'] ?? $row['annual_saving_idr'] ?? 0),
+                $this->money($row['gross_saving_idr'] ?? $row['saving_idr'] ?? $row['annual_saving_idr'] ?? 0),
                 $this->money($row['om_cost_idr'] ?? 0),
                 $this->money($row['net_cashflow_idr'] ?? $row['cashflow_idr'] ?? 0),
             ]);
@@ -403,19 +405,35 @@ class ProjectReportPdfRenderer
     /** @param array<int, string> $cells */
     private function tableRow(array $cells, bool $header = false): void
     {
-        $this->ensure(26);
-        $height = 22;
-        $fill = $header ? '0.88 0.94 0.94' : '1 1 1';
-        $this->rect(self::MARGIN, $this->y - 16, 511, $height, $fill, true);
-        $this->rect(self::MARGIN, $this->y - 16, 511, $height, '0.84 0.89 0.90', false);
         $font = $header ? 'F2' : 'F1';
         $color = '0.05 0.12 0.17';
-
         $x = [50, 310, 365, 553];
+        $widths = [235, 72, 80, 116];
         $align = ['left', 'right', 'left', 'right'];
+        $lineSets = [];
+        $maxLines = 1;
+
         foreach ($cells as $index => $cell) {
-            $this->text($x[$index] ?? 50, $this->y - 6, (string) $cell, 8, $font, $color, $align[$index] ?? 'left');
+            $limit = $this->charLimit($widths[$index] ?? 100, 8);
+            $lines = $this->wrap((string) $cell, $limit);
+            $lineSets[$index] = $lines;
+            $maxLines = max($maxLines, count($lines));
         }
+
+        $height = max(22, 14 + ($maxLines * 9));
+        $this->ensure($height + 4);
+        $fill = $header ? '0.88 0.94 0.94' : '1 1 1';
+        $this->rect(self::MARGIN, $this->y - $height + 6, 511, $height, $fill, true);
+        $this->rect(self::MARGIN, $this->y - $height + 6, 511, $height, '0.84 0.89 0.90', false);
+
+        foreach ($lineSets as $index => $lines) {
+            $lineY = $this->y - 7;
+            foreach ($lines as $line) {
+                $this->text($x[$index] ?? 50, $lineY, $line, 8, $font, $color, $align[$index] ?? 'left');
+                $lineY -= 9;
+            }
+        }
+
         $this->y -= $height;
     }
 
@@ -425,28 +443,50 @@ class ProjectReportPdfRenderer
         $left = array_slice($rows, 0, (int) ceil(count($rows) / 2));
         $right = array_slice($rows, (int) ceil(count($rows) / 2));
         $count = max(count($left), count($right));
+        $width = 222.0;
 
         for ($i = 0; $i < $count; $i++) {
-            $this->ensure(20);
+            $height = max(
+                isset($left[$i]) ? $this->keyValueHeight($left[$i][1], $width) : 0,
+                isset($right[$i]) ? $this->keyValueHeight($right[$i][1], $width) : 0,
+                26
+            );
+
+            $this->ensure($height + 4);
             $top = $this->y;
+
             if (isset($left[$i])) {
-                $this->keyValue(50, $top, $left[$i][0], $left[$i][1], 222);
+                $this->keyValue(50, $top, $left[$i][0], $left[$i][1], $width, $height);
             }
+
             if (isset($right[$i])) {
-                $this->keyValue(310, $top, $right[$i][0], $right[$i][1], 222);
+                $this->keyValue(310, $top, $right[$i][0], $right[$i][1], $width, $height);
             }
-            $this->y -= 22;
+
+            $this->y -= $height;
         }
 
         $this->y -= 6;
     }
 
-    private function keyValue(float $x, float $y, string $key, mixed $value, float $width): void
+    private function keyValueHeight(mixed $value, float $width): float
+    {
+        $lineCount = count($this->wrap($this->value($value), $this->charLimit($width, 9)));
+
+        return 15 + ($lineCount * 10);
+    }
+
+    private function keyValue(float $x, float $y, string $key, mixed $value, float $width, float $height): void
     {
         $this->text($x, $y, $key, 7.2, 'F2', '0.35 0.43 0.48');
-        $display = $this->truncate($this->value($value), 38);
-        $this->text($x, $y - 10, $display, 9, 'F1', '0.05 0.12 0.17');
-        $this->line($x, $y - 15, $x + $width, $y - 15, '0.88 0.91 0.92');
+        $lineY = $y - 10;
+
+        foreach ($this->wrap($this->value($value), $this->charLimit($width, 9)) as $line) {
+            $this->text($x, $lineY, $line, 9, 'F1', '0.05 0.12 0.17');
+            $lineY -= 10;
+        }
+
+        $this->line($x, $y - $height + 4, $x + $width, $y - $height + 4, '0.88 0.91 0.92');
     }
 
     private function sectionTitle(string $title): void
@@ -579,6 +619,7 @@ class ProjectReportPdfRenderer
     /** @return array<int, string> */
     private function wrap(string $text, int $limit): array
     {
+        $limit = max(1, $limit);
         $text = trim(preg_replace('/\s+/', ' ', $this->value($text)) ?: '');
 
         if ($text === '') {
@@ -590,6 +631,19 @@ class ProjectReportPdfRenderer
         $current = '';
 
         foreach ($words as $word) {
+            if (strlen($word) > $limit) {
+                if ($current !== '') {
+                    $lines[] = $current;
+                    $current = '';
+                }
+
+                foreach (str_split($word, $limit) as $chunk) {
+                    $lines[] = $chunk;
+                }
+
+                continue;
+            }
+
             $candidate = trim($current.' '.$word);
 
             if (strlen($candidate) > $limit && $current !== '') {
@@ -605,6 +659,11 @@ class ProjectReportPdfRenderer
         }
 
         return $lines;
+    }
+
+    private function charLimit(float $width, float $fontSize): int
+    {
+        return max(8, (int) floor($width / ($fontSize * 0.48)));
     }
 
     private function money(mixed $value): string
@@ -635,6 +694,11 @@ class ProjectReportPdfRenderer
         $value = $this->value($value);
 
         return $value === '-' ? '-' : ucwords(str_replace(['_', '-'], ' ', $value));
+    }
+
+    private function formatPhone(mixed $value): ?string
+    {
+        return PhoneFormatter::indonesia($value === null ? null : (string) $value);
     }
 
     private function value(mixed $value): string

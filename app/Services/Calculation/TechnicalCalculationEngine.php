@@ -134,6 +134,10 @@ class TechnicalCalculationEngine
         $totalInverterAcKw = $inverterCount * $inverterAcPowerKw;
         $dcAcRatio = $totalInverterAcKw > 0 ? $installedPvKw / $totalInverterAcKw : 0.0;
 
+        if ($dcAcRatio > 0 && $dcAcRatio < 0.95) {
+            $warnings[] = 'DC/AC ratio is low. The inverter capacity may be oversized relative to the installed PV array, reducing utilization and financial performance.';
+        }
+
         if ($dcAcRatio > 0 && ($dcAcRatio < 0.75 || $dcAcRatio > 1.50)) {
             $warnings[] = 'DC/AC ratio is outside the common preliminary design band of 0.75 to 1.50.';
         }

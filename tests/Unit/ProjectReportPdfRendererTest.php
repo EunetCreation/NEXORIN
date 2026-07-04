@@ -24,7 +24,7 @@ class ProjectReportPdfRendererTest extends TestCase
             'name' => 'Pekanbaru Rooftop PV Demo',
             'building_type' => 'commercial',
             'proposed_system' => 'on_grid',
-            'site_address' => 'Jl. Sudirman, Pekanbaru',
+            'site_address' => 'Jl. Sudirman, Pekanbaru, Kompleks Gedung Energi Surya Lantai Dua Blok Timur dengan akses servis belakang',
             'city' => 'Pekanbaru',
             'province' => 'Riau',
             'latitude' => 0.5071,
@@ -105,7 +105,7 @@ class ProjectReportPdfRendererTest extends TestCase
             'lcoe_idr_per_kwh' => 620,
             'project_lifetime_years' => 25,
             'cashflows' => [
-                ['year' => 1, 'saving_idr' => 10600000, 'om_cost_idr' => 685000, 'net_cashflow_idr' => 9915000],
+                ['year' => 1, 'gross_saving_idr' => 10600000, 'om_cost_idr' => 685000, 'net_cashflow_idr' => 9915000],
             ],
             'warnings' => [],
         ]));
@@ -138,6 +138,10 @@ class ProjectReportPdfRendererTest extends TestCase
 
         $this->assertStringStartsWith('%PDF-1.4', $pdf);
         $this->assertStringContainsString('NEXORIN', $pdf);
+        $this->assertStringContainsString('+62 812-3456-789', $pdf);
+        $this->assertStringContainsString('Gedung Energi Surya', $pdf);
+        $this->assertStringContainsString('IDR 10,600,000', $pdf);
+        $this->assertStringNotContainsString('...', $pdf);
         $this->assertStringEndsWith("%%EOF\n", $pdf);
         $this->assertSame('PRJ-TEST-001-project-report.pdf', $renderer->filename($project));
     }

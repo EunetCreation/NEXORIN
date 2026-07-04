@@ -136,6 +136,23 @@ class TechnicalCalculationEngineTest extends TestCase
         );
     }
 
+    public function test_it_warns_when_dc_ac_ratio_is_low(): void
+    {
+        $result = $this->engine->calculate(
+            new Project(),
+            $this->baseInput([
+                'inverter_ac_power_kw' => 20,
+            ]),
+            $this->baseSources()
+        );
+
+        $this->assertLessThan(0.95, $result['dc_ac_ratio']);
+        $this->assertContains(
+            'DC/AC ratio is low. The inverter capacity may be oversized relative to the installed PV array, reducing utilization and financial performance.',
+            $result['warnings']
+        );
+    }
+
     public function test_it_returns_preliminary_status_when_sources_are_missing(): void
     {
         $result = $this->engine->calculate(

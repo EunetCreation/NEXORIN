@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\PhoneFormatter;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -92,35 +93,7 @@ class Customer extends Model
      */
     public function getFormattedPhoneAttribute(): ?string
     {
-        if (! $this->phone) {
-            return null;
-        }
-
-        $digits = preg_replace('/\D+/', '', $this->phone);
-
-        if (! is_string($digits) || $digits === '') {
-            return $this->phone;
-        }
-
-        if (str_starts_with($digits, '0')) {
-            $digits = '62'.substr($digits, 1);
-        }
-
-        if (! str_starts_with($digits, '62')) {
-            return $this->phone;
-        }
-
-        $nationalNumber = substr($digits, 2);
-
-        if (strlen($nationalNumber) <= 3) {
-            return '+62 '.$nationalNumber;
-        }
-
-        $prefix = substr($nationalNumber, 0, 3);
-        $remaining = substr($nationalNumber, 3);
-        $groups = str_split($remaining, 4);
-
-        return '+62 '.$prefix.'-'.implode('-', $groups);
+        return PhoneFormatter::indonesia($this->phone);
     }
 
     /**

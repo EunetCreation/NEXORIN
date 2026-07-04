@@ -117,7 +117,7 @@ class QuotationEngine
                 'name' => $customer?->name,
                 'customer_number' => $customer?->customer_number,
                 'email' => $customer?->email,
-                'phone' => $customer?->phone,
+                'phone' => $customer?->formatted_phone ?? $customer?->phone,
                 'address' => $customer?->address,
                 'city' => $customer?->city,
                 'province' => $customer?->province,

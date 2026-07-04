@@ -22,12 +22,12 @@ class QuotationPdfRendererTest extends TestCase
             'customer_snapshot' => [
                 'name' => 'NEXORIN Customer',
                 'email' => 'customer@nexorin.local',
-                'phone' => '08123456789',
+                'phone' => '+62 0812-3456-7890',
             ],
             'project_snapshot' => [
                 'project_number' => 'NXR-PRJ-001',
-                'name' => 'Residential PV Demo',
-                'site_address' => 'Jl. Solar No. 1, Pekanbaru',
+                'name' => 'Residential PV Demo with a Very Long Project Name for PDF Wrapping Validation',
+                'site_address' => 'Jl. Solar No. 1, Pekanbaru, Kawasan Atap Timur yang Memiliki Nama Lokasi Sangat Panjang',
             ],
             'technical_summary' => [
                 'system_type' => 'on_grid',
@@ -63,8 +63,8 @@ class QuotationPdfRendererTest extends TestCase
             new QuotationItem([
                 'category' => 'pv_module',
                 'item_code' => 'PV-MODULE',
-                'item_name' => 'PV Module 550 Wp',
-                'description' => 'Monocrystalline PV module',
+                'item_name' => 'PV Module 550 Wp with extended product naming for layout validation',
+                'description' => 'Monocrystalline PV module with long description that must wrap cleanly across multiple lines without being cut from the quotation table.',
                 'quantity' => 12,
                 'unit' => 'pcs',
                 'unit_price_idr' => 1900000,
@@ -89,6 +89,9 @@ class QuotationPdfRendererTest extends TestCase
         $this->assertStringContainsString('NEXORIN', $pdf);
         $this->assertStringContainsString('QTN-DEMO-001', $pdf);
         $this->assertStringContainsString('Residential PV Demo', $pdf);
+        $this->assertStringContainsString('+62 812-3456-7890', $pdf);
+        $this->assertStringContainsString('layout validation', $pdf);
+        $this->assertStringNotContainsString('...', $pdf);
         $this->assertStringContainsString('%%EOF', $pdf);
         $this->assertSame('QTN-DEMO-001.pdf', $renderer->filename($quotation));
     }

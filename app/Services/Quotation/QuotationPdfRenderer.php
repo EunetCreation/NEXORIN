@@ -3,6 +3,7 @@
 namespace App\Services\Quotation;
 
 use App\Models\Quotation;
+use App\Support\PhoneFormatter;
 use DateTimeInterface;
 
 class QuotationPdfRenderer
@@ -34,7 +35,7 @@ class QuotationPdfRenderer
         $this->twoColumnRows([
             ['Customer', $this->value($quotation->customer_snapshot['name'] ?? $quotation->project?->customer?->name)],
             ['Email', $this->value($quotation->customer_snapshot['email'] ?? $quotation->project?->customer?->email)],
-            ['Phone', $this->value($quotation->customer_snapshot['phone'] ?? $quotation->project?->customer?->phone)],
+            ['Phone', $this->formatPhone($quotation->customer_snapshot['phone'] ?? $quotation->project?->customer?->phone)],
             ['Project', $this->value($quotation->project_snapshot['name'] ?? $quotation->project?->name)],
             ['Project No.', $this->value($quotation->project_snapshot['project_number'] ?? $quotation->project?->project_number)],
             ['Site', $this->value($quotation->project_snapshot['site_address'] ?? $quotation->project?->site_address)],
@@ -62,6 +63,7 @@ class QuotationPdfRenderer
             ['LCOE', $this->nullableNumber($financial['lcoe_idr_per_kwh'] ?? null, 2, ' IDR/kWh')],
         ]);
 
+        $this->ensure(106);
         $this->sectionTitle('Commercial Offer');
         $this->drawItemsTable($quotation);
 
@@ -125,26 +127,42 @@ class QuotationPdfRenderer
         $i = 0;
 
         while ($i < count($rows)) {
-            $this->ensure(32);
-            $this->fieldRow($leftX, $this->y, $rowWidth, $rows[$i][0], $rows[$i][1]);
+            $leftHeight = $this->fieldHeight($rowWidth, $rows[$i][1]);
+            $rightHeight = isset($rows[$i + 1]) ? $this->fieldHeight($rowWidth, $rows[$i + 1][1]) : 0;
+            $height = max($leftHeight, $rightHeight, 28);
+
+            $this->ensure($height + 6);
+            $this->fieldRow($leftX, $this->y, $rowWidth, $height, $rows[$i][0], $rows[$i][1]);
 
             if (isset($rows[$i + 1])) {
-                $this->fieldRow($rightX, $this->y, $rowWidth, $rows[$i + 1][0], $rows[$i + 1][1]);
+                $this->fieldRow($rightX, $this->y, $rowWidth, $height, $rows[$i + 1][0], $rows[$i + 1][1]);
             }
 
-            $this->y -= 34;
+            $this->y -= $height + 6;
             $i += 2;
         }
 
         $this->y -= 4;
     }
 
-    private function fieldRow(float $x, float $y, float $width, string $label, string $value): void
+    private function fieldHeight(float $width, string $value): float
     {
-        $this->rect($x, $y - 22, $width, 28, '0.96 0.98 0.98', true);
-        $this->rect($x, $y - 22, $width, 28, '0.86 0.90 0.91', false);
+        $lineCount = count($this->wrap($value, $this->charLimit($width - 16, 9.5)));
+
+        return 20 + ($lineCount * 11);
+    }
+
+    private function fieldRow(float $x, float $y, float $width, float $height, string $label, string $value): void
+    {
+        $this->rect($x, $y - $height + 6, $width, $height, '0.96 0.98 0.98', true);
+        $this->rect($x, $y - $height + 6, $width, $height, '0.86 0.90 0.91', false);
         $this->text($x + 8, $y - 2, $label, 7.5, 'F2', '0.33 0.40 0.44');
-        $this->text($x + 8, $y - 15, $this->truncate($value, 35), 9.5, 'F1', '0.05 0.12 0.17');
+
+        $lineY = $y - 15;
+        foreach ($this->wrap($value, $this->charLimit($width - 16, 9.5)) as $line) {
+            $this->text($x + 8, $lineY, $line, 9.5, 'F1', '0.05 0.12 0.17');
+            $lineY -= 11;
+        }
     }
 
     private function drawItemsTable(Quotation $quotation): void
@@ -155,8 +173,9 @@ class QuotationPdfRenderer
         foreach ($quotation->items as $item) {
             $name = (string) $item->item_name;
             $description = (string) ($item->description ?: $item->item_name);
-            $descriptionLines = $this->wrap($description, 42);
-            $height = max(32, 22 + (count($descriptionLines) * 10));
+            $nameLines = $this->wrap($name, 44);
+            $descriptionLines = $this->wrap($description, 58);
+            $height = max(34, 18 + (count($nameLines) * 10) + (count($descriptionLines) * 9));
 
             if ($this->y - $height < self::BOTTOM_MARGIN) {
                 $this->newPage();
@@ -166,12 +185,17 @@ class QuotationPdfRenderer
 
             $top = $this->y;
             $this->rect(self::MARGIN, $top - $height + 6, 511, $height, '0.90 0.93 0.94', false);
-            $this->text(50, $top - 10, $this->truncate($name, 36), 9, 'F2');
 
-            $lineY = $top - 22;
-            foreach (array_slice($descriptionLines, 0, 3) as $line) {
-                $this->text(50, $lineY, $line, 7.5, 'F1', '0.39 0.45 0.50');
+            $lineY = $top - 10;
+            foreach ($nameLines as $line) {
+                $this->text(50, $lineY, $line, 9, 'F2');
                 $lineY -= 10;
+            }
+
+            $lineY -= 2;
+            foreach ($descriptionLines as $line) {
+                $this->text(50, $lineY, $line, 7.5, 'F1', '0.39 0.45 0.50');
+                $lineY -= 9;
             }
 
             $this->text(290, $top - 12, $this->number($item->quantity, 3), 8.5, 'F1', '0.05 0.12 0.17', 'right');
@@ -303,6 +327,7 @@ class QuotationPdfRenderer
     /** @return array<int, string> */
     private function wrap(string $text, int $limit): array
     {
+        $limit = max(1, $limit);
         $text = trim(preg_replace('/\s+/', ' ', $this->value($text)) ?: '');
 
         if ($text === '') {
@@ -314,6 +339,19 @@ class QuotationPdfRenderer
         $current = '';
 
         foreach ($words as $word) {
+            if (strlen($word) > $limit) {
+                if ($current !== '') {
+                    $lines[] = $current;
+                    $current = '';
+                }
+
+                foreach (str_split($word, $limit) as $chunk) {
+                    $lines[] = $chunk;
+                }
+
+                continue;
+            }
+
             $candidate = trim($current.' '.$word);
 
             if (strlen($candidate) > $limit && $current !== '') {
@@ -329,6 +367,11 @@ class QuotationPdfRenderer
         }
 
         return $lines;
+    }
+
+    private function charLimit(float $width, float $fontSize): int
+    {
+        return max(8, (int) floor($width / ($fontSize * 0.48)));
     }
 
     private function money(mixed $value): string
@@ -359,6 +402,11 @@ class QuotationPdfRenderer
         $value = $this->value($value);
 
         return ucwords(str_replace(['_', '-'], ' ', $value));
+    }
+
+    private function formatPhone(mixed $value): string
+    {
+        return PhoneFormatter::indonesia($value === null ? null : (string) $value) ?? '-';
     }
 
     private function value(mixed $value): string
