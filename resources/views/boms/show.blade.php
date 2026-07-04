@@ -64,6 +64,7 @@
             <div class="bom-actions">
                 <a href="{{ route('companies.boms.index', $company) }}" class="ui-button ui-button-secondary">BOM Directory</a>
                 <a href="{{ route('companies.technical-calculations.show', [$company, $project]) }}" class="ui-button ui-button-secondary">Technical Calculation</a>
+                <a href="{{ route('companies.financial-analyses.show', [$company, $project]) }}" class="ui-button ui-button-secondary">Financial Analysis</a>
                 <a href="{{ route('companies.projects.show', [$company, $project]) }}" class="ui-button ui-button-secondary">Project Details</a>
             </div>
         </section>

@@ -105,6 +105,19 @@
             ]
         );
 
+    $canViewFinancialAnalyses = $currentCompany
+        && $currentUser->hasAnyCompanyPermission(
+            $currentCompany,
+            [
+                'calculation.view',
+                'price.selling.view',
+                'quotation.view',
+                'quotation.create',
+                'calculation.view_own',
+                'quotation.view_own',
+            ]
+        );
+
     $canViewQuotations = $currentCompany
         && $currentUser->hasAnyCompanyPermission(
             $currentCompany,
@@ -826,11 +839,21 @@
                 </a>
             @endif
 
+            @if ($canViewFinancialAnalyses)
+                <a
+                    href="{{ route('companies.financial-analyses.index', $currentCompany) }}"
+                    class="navigation-link {{ request()->routeIs('companies.financial-analyses.*') ? 'active' : '' }}"
+                >
+                    <span class="navigation-icon">₿</span>
+                    <span class="navigation-text">Financial Analysis</span>
+                    <span class="navigation-badge live">LIVE</span>
+                </a>
+            @endif
+
                 @if($canViewQuotations)
                     <a
-                        href="#"
-                        class="navigation-link"
-                        onclick="return false;"
+                        href="{{ route('companies.quotations.index', $currentCompany) }}"
+                        class="navigation-link {{ request()->routeIs('companies.quotations.*') ? 'active' : '' }}"
                     >
                         <svg
                             class="navigation-icon"
@@ -848,8 +871,8 @@
                             Quotations
                         </span>
 
-                        <span class="navigation-badge">
-                            Soon
+                        <span class="navigation-badge live">
+                            LIVE
                         </span>
                     </a>
                 @endif

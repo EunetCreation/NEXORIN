@@ -4,10 +4,12 @@ use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\BillOfMaterialController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ElectricityBillController;
+use App\Http\Controllers\FinancialAnalysisController;
 use App\Http\Controllers\LoadAnalysisController;
 use App\Http\Controllers\LoadApplianceController;
 use App\Http\Controllers\LocationSolarController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\QuotationController;
 use App\Http\Controllers\RoofSiteSurveyController;
 use App\Http\Controllers\RoofSiteSurveyPhotoController;
 use App\Http\Controllers\RoofSurfaceController;
@@ -247,6 +249,35 @@ Route::middleware(['auth', 'user.active'])->group(function () {
             Route::post('/projects/{project}/bom/pricing', [BillOfMaterialController::class, 'price'])
                 ->middleware('company.permission:price.cost.update,price.selling.update')
                 ->name('boms.price');
+
+
+            Route::get('/financial-analyses', [FinancialAnalysisController::class, 'index'])
+                ->middleware('company.permission:calculation.view,price.selling.view,quotation.view,calculation.view_own,quotation.view_own')
+                ->name('financial-analyses.index');
+
+            Route::get('/projects/{project}/financial-analysis', [FinancialAnalysisController::class, 'show'])
+                ->middleware('company.permission:calculation.view,price.selling.view,quotation.view,quotation.create,price.selling.update,calculation.view_own,quotation.view_own')
+                ->name('financial-analyses.show');
+
+            Route::post('/projects/{project}/financial-analysis/calculate', [FinancialAnalysisController::class, 'calculate'])
+                ->middleware('company.permission:price.selling.update,quotation.create')
+                ->name('financial-analyses.calculate');
+
+            Route::get('/quotations', [QuotationController::class, 'index'])
+                ->middleware('company.permission:quotation.view,quotation.view_own')
+                ->name('quotations.index');
+
+            Route::get('/projects/{project}/quotation', [QuotationController::class, 'show'])
+                ->middleware('company.permission:quotation.view,quotation.create,quotation.update,quotation.send,quotation.view_own')
+                ->name('quotations.show');
+
+            Route::post('/projects/{project}/quotation/generate', [QuotationController::class, 'generate'])
+                ->middleware('company.permission:quotation.create,quotation.update')
+                ->name('quotations.generate');
+
+            Route::patch('/projects/{project}/quotation/issue', [QuotationController::class, 'issue'])
+                ->middleware('company.permission:quotation.send')
+                ->name('quotations.issue');
 
             Route::get('/projects', [ProjectController::class, 'index'])
                 ->middleware('company.permission:project.view,project.view_own')

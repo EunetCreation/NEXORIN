@@ -156,6 +156,18 @@ class Project extends Model
         return $this->hasOne(BillOfMaterial::class);
     }
 
+    /** Get the project financial analysis. */
+    public function financialAnalysis(): HasOne
+    {
+        return $this->hasOne(FinancialAnalysis::class);
+    }
+
+    /** Get the project quotation. */
+    public function quotation(): HasOne
+    {
+        return $this->hasOne(Quotation::class);
+    }
+
     /**
      * Get roof surfaces recorded for the project.
      */
