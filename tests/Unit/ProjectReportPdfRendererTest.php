@@ -74,6 +74,54 @@ class ProjectReportPdfRendererTest extends TestCase
                         'description' => 'Average daily solar resource used in preliminary energy production estimation.',
                     ],
                 ],
+                'formula_snapshot' => [
+                    'required_pv_kw' => [
+                        'code' => 'REQUIRED_PV_CAPACITY',
+                        'category' => 'PV sizing',
+                        'label' => 'Required PV capacity',
+                        'formula' => 'target_daily_energy_kwh / (average_psh * effective_performance_ratio)',
+                        'display_formula' => 'Target daily energy ÷ (PSH × effective PR)',
+                        'inputs' => [
+                            'target_daily_energy_kwh' => ['label' => 'Target daily energy', 'value' => 24, 'unit' => 'kWh/day'],
+                            'average_psh' => ['label' => 'Average peak sun hour', 'value' => 4.7, 'unit' => 'h/day'],
+                            'effective_performance_ratio' => ['label' => 'Effective performance ratio', 'value' => 0.741, 'unit' => ''],
+                        ],
+                        'result' => 6.5,
+                        'unit' => 'kWp',
+                        'explanation' => 'Calculates the preliminary PV array size needed to meet the selected energy offset target.',
+                        'source' => 'technical_calculation_engine',
+                    ],
+                    'installed_pv_kw' => [
+                        'code' => 'INSTALLED_PV_CAPACITY',
+                        'category' => 'PV sizing',
+                        'label' => 'Installed PV capacity',
+                        'formula' => 'module_count * module_power_wp / 1000',
+                        'display_formula' => 'Module count × module power ÷ 1000',
+                        'inputs' => [
+                            'module_count' => ['label' => 'Module count', 'value' => 12, 'unit' => 'pcs'],
+                            'module_power_wp' => ['label' => 'Module power', 'value' => 550, 'unit' => 'Wp'],
+                        ],
+                        'result' => 6.6,
+                        'unit' => 'kWp',
+                        'explanation' => 'Calculates final installed PV capacity after roof constraints and module rounding.',
+                        'source' => 'technical_calculation_engine',
+                    ],
+                    'dc_ac_ratio' => [
+                        'code' => 'DC_AC_RATIO',
+                        'category' => 'Inverter sizing',
+                        'label' => 'DC/AC ratio',
+                        'formula' => 'installed_pv_kw / total_inverter_ac_kw',
+                        'display_formula' => 'Installed PV ÷ total inverter AC capacity',
+                        'inputs' => [
+                            'installed_pv_kw' => ['label' => 'Installed PV capacity', 'value' => 6.6, 'unit' => 'kWp'],
+                            'total_inverter_ac_kw' => ['label' => 'Total inverter AC power', 'value' => 5.5, 'unit' => 'kW'],
+                        ],
+                        'result' => 1.2,
+                        'unit' => '',
+                        'explanation' => 'Checks whether inverter capacity is reasonably matched to the installed DC array capacity.',
+                        'source' => 'technical_calculation_engine',
+                    ],
+                ],
             ],
             'warnings' => [
                 [
@@ -183,6 +231,9 @@ class ProjectReportPdfRendererTest extends TestCase
         $this->assertStringContainsString('Surya', $pdf);
 
         $this->assertStringContainsString('IDR 10,600,000', $pdf);
+        $this->assertStringContainsString('Calculation basis', $pdf);
+        $this->assertStringContainsString('Required PV capacity', $pdf);
+        $this->assertStringContainsString('Target daily energy', $pdf);
         $this->assertStringContainsString('Engineering assumptions', $pdf);
         $this->assertStringContainsString('Base performance ratio', $pdf);
         $this->assertStringContainsString('Low DC/AC Ratio', $pdf);

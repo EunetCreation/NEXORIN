@@ -3,11 +3,12 @@
 namespace App\Services\Calculation;
 
 use App\Models\Project;
+use App\Support\CalculationFormula;
 use App\Support\CalculationWarning;
 
 class TechnicalCalculationEngine
 {
-    public const VERSION = 'nexorin-technical-lv-v1.2.0';
+    public const VERSION = 'nexorin-technical-lv-v1.3.0';
 
     /**
      * Calculate preliminary low-voltage rooftop PV technical design values.
@@ -403,9 +404,295 @@ class TechnicalCalculationEngine
                 'system_type' => $systemType,
                 'cable_material' => $cableMaterial,
             ]),
+            'formula_snapshot' => $this->formulaSnapshot([
+                'daily_load_kwh' => round($dailyLoadKwh, 3),
+                'target_daily_energy_kwh' => round($targetDailyEnergyKwh, 3),
+                'critical_daily_load_kwh' => round($criticalDailyLoadKwh, 3),
+                'peak_demand_kw' => round($peakDemandKw, 3),
+                'average_psh' => round($psh, 3),
+                'weighted_shading_percent' => round($weightedShadingPercent, 3),
+                'shading_factor' => round($shadingFactor, 4),
+                'energy_offset_target_percent' => round($offsetTarget * 100, 3),
+                'performance_ratio' => round($performanceRatio, 4),
+                'effective_performance_ratio' => round($effectivePerformanceRatio, 4),
+                'module_power_wp' => round($moduleWp, 3),
+                'module_area_m2' => round($moduleAreaM2, 3),
+                'usable_roof_area_m2' => round($usableRoofAreaM2, 3),
+                'required_pv_kw' => round($requiredPvKw, 3),
+                'required_module_count' => $requiredModuleCount,
+                'area_limited_module_count' => $areaLimitedModuleCount,
+                'module_count' => $moduleCount,
+                'installed_pv_kw' => round($installedPvKw, 3),
+                'inverter_count' => $inverterCount,
+                'inverter_ac_power_kw' => round($inverterAcPowerKw, 3),
+                'desired_dc_ac_ratio' => round($desiredDcAcRatio, 3),
+                'total_inverter_ac_kw' => round($totalInverterAcKw, 3),
+                'dc_ac_ratio' => round($dcAcRatio, 3),
+                'module_voc_cold_v' => round($moduleVocCold, 3),
+                'module_vmp_hot_v' => round($moduleVmpHot, 3),
+                'minimum_modules_per_string' => $minimumModulesPerString,
+                'maximum_modules_per_string' => $maximumModulesPerString,
+                'modules_per_string' => $modulesPerString,
+                'string_count' => $stringCount,
+                'string_voc_cold_v' => round($stringVocColdV, 3),
+                'string_vmp_hot_v' => round($stringVmpHotV, 3),
+                'estimated_daily_generation_kwh' => round($estimatedDailyGenerationKwh, 3),
+                'annual_energy_kwh' => round($annualEnergyKwh, 3),
+                'battery_backup_hours' => round($backupHours, 3),
+                'battery_dod_percent' => round($batteryDod * 100, 3),
+                'battery_efficiency_percent' => round($batteryEfficiency * 100, 3),
+                'battery_nominal_kwh' => round($batteryNominalKwh, 3),
+                'battery_minimum_power_kw' => round($batteryMinimumPowerKw, 3),
+                'dc_current_a' => round($moduleImp * max($parallelStringsPerMppt, 1), 3),
+                'dc_cable_length_m' => round($dcCableLengthM, 3),
+                'dc_cable_area_mm2' => round($dcCableAreaMm2, 3),
+                'dc_voltage_drop_percent' => round($dcVoltageDropPercent, 3),
+                'ac_current_a' => round($acCurrentA, 3),
+                'ac_cable_length_m' => round($acCableLengthM, 3),
+                'ac_cable_area_mm2' => round($acCableAreaMm2, 3),
+                'ac_voltage_drop_percent' => round($acVoltageDropPercent, 3),
+                'system_type' => $systemType,
+                'supply_phase' => $supplyPhase,
+                'cable_material' => $cableMaterial,
+            ]),
             'warnings' => CalculationWarning::unique($warnings),
             'source_snapshot' => $sources,
         ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $values
+     * @return array<string, array<string, mixed>>
+     */
+    private function formulaSnapshot(array $values): array
+    {
+        $formulas = [
+            'target_daily_energy_kwh' => CalculationFormula::make(
+                'TARGET_DAILY_ENERGY',
+                'PV sizing',
+                'Target daily energy',
+                'daily_load_kwh * energy_offset_target',
+                'Daily load × energy offset target',
+                [
+                    'daily_load_kwh' => ['label' => 'Daily load energy', 'value' => $values['daily_load_kwh'] ?? 0, 'unit' => 'kWh/day'],
+                    'energy_offset_target_percent' => ['label' => 'Energy offset target', 'value' => $values['energy_offset_target_percent'] ?? 0, 'unit' => '%'],
+                ],
+                $values['target_daily_energy_kwh'] ?? 0,
+                'kWh/day',
+                'Determines how much daily load the PV system should offset in the preliminary design.'
+            ),
+            'effective_performance_ratio' => CalculationFormula::make(
+                'EFFECTIVE_PERFORMANCE_RATIO',
+                'PV sizing',
+                'Effective performance ratio',
+                'performance_ratio * (1 - weighted_shading_percent / 100)',
+                'Base PR × shading factor',
+                [
+                    'performance_ratio' => ['label' => 'Base performance ratio', 'value' => $values['performance_ratio'] ?? 0, 'unit' => ''],
+                    'weighted_shading_percent' => ['label' => 'Weighted shading', 'value' => $values['weighted_shading_percent'] ?? 0, 'unit' => '%'],
+                    'shading_factor' => ['label' => 'Shading factor', 'value' => $values['shading_factor'] ?? 0, 'unit' => ''],
+                ],
+                $values['effective_performance_ratio'] ?? 0,
+                '',
+                'Combines the base performance ratio and roof shading factor used by the energy model.'
+            ),
+            'required_pv_kw' => CalculationFormula::make(
+                'REQUIRED_PV_CAPACITY',
+                'PV sizing',
+                'Required PV capacity',
+                'target_daily_energy_kwh / (average_psh * effective_performance_ratio)',
+                'Target daily energy ÷ (PSH × effective PR)',
+                [
+                    'target_daily_energy_kwh' => ['label' => 'Target daily energy', 'value' => $values['target_daily_energy_kwh'] ?? 0, 'unit' => 'kWh/day'],
+                    'average_psh' => ['label' => 'Average peak sun hour', 'value' => $values['average_psh'] ?? 0, 'unit' => 'h/day'],
+                    'effective_performance_ratio' => ['label' => 'Effective performance ratio', 'value' => $values['effective_performance_ratio'] ?? 0, 'unit' => ''],
+                ],
+                $values['required_pv_kw'] ?? 0,
+                'kWp',
+                'Calculates the preliminary PV array size needed to meet the selected energy offset target.'
+            ),
+            'required_module_count' => CalculationFormula::make(
+                'REQUIRED_MODULE_COUNT',
+                'PV sizing',
+                'Required module count',
+                'ceil(required_pv_kw * 1000 / module_power_wp)',
+                'Ceiling(required PV × 1000 ÷ module power)',
+                [
+                    'required_pv_kw' => ['label' => 'Required PV capacity', 'value' => $values['required_pv_kw'] ?? 0, 'unit' => 'kWp'],
+                    'module_power_wp' => ['label' => 'Module power', 'value' => $values['module_power_wp'] ?? 0, 'unit' => 'Wp'],
+                ],
+                $values['required_module_count'] ?? 0,
+                'pcs',
+                'Converts required PV capacity into the minimum module quantity before applying roof-area limits.'
+            ),
+            'area_limited_module_count' => CalculationFormula::make(
+                'AREA_LIMITED_MODULE_COUNT',
+                'Roof constraint',
+                'Area-limited module count',
+                'floor(usable_roof_area_m2 / module_area_m2)',
+                'Floor(usable roof area ÷ module area)',
+                [
+                    'usable_roof_area_m2' => ['label' => 'Usable roof area', 'value' => $values['usable_roof_area_m2'] ?? 0, 'unit' => 'm2'],
+                    'module_area_m2' => ['label' => 'Module area', 'value' => $values['module_area_m2'] ?? 0, 'unit' => 'm2/module'],
+                ],
+                $values['area_limited_module_count'] ?? 0,
+                'pcs',
+                'Limits module quantity based on the preliminary usable roof area recorded in the site survey.'
+            ),
+            'module_count' => CalculationFormula::make(
+                'FINAL_MODULE_COUNT',
+                'Roof constraint',
+                'Final module count',
+                'min(required_module_count, area_limited_module_count)',
+                'Minimum(required modules, roof-limited modules)',
+                [
+                    'required_module_count' => ['label' => 'Required module count', 'value' => $values['required_module_count'] ?? 0, 'unit' => 'pcs'],
+                    'area_limited_module_count' => ['label' => 'Area-limited module count', 'value' => $values['area_limited_module_count'] ?? 0, 'unit' => 'pcs'],
+                ],
+                $values['module_count'] ?? 0,
+                'pcs',
+                'Selects the effective module quantity used by downstream string design, BOM, and reports.'
+            ),
+            'installed_pv_kw' => CalculationFormula::make(
+                'INSTALLED_PV_CAPACITY',
+                'PV sizing',
+                'Installed PV capacity',
+                'module_count * module_power_wp / 1000',
+                'Module count × module power ÷ 1000',
+                [
+                    'module_count' => ['label' => 'Module count', 'value' => $values['module_count'] ?? 0, 'unit' => 'pcs'],
+                    'module_power_wp' => ['label' => 'Module power', 'value' => $values['module_power_wp'] ?? 0, 'unit' => 'Wp'],
+                ],
+                $values['installed_pv_kw'] ?? 0,
+                'kWp',
+                'Calculates final installed PV capacity after roof constraints and module rounding.'
+            ),
+            'inverter_count' => CalculationFormula::make(
+                'INVERTER_COUNT_SELECTION',
+                'Inverter sizing',
+                'Inverter count',
+                'nearest count to installed_pv_kw / (inverter_ac_power_kw * desired_dc_ac_ratio)',
+                'Nearest integer to installed PV ÷ (inverter AC × desired DC/AC)',
+                [
+                    'installed_pv_kw' => ['label' => 'Installed PV capacity', 'value' => $values['installed_pv_kw'] ?? 0, 'unit' => 'kWp'],
+                    'inverter_ac_power_kw' => ['label' => 'Inverter AC power', 'value' => $values['inverter_ac_power_kw'] ?? 0, 'unit' => 'kW/unit'],
+                    'desired_dc_ac_ratio' => ['label' => 'Desired DC/AC ratio', 'value' => $values['desired_dc_ac_ratio'] ?? 0, 'unit' => ''],
+                ],
+                $values['inverter_count'] ?? 0,
+                'unit',
+                'Chooses the inverter quantity that keeps DC/AC ratio closest to the selected design target.'
+            ),
+            'dc_ac_ratio' => CalculationFormula::make(
+                'DC_AC_RATIO',
+                'Inverter sizing',
+                'DC/AC ratio',
+                'installed_pv_kw / total_inverter_ac_kw',
+                'Installed PV ÷ total inverter AC capacity',
+                [
+                    'installed_pv_kw' => ['label' => 'Installed PV capacity', 'value' => $values['installed_pv_kw'] ?? 0, 'unit' => 'kWp'],
+                    'total_inverter_ac_kw' => ['label' => 'Total inverter AC power', 'value' => $values['total_inverter_ac_kw'] ?? 0, 'unit' => 'kW'],
+                ],
+                $values['dc_ac_ratio'] ?? 0,
+                '',
+                'Checks whether inverter capacity is reasonably matched to the installed DC array capacity.'
+            ),
+            'maximum_modules_per_string' => CalculationFormula::make(
+                'MAXIMUM_MODULES_PER_STRING',
+                'String design',
+                'Maximum modules per string',
+                'min(floor(inverter_max_dc_voltage / corrected_voc), floor(mppt_max_voltage / corrected_vmp))',
+                'Minimum of Voc limit and MPPT upper voltage limit',
+                [
+                    'module_voc_cold_v' => ['label' => 'Corrected cold module Voc', 'value' => $values['module_voc_cold_v'] ?? 0, 'unit' => 'V'],
+                    'module_vmp_hot_v' => ['label' => 'Corrected hot module Vmp', 'value' => $values['module_vmp_hot_v'] ?? 0, 'unit' => 'V'],
+                ],
+                $values['maximum_modules_per_string'] ?? 0,
+                'pcs/string',
+                'Prevents string voltage from exceeding inverter maximum DC voltage and MPPT upper window.'
+            ),
+            'minimum_modules_per_string' => CalculationFormula::make(
+                'MINIMUM_MODULES_PER_STRING',
+                'String design',
+                'Minimum modules per string',
+                'ceil(inverter_mppt_min_voltage / corrected_hot_module_vmp)',
+                'Ceiling(MPPT minimum voltage ÷ corrected hot module Vmp)',
+                [
+                    'module_vmp_hot_v' => ['label' => 'Corrected hot module Vmp', 'value' => $values['module_vmp_hot_v'] ?? 0, 'unit' => 'V'],
+                ],
+                $values['minimum_modules_per_string'] ?? 0,
+                'pcs/string',
+                'Ensures string operating voltage stays above the inverter MPPT lower limit under hot conditions.'
+            ),
+            'annual_energy_kwh' => CalculationFormula::make(
+                'ANNUAL_ENERGY_ESTIMATE',
+                'Energy estimate',
+                'Annual energy estimate',
+                'installed_pv_kw * average_psh * effective_performance_ratio * 365',
+                'Installed PV × PSH × effective PR × 365',
+                [
+                    'installed_pv_kw' => ['label' => 'Installed PV capacity', 'value' => $values['installed_pv_kw'] ?? 0, 'unit' => 'kWp'],
+                    'average_psh' => ['label' => 'Average peak sun hour', 'value' => $values['average_psh'] ?? 0, 'unit' => 'h/day'],
+                    'effective_performance_ratio' => ['label' => 'Effective performance ratio', 'value' => $values['effective_performance_ratio'] ?? 0, 'unit' => ''],
+                ],
+                $values['annual_energy_kwh'] ?? 0,
+                'kWh/year',
+                'Estimates annual PV production using a preliminary PSH-based energy model.'
+            ),
+            'battery_nominal_kwh' => CalculationFormula::make(
+                'BATTERY_NOMINAL_CAPACITY',
+                'Battery sizing',
+                'Battery nominal capacity',
+                'usable_backup_energy / (battery_dod * battery_efficiency)',
+                'Usable backup energy ÷ (DoD × efficiency)',
+                [
+                    'critical_daily_load_kwh' => ['label' => 'Critical daily load', 'value' => $values['critical_daily_load_kwh'] ?? 0, 'unit' => 'kWh/day'],
+                    'battery_backup_hours' => ['label' => 'Backup duration', 'value' => $values['battery_backup_hours'] ?? 0, 'unit' => 'hours'],
+                    'battery_dod_percent' => ['label' => 'Battery DoD', 'value' => $values['battery_dod_percent'] ?? 0, 'unit' => '%'],
+                    'battery_efficiency_percent' => ['label' => 'Battery efficiency', 'value' => $values['battery_efficiency_percent'] ?? 0, 'unit' => '%'],
+                ],
+                $values['battery_nominal_kwh'] ?? 0,
+                'kWh',
+                'Calculates nominal battery capacity for hybrid backup after depth-of-discharge and efficiency assumptions.'
+            ),
+            'dc_voltage_drop_percent' => CalculationFormula::make(
+                'DC_VOLTAGE_DROP',
+                'Cable check',
+                'DC voltage drop',
+                '(current * 2 * resistivity * cable_length / cable_area) / string_voltage * 100',
+                'DC voltage drop ÷ string voltage × 100',
+                [
+                    'dc_current_a' => ['label' => 'DC design current', 'value' => $values['dc_current_a'] ?? 0, 'unit' => 'A'],
+                    'dc_cable_length_m' => ['label' => 'DC cable length', 'value' => $values['dc_cable_length_m'] ?? 0, 'unit' => 'm'],
+                    'dc_cable_area_mm2' => ['label' => 'DC cable area', 'value' => $values['dc_cable_area_mm2'] ?? 0, 'unit' => 'mm2'],
+                    'string_vmp_hot_v' => ['label' => 'Hot string Vmp', 'value' => $values['string_vmp_hot_v'] ?? 0, 'unit' => 'V'],
+                ],
+                $values['dc_voltage_drop_percent'] ?? 0,
+                '%',
+                'Estimates preliminary two-wire DC voltage drop using conductor material, length, area, current, and string voltage.'
+            ),
+            'ac_voltage_drop_percent' => CalculationFormula::make(
+                'AC_VOLTAGE_DROP',
+                'Cable check',
+                'AC voltage drop',
+                'phase multiplier * current * resistance / line_voltage * 100',
+                'AC voltage drop ÷ nominal line voltage × 100',
+                [
+                    'ac_current_a' => ['label' => 'AC design current', 'value' => $values['ac_current_a'] ?? 0, 'unit' => 'A'],
+                    'ac_cable_length_m' => ['label' => 'AC cable length', 'value' => $values['ac_cable_length_m'] ?? 0, 'unit' => 'm'],
+                    'ac_cable_area_mm2' => ['label' => 'AC cable area', 'value' => $values['ac_cable_area_mm2'] ?? 0, 'unit' => 'mm2'],
+                    'supply_phase' => ['label' => 'Supply phase', 'value' => $values['supply_phase'] ?? '-', 'unit' => ''],
+                ],
+                $values['ac_voltage_drop_percent'] ?? 0,
+                '%',
+                'Estimates preliminary AC voltage drop using conductor material, cable route, supply phase, and calculated AC current.'
+            ),
+        ];
+
+        if (($values['system_type'] ?? 'on_grid') !== 'hybrid') {
+            unset($formulas['battery_nominal_kwh']);
+        }
+
+        return $formulas;
     }
 
     /**

@@ -370,6 +370,13 @@ class TechnicalCalculationController extends Controller
             ]);
 
             $results[$field] = $overrideValue;
+            $results = $this->markFormulaOverride(
+                $results,
+                $field,
+                $overrideValue,
+                true,
+                $override->reason
+            );
 
             $calculation->fill([
                 'results' => $results,
@@ -450,6 +457,7 @@ class TechnicalCalculationController extends Controller
             }
 
             $results[$field] = $this->normalizeOverrideValue($engineValue, $override->value_type);
+            $results = $this->markFormulaOverride($results, $field, $results[$field], false);
 
             $calculation->fill([
                 'results' => $results,
@@ -570,6 +578,37 @@ class TechnicalCalculationController extends Controller
             ])
             ->values()
             ->all();
+    }
+
+    /**
+     * @param  array<string, mixed>  $results
+     * @return array<string, mixed>
+     */
+    private function markFormulaOverride(
+        array $results,
+        string $field,
+        mixed $effectiveValue,
+        bool $isOverridden,
+        ?string $reason = null
+    ): array {
+        if (! isset($results['formula_snapshot']) || ! is_array($results['formula_snapshot'])) {
+            return $results;
+        }
+
+        if (! isset($results['formula_snapshot'][$field]) || ! is_array($results['formula_snapshot'][$field])) {
+            return $results;
+        }
+
+        $results['formula_snapshot'][$field]['effective_result'] = $effectiveValue;
+        $results['formula_snapshot'][$field]['is_overridden'] = $isOverridden;
+
+        if ($isOverridden) {
+            $results['formula_snapshot'][$field]['override_reason'] = $reason;
+        } else {
+            unset($results['formula_snapshot'][$field]['override_reason']);
+        }
+
+        return $results;
     }
 
     private function normalizeOverrideValue(mixed $value, string $type): int|float|string|null

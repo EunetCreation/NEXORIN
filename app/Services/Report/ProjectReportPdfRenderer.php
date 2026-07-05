@@ -4,6 +4,7 @@ namespace App\Services\Report;
 
 use App\Models\BillOfMaterialItem;
 use App\Models\Project;
+use App\Support\CalculationFormula;
 use App\Support\CalculationWarning;
 use App\Support\PhoneFormatter;
 use DateTimeInterface;
@@ -226,6 +227,7 @@ class ProjectReportPdfRenderer
             ['Calculated at', $this->dateTime($calculation->calculated_at)],
         ]);
 
+        $this->drawCalculationBasis($result['formula_snapshot'] ?? []);
         $this->drawEngineeringAssumptions($result['assumption_snapshot'] ?? []);
 
         $overrides = $calculation->relationLoaded('activeOverrides')
@@ -269,6 +271,47 @@ class ProjectReportPdfRenderer
                 $this->bullet(CalculationWarning::text($warning));
             }
         }
+    }
+
+    private function drawCalculationBasis(mixed $formulas): void
+    {
+        if (! is_array($formulas) || $formulas === []) {
+            return;
+        }
+
+        $priority = [
+            'required_pv_kw',
+            'installed_pv_kw',
+            'dc_ac_ratio',
+            'annual_energy_kwh',
+            'battery_nominal_kwh',
+            'dc_voltage_drop_percent',
+        ];
+
+        $rows = [];
+        foreach ($priority as $field) {
+            $formula = $formulas[$field] ?? null;
+            if (! is_array($formula)) {
+                continue;
+            }
+
+            $label = (string) ($formula['label'] ?? 'Calculation formula');
+            $display = (string) ($formula['display_formula'] ?? $formula['formula'] ?? '-');
+            $result = CalculationFormula::formatValue(
+                $formula['effective_result'] ?? $formula['result'] ?? null,
+                (string) ($formula['unit'] ?? '')
+            );
+            $status = ! empty($formula['is_overridden']) ? ' | overridden effective value' : '';
+
+            $rows[] = [$label, trim($display.' = '.$result.$status)];
+        }
+
+        if ($rows === []) {
+            return;
+        }
+
+        $this->miniTitle('Calculation basis');
+        $this->twoColumnRows($rows);
     }
 
     private function drawEngineeringAssumptions(mixed $assumptions): void

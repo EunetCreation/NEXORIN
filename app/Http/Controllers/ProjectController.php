@@ -8,6 +8,7 @@ use App\Models\Company;
 use App\Models\Customer;
 use App\Models\Project;
 use App\Models\User;
+use App\Support\ProjectCockpit;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
@@ -268,20 +269,35 @@ class ProjectController extends Controller
             'updater:id,name,email',
             'statusUpdater:id,name,email',
             'statusHistories.changedBy:id,name,email',
+            'loadAnalysis.appliances',
+            'loadAnalysis.electricityBills',
+            'solarProfile.monthlyData',
+            'roofSiteSurvey.surfaces',
+            'systemRecommendation.scores',
+            'technicalCalculation.activeOverrides.creator:id,name',
+            'technicalCalculation.calculator:id,name',
+            'technicalCalculation.verifier:id,name',
+            'billOfMaterial.items',
+            'financialAnalysis',
+            'quotation.items',
         ]);
+
+        $user = $request->user();
+        $cockpit = ProjectCockpit::build($project);
 
         return view('projects.show', [
             'company' => $company,
             'project' => $project,
-            'canUpdateProject' => $request->user()->hasCompanyPermission(
+            'cockpit' => $cockpit,
+            'canUpdateProject' => $user->hasCompanyPermission(
                 $company,
                 'project.update'
             ),
-            'canArchiveProject' => $request->user()->hasCompanyPermission(
+            'canArchiveProject' => $user->hasCompanyPermission(
                 $company,
                 'project.archive'
             ),
-            'canViewLoadAnalysis' => $request->user()->hasAnyCompanyPermission(
+            'canViewLoadAnalysis' => $user->hasAnyCompanyPermission(
                 $company,
                 [
                     'load_analysis.view',
@@ -290,7 +306,7 @@ class ProjectController extends Controller
                     'load_analysis.manage_own',
                 ]
             ),
-            'canViewLocationSolar' => $request->user()->hasAnyCompanyPermission(
+            'canViewLocationSolar' => $user->hasAnyCompanyPermission(
                 $company,
                 [
                     'location_solar.view',
@@ -299,7 +315,7 @@ class ProjectController extends Controller
                     'location_solar.manage_own',
                 ]
             ),
-            'canViewRoofSite' => $request->user()->hasAnyCompanyPermission(
+            'canViewRoofSite' => $user->hasAnyCompanyPermission(
                 $company,
                 [
                     'roof_site.view',
@@ -308,13 +324,63 @@ class ProjectController extends Controller
                     'roof_site.manage_own',
                 ]
             ),
-            'canViewRecommendation' => $request->user()->hasAnyCompanyPermission(
+            'canViewRecommendation' => $user->hasAnyCompanyPermission(
                 $company,
                 [
                     'recommendation.view',
                     'recommendation.run',
                     'recommendation.override',
                     'recommendation.view_own',
+                ]
+            ),
+            'canViewTechnicalCalculation' => $user->hasAnyCompanyPermission(
+                $company,
+                [
+                    'calculation.view',
+                    'calculation.run',
+                    'calculation.revise',
+                    'calculation.verify',
+                    'calculation.view_own',
+                ]
+            ),
+            'canViewBom' => $user->hasAnyCompanyPermission(
+                $company,
+                [
+                    'calculation.view',
+                    'calculation.run',
+                    'calculation.revise',
+                    'calculation.view_own',
+                ]
+            ),
+            'canViewFinancialAnalysis' => $user->hasAnyCompanyPermission(
+                $company,
+                [
+                    'calculation.view',
+                    'price.selling.view',
+                    'quotation.view',
+                    'calculation.view_own',
+                    'quotation.view_own',
+                ]
+            ),
+            'canViewQuotation' => $user->hasAnyCompanyPermission(
+                $company,
+                [
+                    'quotation.view',
+                    'quotation.create',
+                    'quotation.update',
+                    'quotation.send',
+                    'quotation.view_own',
+                ]
+            ),
+            'canViewReports' => $user->hasAnyCompanyPermission(
+                $company,
+                [
+                    'project.view',
+                    'project.view_own',
+                    'calculation.view',
+                    'calculation.view_own',
+                    'quotation.view',
+                    'quotation.view_own',
                 ]
             ),
         ]);

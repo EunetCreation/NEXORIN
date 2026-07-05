@@ -67,6 +67,23 @@
     .tc-assumption-table th{background:var(--slate-50);color:var(--slate-600);font-size:.72rem;text-transform:uppercase;letter-spacing:.05em}
     .tc-assumption-table tr:last-child td{border-bottom:0}
     .tc-assumption-desc{color:var(--slate-600);line-height:1.45}
+    .tc-formula-list{display:grid;gap:12px;margin-top:16px}
+    .tc-formula{border:1px solid var(--slate-200);border-radius:18px;background:#fff;overflow:hidden}
+    .tc-formula[open]{box-shadow:0 14px 32px rgba(15,23,42,.07)}
+    .tc-formula summary{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:15px 16px;cursor:pointer;list-style:none}
+    .tc-formula summary::-webkit-details-marker{display:none}
+    .tc-formula-title{display:grid;gap:5px;min-width:0}
+    .tc-formula-title strong{color:var(--navy-900);font-size:.95rem}
+    .tc-formula-title span{color:var(--slate-500);font-size:.76rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em}
+    .tc-formula-result{white-space:nowrap;color:#087a70;font-weight:900;font-size:.9rem}
+    .tc-formula-body{display:grid;gap:12px;padding:0 16px 16px;border-top:1px solid var(--slate-200)}
+    .tc-formula-equation{margin:14px 0 0;padding:12px 14px;border-radius:14px;background:#f8fafc;color:#0f172a;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:.8rem;line-height:1.5;overflow-wrap:anywhere}
+    .tc-formula-explanation{margin:0;color:var(--slate-600);font-size:.84rem;line-height:1.5}
+    .tc-formula-inputs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+    .tc-formula-input{padding:10px 11px;border-radius:13px;background:var(--slate-50);border:1px solid var(--slate-200)}
+    .tc-formula-input span{display:block;color:var(--slate-500);font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em}
+    .tc-formula-input strong{display:block;margin-top:5px;color:var(--navy-900);font-size:.86rem}
+    .tc-formula-badge{display:inline-flex;width:max-content;padding:4px 8px;border-radius:999px;background:#fef3c7;color:#92400e;font-size:.68rem;font-weight:850;text-transform:uppercase;letter-spacing:.05em}
     .tc-override-badge{display:inline-flex;align-items:center;width:max-content;margin-top:8px;padding:4px 8px;border-radius:999px;background:#fef3c7;color:#92400e;font-size:.68rem;font-weight:850;letter-spacing:.05em;text-transform:uppercase}
     .tc-override-table{width:100%;border-collapse:collapse;background:#fff}
     .tc-override-table th,.tc-override-table td{padding:12px 14px;border-bottom:1px solid var(--slate-200);text-align:left;vertical-align:top;font-size:.84rem}
@@ -92,7 +109,7 @@
     .tc-table tr:last-child th,.tc-table tr:last-child td{border-bottom:0}
     .tc-table th{width:24%;background:var(--slate-50);color:var(--slate-600);font-size:.76rem;text-transform:uppercase;letter-spacing:.05em}
     @media(max-width:1180px){.tc-layout{grid-template-columns:1fr}.tc-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
-    @media(max-width:760px){.tc-hero{grid-template-columns:1fr;padding:26px}.tc-actions{justify-content:flex-start}.tc-stats,.tc-form-section,.tc-result-grid,.tc-source-grid{grid-template-columns:1fr}.tc-field-wide,.tc-result-panel-wide{grid-column:auto}.tc-metrics{grid-template-columns:1fr}.tc-form-actions{justify-content:stretch}.tc-form-actions .ui-button{width:100%}}
+    @media(max-width:760px){.tc-hero{grid-template-columns:1fr;padding:26px}.tc-actions{justify-content:flex-start}.tc-stats,.tc-form-section,.tc-result-grid,.tc-source-grid{grid-template-columns:1fr}.tc-field-wide,.tc-result-panel-wide{grid-column:auto}.tc-metrics,.tc-formula-inputs{grid-template-columns:1fr}.tc-form-actions{justify-content:stretch}.tc-form-actions .ui-button{width:100%}}
 </style>
 @endpush
 
@@ -136,6 +153,9 @@
         $warningCounts = collect($warningRecords)->countBy(fn ($warning) => $warning['severity'] ?? 'info');
         $assumptionSnapshot = $results['assumption_snapshot'] ?? [];
         $assumptionSnapshot = is_array($assumptionSnapshot) ? $assumptionSnapshot : [];
+        $formulaSnapshot = $results['formula_snapshot'] ?? [];
+        $formulaSnapshot = is_array($formulaSnapshot) ? $formulaSnapshot : [];
+        $formulaGroups = collect($formulaSnapshot)->groupBy(fn ($formula) => $formula['category'] ?? 'General');
         $formatAssumptionValue = function ($assumption) {
             $value = $assumption['value'] ?? '-';
             $unit = $assumption['unit'] ?? '';
@@ -153,6 +173,17 @@
             if (is_numeric($value)) {
                 $decimals = $type === 'integer' ? 0 : 3;
                 $formatted = rtrim(rtrim(number_format((float) $value, $decimals), '0'), '.');
+            } else {
+                $formatted = (string) $value;
+            }
+            return trim($formatted.' '.($unit ?: ''));
+        };
+        $formatFormulaValue = function ($value, $unit = '') {
+            if ($value === null || $value === '') {
+                return '-';
+            }
+            if (is_numeric($value)) {
+                $formatted = rtrim(rtrim(number_format((float) $value, 4), '0'), '.');
             } else {
                 $formatted = (string) $value;
             }
@@ -378,6 +409,56 @@
                                 </div>
                             </article>
                         </div>
+
+                        @if ($formulaSnapshot !== [])
+                            <article class="tc-result-panel tc-result-panel-wide" style="margin-top:16px">
+                                <h4>Formula Explanation</h4>
+                                <p class="tc-card-subtitle">Each formula keeps the equation, source inputs, engine result, and effective result when an engineer override is active.</p>
+                                <div class="tc-formula-list">
+                                    @foreach ($formulaGroups as $category => $formulas)
+                                        @foreach ($formulas as $field => $formula)
+                                            @php
+                                                $unit = $formula['unit'] ?? '';
+                                                $engineResult = $formula['result'] ?? null;
+                                                $effectiveResult = $formula['effective_result'] ?? $engineResult;
+                                                $isFormulaOverridden = (bool) ($formula['is_overridden'] ?? false);
+                                            @endphp
+                                            <details class="tc-formula" @if($loop->parent->first && $loop->first) open @endif>
+                                                <summary>
+                                                    <span class="tc-formula-title">
+                                                        <span>{{ $category }}</span>
+                                                        <strong>{{ $formula['label'] ?? 'Calculation formula' }}</strong>
+                                                    </span>
+                                                    <span class="tc-formula-result">
+                                                        {{ $formatFormulaValue($effectiveResult, $unit) }}
+                                                    </span>
+                                                </summary>
+                                                <div class="tc-formula-body">
+                                                    <div class="tc-formula-equation">{{ $formula['display_formula'] ?? $formula['formula'] ?? '-' }}</div>
+                                                    <p class="tc-formula-explanation">{{ $formula['explanation'] ?? '-' }}</p>
+                                                    @if ($isFormulaOverridden)
+                                                        <span class="tc-formula-badge">Effective value overridden</span>
+                                                        @if(! empty($formula['override_reason']))
+                                                            <p class="tc-formula-explanation"><strong>Override reason:</strong> {{ $formula['override_reason'] }}</p>
+                                                        @endif
+                                                    @endif
+                                                    @if (! empty($formula['inputs']) && is_array($formula['inputs']))
+                                                        <div class="tc-formula-inputs">
+                                                            @foreach ($formula['inputs'] as $input)
+                                                                <div class="tc-formula-input">
+                                                                    <span>{{ $input['label'] ?? 'Input' }}</span>
+                                                                    <strong>{{ $formatFormulaValue($input['value'] ?? null, $input['unit'] ?? '') }}</strong>
+                                                                </div>
+                                                            @endforeach
+                                                        </div>
+                                                    @endif
+                                                </div>
+                                            </details>
+                                        @endforeach
+                                    @endforeach
+                                </div>
+                            </article>
+                        @endif
 
                         @if ($assumptionSnapshot !== [])
                             <article class="tc-result-panel tc-result-panel-wide" style="margin-top:16px">

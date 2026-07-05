@@ -31,8 +31,12 @@ class TechnicalCalculationEngineTest extends TestCase
         $this->assertSame('detailed', $result['result_status']);
         $this->assertSame('on_grid', $result['assumptions']['system_type']);
         $this->assertArrayHasKey('assumption_snapshot', $result);
+        $this->assertArrayHasKey('formula_snapshot', $result);
         $this->assertSame(TechnicalCalculationEngine::VERSION, $result['assumption_snapshot']['engine_version']['value']);
         $this->assertSame('load_analysis', $result['assumption_snapshot']['daily_load_kwh']['source']);
+        $this->assertSame('Required PV capacity', $result['formula_snapshot']['required_pv_kw']['label']);
+        $this->assertSame('Target daily energy ÷ (PSH × effective PR)', $result['formula_snapshot']['required_pv_kw']['display_formula']);
+        $this->assertArrayHasKey('target_daily_energy_kwh', $result['formula_snapshot']['required_pv_kw']['inputs']);
 
         $this->assertGreaterThan(6.0, $result['required_pv_kw']);
         $this->assertGreaterThan(6.0, $result['installed_pv_kw']);
@@ -187,6 +191,9 @@ class TechnicalCalculationEngineTest extends TestCase
         $this->assertWarningCode('DC_AC_RATIO_LOW', $result['warnings']);
         $this->assertSame('calculation_input', $result['assumption_snapshot']['desired_dc_ac_ratio']['source']);
         $this->assertSame('Maximum voltage drop', $result['assumption_snapshot']['maximum_voltage_drop_percent']['label']);
+        $this->assertSame('DC/AC ratio', $result['formula_snapshot']['dc_ac_ratio']['label']);
+        $this->assertSame('Inverter sizing', $result['formula_snapshot']['dc_ac_ratio']['category']);
+        $this->assertArrayHasKey('installed_pv_kw', $result['formula_snapshot']['dc_ac_ratio']['inputs']);
     }
 
 

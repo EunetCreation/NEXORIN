@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Support\CalculationFormula;
 use App\Support\CalculationWarning;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -185,6 +186,24 @@ class TechnicalCalculation extends Model
         $snapshot = $results['assumption_snapshot'] ?? [];
 
         return is_array($snapshot) ? $snapshot : [];
+    }
+
+    /**
+     * @return array<string, array<string, mixed>>
+     */
+    public function formulaSnapshot(): array
+    {
+        $results = $this->results ?? [];
+        $snapshot = $results['formula_snapshot'] ?? [];
+
+        return is_array($snapshot) ? $snapshot : [];
+    }
+
+    public function formulaText(string $field): string
+    {
+        $formula = $this->formulaSnapshot()[$field] ?? null;
+
+        return is_array($formula) ? CalculationFormula::text($formula) : '-';
     }
 
     public function getResultStatusLabelAttribute(): string
