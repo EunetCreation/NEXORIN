@@ -174,6 +174,22 @@ class Project extends Model
         return $this->hasOne(Quotation::class);
     }
 
+    /** Get all client release approvals for the project. */
+    public function releaseApprovals(): HasMany
+    {
+        return $this->hasMany(ProjectReleaseApproval::class)
+            ->latest('approved_at')
+            ->latest('id');
+    }
+
+    /** Get the currently active client release approval. */
+    public function activeReleaseApproval(): HasOne
+    {
+        return $this->hasOne(ProjectReleaseApproval::class)
+            ->where('status', 'active')
+            ->latestOfMany('approved_at');
+    }
+
     /**
      * Get roof surfaces recorded for the project.
      */

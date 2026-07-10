@@ -1,180 +1,149 @@
-<style>
-.topbar {
-    position: sticky;
-    z-index: 60;
-    top: 0;
-    min-height: var(--topbar-height);
-    display: flex;
-    align-items: center;
-    border-bottom: 1px solid rgba(7, 40, 61, 0.07);
-    background: #f7fafb;
-    box-shadow: 0 8px 24px rgba(3, 21, 34, 0.05);
-}
+@php
+    $topbarUser = auth()->user();
+    $routeCompany = request()->route('company');
 
-    .topbar-container {
-        width: min(1480px, 100%);
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 22px;
-        margin: 0 auto;
-        padding: 0 32px;
-    }
+    $topbarCompany = $routeCompany instanceof \App\Models\Company && $routeCompany->isActive()
+        ? $routeCompany
+        : $topbarUser->activeCompanies()->first();
 
-    .topbar-left {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-    }
+    $topbarRoleLabel = $topbarUser->isSuperAdmin()
+        ? 'Super Admin'
+        : ($topbarCompany
+            ? ($topbarUser->companyMemberships()
+                ->where('company_id', $topbarCompany->getKey())
+                ->where('status', 'active')
+                ->with('roles')
+                ->first()?->roles?->first()?->name ?? 'Company Member')
+            : 'System User');
 
-    .menu-toggle {
-        width: 44px;
-        height: 44px;
-        display: none;
-        place-items: center;
-        border: 1px solid var(--slate-200);
-        border-radius: 13px;
-        color: var(--navy-800);
-        cursor: pointer;
-        background: rgba(255, 255, 255, 0.86);
-        box-shadow: var(--shadow-sm);
-    }
+    $canCreateProject = $topbarCompany
+        && $topbarUser->hasAnyCompanyPermission($topbarCompany, ['project.create', 'project.create_own']);
 
-    .menu-toggle svg {
-        width: 20px;
-        height: 20px;
-    }
+    $canSearchProjects = $topbarCompany
+        && $topbarUser->hasAnyCompanyPermission($topbarCompany, ['project.view', 'project.view_own']);
 
-    .page-heading small {
-        display: block;
-        margin-bottom: 4px;
-        color: var(--teal-600);
-        font-size: 9px;
-        font-weight: 800;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-    }
+    $canViewQuotations = $topbarCompany
+        && $topbarUser->hasAnyCompanyPermission($topbarCompany, ['quotation.view', 'quotation.view_own']);
 
-    .page-heading h1 {
-        margin: 0;
-        font-family: "Space Grotesk", sans-serif;
-        font-size: 22px;
-        line-height: 1.2;
-        letter-spacing: -0.025em;
-    }
-
-    .topbar-right {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-    }
-
-    .system-status {
-        display: flex;
-        align-items: center;
-        gap: 9px;
-        padding: 10px 13px;
-        border: 1px solid rgba(22, 190, 179, 0.16);
-        border-radius: 13px;
-        color: var(--slate-700);
-        background: rgba(255, 255, 255, 0.72);
-        font-size: 10px;
-        font-weight: 700;
-    }
-
-    .status-indicator {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: var(--teal-500);
-        box-shadow:
-            0 0 0 5px rgba(22, 190, 179, 0.10),
-            0 0 15px rgba(22, 190, 179, 0.45);
-    }
-
-    .date-card {
-        padding: 10px 13px;
-        border: 1px solid var(--slate-200);
-        border-radius: 13px;
-        color: var(--slate-600);
-        background: rgba(255, 255, 255, 0.72);
-        font-size: 10px;
-        font-weight: 600;
-    }
-
-    @media (max-width: 1100px) {
-        .menu-toggle {
-            display: grid;
-        }
-    }
-
-    @media (max-width: 720px) {
-        .topbar {
-            min-height: 76px;
-        }
-
-        .topbar-container {
-            padding: 0 16px;
-        }
-
-        .page-heading h1 {
-            font-size: 18px;
-        }
-
-        .system-status span:last-child,
-        .date-card {
-            display: none;
-        }
-
-        .system-status {
-            width: 42px;
-            height: 42px;
-            justify-content: center;
-            padding: 0;
-        }
-    }
-</style>
+    $openQuotationCount = $canViewQuotations
+        ? \App\Models\Quotation::query()
+            ->where('company_id', $topbarCompany->getKey())
+            ->whereNotIn('status', ['accepted', 'rejected', 'cancelled', 'expired'])
+            ->count()
+        : 0;
+@endphp
 
 <header class="topbar">
     <div class="topbar-container">
-        <div class="topbar-left">
-            <button
-                id="sidebarToggle"
-                class="menu-toggle"
-                type="button"
-                aria-label="Open navigation"
-            >
-                <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.8"
-                    aria-hidden="true"
-                >
+        <div class="topbar-heading-group">
+            <button id="sidebarToggle" class="topbar-icon-button mobile-menu-button" type="button" aria-label="Open navigation">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
                     <path d="M4 7h16M4 12h16M4 17h16"/>
                 </svg>
             </button>
 
             <div class="page-heading">
-                <small>
-                    @yield('page-eyebrow', 'Solar intelligence platform')
-                </small>
-
-                <h1>
-                    @yield('page-heading', 'Dashboard Overview')
-                </h1>
+                <span class="page-eyebrow">@yield('page-eyebrow', 'Solar engineering workspace')</span>
+                <h1>@yield('page-heading', 'Dashboard')</h1>
             </div>
         </div>
 
-        <div class="topbar-right">
-            <div class="system-status">
-                <span class="status-indicator"></span>
-                <span>System operational</span>
-            </div>
+        <div class="topbar-actions">
+            @if ($canSearchProjects)
+                <form action="{{ route('companies.projects.index', $topbarCompany) }}" method="GET" class="topbar-search" role="search">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
+                        <circle cx="11" cy="11" r="7"/>
+                        <path d="M20 20l-3.5-3.5"/>
+                    </svg>
+                    <input
+                        type="search"
+                        name="search"
+                        value="{{ request('search') }}"
+                        placeholder="Search project or customer"
+                        aria-label="Search projects"
+                    >
+                    <kbd>/</kbd>
+                </form>
+            @endif
 
-            <div class="date-card">
-                {{ now('Asia/Jakarta')->format('d M Y') }}
-            </div>
+            <button id="themeToggle" class="topbar-icon-button theme-toggle" type="button" aria-label="Change color theme" title="Change color theme">
+                <svg class="theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
+                    <circle cx="12" cy="12" r="4"/>
+                    <path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.66 6.34l1.41-1.41"/>
+                </svg>
+                <svg class="theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
+                    <path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5 8.5 8.5 0 1 0 20.5 14.2z"/>
+                </svg>
+            </button>
+
+            @if ($canViewQuotations)
+                <a href="{{ route('companies.quotations.index', $topbarCompany) }}" class="topbar-icon-button notification-button" aria-label="Open quotations">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
+                        <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/>
+                        <path d="M10 21h4"/>
+                    </svg>
+                    @if ($openQuotationCount > 0)
+                        <span class="notification-count">{{ min($openQuotationCount, 9) }}{{ $openQuotationCount > 9 ? '+' : '' }}</span>
+                    @endif
+                </a>
+            @endif
+
+            @if ($canCreateProject)
+                <a href="{{ route('companies.projects.create', $topbarCompany) }}" class="topbar-primary-action">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path d="M12 5v14M5 12h14"/>
+                    </svg>
+                    <span>New Project</span>
+                </a>
+            @endif
+
+            <details class="profile-menu">
+                <summary class="profile-menu-trigger" aria-label="Open user menu">
+                    <span class="profile-avatar profile-avatar-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <circle cx="12" cy="8" r="4"/>
+                            <path d="M4.5 21a7.5 7.5 0 0 1 15 0"/>
+                        </svg>
+                    </span>
+                    <span class="profile-copy">
+                        <strong>{{ $topbarUser->name }}</strong>
+                        <span>{{ $topbarRoleLabel }}</span>
+                    </span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
+                        <path d="M7 10l5 5 5-5"/>
+                    </svg>
+                </summary>
+
+                <div class="profile-menu-panel">
+                    <div class="profile-menu-header">
+                        <span class="profile-avatar profile-avatar-icon large" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                <circle cx="12" cy="8" r="4"/>
+                                <path d="M4.5 21a7.5 7.5 0 0 1 15 0"/>
+                            </svg>
+                        </span>
+                        <div>
+                            <strong>{{ $topbarUser->name }}</strong>
+                            <span>{{ $topbarUser->email }}</span>
+                        </div>
+                    </div>
+
+                    <div class="profile-workspace-row">
+                        <span>Active workspace</span>
+                        <strong>{{ $topbarCompany?->name ?? 'System Workspace' }}</strong>
+                    </div>
+
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="profile-signout">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
+                                <path d="M10 4H5v16h5M14 8l4 4-4 4M18 12H9"/>
+                            </svg>
+                            Sign out
+                        </button>
+                    </form>
+                </div>
+            </details>
         </div>
     </div>
 </header>

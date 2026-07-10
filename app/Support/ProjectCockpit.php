@@ -122,7 +122,7 @@ class ProjectCockpit
                 'key' => 'quotation',
                 'label' => 'Quotation',
                 'caption' => 'Customer-facing offer and reports',
-                'state' => $quotation ? ($quotation->status === 'issued' ? 'locked' : 'complete') : 'missing',
+                'state' => $quotation ? (in_array($quotation->status, ['approved', 'sent', 'issued', 'accepted'], true) ? 'locked' : 'complete') : 'missing',
                 'status' => $quotation?->status_label ?? 'Missing',
                 'metric' => $quotation?->quote_number ?? 'No quote',
             ],

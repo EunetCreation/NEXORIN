@@ -24,11 +24,19 @@ class QuantityEngineTest extends TestCase
 
         $names = array_column($payload['items'], 'item_name');
 
-        $this->assertContains('PV Module', $names);
-        $this->assertContains('Grid-Tied Inverter', $names);
-        $this->assertContains('DC Solar Cable', $names);
+        $this->assertContains('Solar PV Module', $names);
+        $this->assertContains('On-Grid String Inverter', $names);
+        $this->assertContains('PV DC Cable Red / Black', $names);
         $this->assertContains('AC Circuit Breaker', $names);
+        $this->assertContains('Smart Meter / Energy Meter Set', $names);
+        $this->assertContains('Shading Analysis Service', $names);
         $this->assertNotContains('Battery Energy Storage Pack', $names);
+        $this->assertSame('08B-scope-mode-chargeability-control', $payload['summary']['master_catalog_version']);
+        $this->assertGreaterThan(0, $payload['summary']['catalog_candidate_item_count']);
+
+        $shading = collect($payload['items'])->firstWhere('item_code', 'SHADING-ANALYSIS-SERVICE');
+        $this->assertFalse($shading['metadata']['included_in_base_price']);
+        $this->assertSame('internal_catalog_candidate', $shading['metadata']['scope_mode']);
     }
 
     public function test_it_generates_battery_items_for_hybrid_system(): void
@@ -44,7 +52,13 @@ class QuantityEngineTest extends TestCase
         $this->assertGreaterThan(0, $payload['summary']['battery_nominal_kwh']);
         $this->assertContains('Hybrid Inverter', $names);
         $this->assertContains('Battery Energy Storage Pack', $names);
-        $this->assertContains('Battery Protection and BMS Interface Set', $names);
+        $this->assertContains('Battery Cabinet and BMS Interface Set', $names);
+        $this->assertContains('ATS / AMF / STS Transfer Set', $names);
+        $this->assertContains('Battery Commissioning Report', $names);
+
+        $ats = collect($payload['items'])->firstWhere('item_code', 'ATS-AMF-STS');
+        $this->assertFalse($ats['metadata']['included_in_base_price']);
+        $this->assertSame('internal_catalog_candidate', $ats['metadata']['scope_mode']);
     }
 
     public function test_it_warns_when_calculation_is_not_verified(): void
@@ -55,7 +69,7 @@ class QuantityEngineTest extends TestCase
         $payload = (new QuantityEngine())->generate($this->project(), $calculation);
 
         $this->assertContains(
-            'The technical calculation has not been engineer verified. This BOM should remain a draft.',
+            'The technical calculation has not been engineer verified. Keep this BOM/BOQ as a draft until review is complete.',
             $payload['warnings']
         );
     }

@@ -231,6 +231,14 @@ class ProjectReportPdfRendererTest extends TestCase
         $this->assertStringContainsString('Surya', $pdf);
 
         $this->assertStringContainsString('IDR 10,600,000', $pdf);
+        $this->assertStringContainsString('ENGINEERING REPORT', $pdf);
+        $this->assertStringContainsString('Executive Summary', $pdf);
+        $this->assertStringContainsString('Document control', $pdf);
+        $this->assertStringContainsString('Warning severity summary', $pdf);
+        $this->assertStringContainsString('Warning matrix', $pdf);
+        $this->assertStringContainsString('Review and approval', $pdf);
+        $this->assertStringContainsString('Prepared by', $pdf);
+        $this->assertStringContainsString('Reviewed by', $pdf);
         $this->assertStringContainsString('Calculation basis', $pdf);
         $this->assertStringContainsString('Required PV capacity', $pdf);
         $this->assertStringContainsString('Target daily energy', $pdf);

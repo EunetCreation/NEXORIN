@@ -32,9 +32,11 @@
         </div>
         <div class="quote-actions">
             @if ($quotation)
-                <a class="ui-button ui-button-secondary" href="{{ route('companies.quotations.pdf', [$company, $project]) }}">Download PDF</a>
+                <a class="ui-button ui-button-secondary" href="{{ route('companies.quotations.pdf', [$company, $project]) }}">Approved Client Proposal PDF</a>
             @endif
-            <a class="ui-button ui-button-secondary" href="{{ route('companies.projects.report.pdf', [$company, $project]) }}">Project Report PDF</a>
+            <a class="ui-button ui-button-secondary" href="{{ route('companies.projects.report.premium.pdf', [$company, $project]) }}">Internal Engineering Report</a>
+            <a class="ui-button ui-button-secondary" href="{{ route('companies.projects.report.client-proposal.pdf', [$company, $project]) }}">Client Proposal PDF</a>
+            <a class="ui-button ui-button-secondary" href="{{ route('companies.projects.report.client-proposal.preview', [$company, $project]) }}" target="_blank" rel="noopener">Client Proposal Preview</a>
             <a class="ui-button ui-button-secondary" href="{{ route('companies.financial-analyses.show', [$company, $project]) }}">Financial Analysis</a>
             <a class="ui-button ui-button-secondary" href="{{ route('companies.quotations.index', $company) }}">Back to list</a>
         </div>
@@ -69,11 +71,30 @@
                 <div class="quote-preview">
                     <div class="quote-row"><span>Customer</span><strong>{{ $quotation->customer_snapshot['name'] ?? $project->customer?->name }}</strong></div>
                     <div class="quote-row"><span>Project</span><strong>{{ $quotation->project_snapshot['name'] ?? $project->name }}</strong></div>
+                    <div class="quote-row"><span>Revision</span><strong>{{ $quotation->version_display }}</strong></div>
+                    <div class="quote-row"><span>Snapshot</span><strong>{{ $quotation->snapshot_hash ? substr($quotation->snapshot_hash, 0, 12) : '—' }}</strong></div>
+                    <div class="quote-row"><span>Client PDF</span><strong>{{ $quotation->client_proposal_pdf_generated_at ? 'Generated · '.$quotation->client_proposal_pdf_generated_at->format('d M Y, H:i') : 'Not generated from approved snapshot' }}</strong></div>
                     <div class="quote-row"><span>Site</span><strong>{{ $quotation->project_snapshot['site_address'] ?? $project->site_address }}</strong></div>
                     <div class="quote-row"><span>Valid Until</span><strong>{{ $quotation->valid_until?->format('d M Y') ?? '—' }}</strong></div>
                     <div class="quote-row"><span>Prepared By</span><strong>{{ $quotation->preparer?->name ?? 'System' }}</strong></div>
+                    @if ($quotation->approved_at)
+                        <div class="quote-row"><span>Approved By</span><strong>{{ $quotation->approver?->name ?? 'System' }} · {{ $quotation->approved_at->format('d M Y, H:i') }}</strong></div>
+                    @endif
                     @if ($quotation->issued_at)
-                        <div class="quote-row"><span>Issued By</span><strong>{{ $quotation->issuer?->name ?? 'System' }} · {{ $quotation->issued_at->format('d M Y, H:i') }}</strong></div>
+                        <div class="quote-row"><span>Sent By</span><strong>{{ $quotation->issuer?->name ?? 'System' }} · {{ $quotation->issued_at->format('d M Y, H:i') }}</strong></div>
+                        <div class="quote-row"><span>Delivery</span><strong>{{ ucfirst($quotation->delivery_method ?? 'manual') }}{{ $quotation->sent_to ? ' · '.$quotation->sent_to : '' }}</strong></div>
+                    @endif
+                    @if ($quotation->accepted_at)
+                        <div class="quote-row"><span>Accepted</span><strong>{{ $quotation->accepter?->name ?? 'System' }} · {{ $quotation->accepted_at->format('d M Y, H:i') }}</strong></div>
+                    @endif
+                    @if ($quotation->rejected_at)
+                        <div class="quote-row"><span>Rejected</span><strong>{{ $quotation->rejecter?->name ?? 'System' }} · {{ $quotation->rejected_at->format('d M Y, H:i') }}</strong></div>
+                    @endif
+                    @if ($quotation->cancelled_at)
+                        <div class="quote-row"><span>Cancelled</span><strong>{{ $quotation->canceller?->name ?? 'System' }} · {{ $quotation->cancelled_at->format('d M Y, H:i') }}</strong></div>
+                    @endif
+                    @if ($quotation->expired_at)
+                        <div class="quote-row"><span>Expired</span><strong>{{ $quotation->expired_at->format('d M Y, H:i') }}</strong></div>
                     @endif
                 </div>
 
@@ -119,12 +140,100 @@
                     @endif
                 </div>
 
+                @if ($canApprove)
+                    <form class="quote-issue" method="POST" action="{{ route('companies.quotations.approve', [$company, $project]) }}">
+                        @csrf
+                        @method('PATCH')
+                        <div class="ui-field" style="margin-bottom:12px">
+                            <label class="ui-label">Approval Notes</label>
+                            <textarea class="ui-input" name="approval_notes" rows="2" placeholder="Internal approval note, optional"></textarea>
+                        </div>
+                        <button class="ui-button ui-button-primary" type="submit" data-confirm="Approve this quotation snapshot? The revision will become client-safe.">Approve Quotation Snapshot</button>
+                    </form>
+                @endif
+
                 @if ($canIssue)
                     <form class="quote-issue" method="POST" action="{{ route('companies.quotations.issue', [$company, $project]) }}">
                         @csrf
                         @method('PATCH')
-                        <button class="ui-button ui-button-primary" type="submit" data-confirm="Issue this quotation? It will be marked as customer-ready.">Issue Quotation</button>
+                        <div class="quote-grid">
+                            <div class="ui-field">
+                                <label class="ui-label">Delivery Method</label>
+                                <select class="ui-select" name="delivery_method">
+                                    <option value="manual">Manual</option>
+                                    <option value="email">Email</option>
+                                    <option value="whatsapp">WhatsApp</option>
+                                    <option value="download">Downloaded</option>
+                                    <option value="portal">Client Portal</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            <div class="ui-field">
+                                <label class="ui-label">Recipient</label>
+                                <input class="ui-input" name="sent_to" value="{{ old('sent_to', $project->customer?->email ?: $project->customer?->phone) }}" placeholder="client email, phone, or contact name">
+                            </div>
+                        </div>
+                        <div class="ui-field" style="margin-top:12px">
+                            <label class="ui-label">Delivery Notes</label>
+                            <textarea class="ui-input" name="delivery_notes" rows="2" placeholder="Optional delivery note"></textarea>
+                        </div>
+                        <button class="ui-button ui-button-primary" type="submit" data-confirm="Send this approved quotation?">Send Quotation</button>
                     </form>
+                @endif
+
+                @if ($canAccept || $canReject || $canCancel)
+                    <div class="quote-issue">
+                        @if ($canAccept)
+                            <form method="POST" action="{{ route('companies.quotations.accept', [$company, $project]) }}" style="display:grid;gap:10px;margin-bottom:14px">
+                                @csrf
+                                @method('PATCH')
+                                <textarea class="ui-input" name="acceptance_notes" rows="2" placeholder="Acceptance notes, optional"></textarea>
+                                <button class="ui-button ui-button-primary" type="submit" data-confirm="Record this quotation as accepted?">Record Acceptance</button>
+                            </form>
+                        @endif
+                        @if ($canReject)
+                            <form method="POST" action="{{ route('companies.quotations.reject', [$company, $project]) }}" style="display:grid;gap:10px;margin-bottom:14px">
+                                @csrf
+                                @method('PATCH')
+                                <textarea class="ui-input" name="rejection_reason" rows="2" placeholder="Rejection reason, required" required></textarea>
+                                <button class="ui-button ui-button-secondary" type="submit" data-confirm="Record this quotation as rejected?">Record Rejection</button>
+                            </form>
+                        @endif
+                        @if ($canCancel)
+                            <form method="POST" action="{{ route('companies.quotations.cancel', [$company, $project]) }}" style="display:grid;gap:10px">
+                                @csrf
+                                @method('PATCH')
+                                <textarea class="ui-input" name="cancellation_reason" rows="2" placeholder="Cancellation reason, optional"></textarea>
+                                <button class="ui-button ui-button-secondary" type="submit" data-confirm="Cancel this quotation?">Cancel Quotation</button>
+                            </form>
+                        @endif
+                    </div>
+                @endif
+
+                @if ($quotation->events->isNotEmpty())
+                    <div class="quote-terms">
+                        <div class="quote-term">
+                            <span>Audit Trail</span>
+                            <p>
+                                @foreach ($quotation->events as $event)
+                                    {{ $event->event_label }} · {{ $event->actor?->name ?? 'System' }} · {{ $event->event_at?->format('d M Y H:i') }}{{ $event->channel ? ' · '.$event->channel : '' }}{{ $event->recipient ? ' · '.$event->recipient : '' }}<br>
+                                @endforeach
+                            </p>
+                        </div>
+                    </div>
+                @endif
+
+                @if ($quotation->versions->isNotEmpty())
+                    <div class="quote-terms">
+                        <div class="quote-term">
+                            <span>Revision History</span>
+                            <p>
+                                @foreach ($quotation->versions as $version)
+                                    {{ $version->version_label ?? ('Rev. '.$version->revision_number) }} · {{ ucfirst(str_replace('_', ' ', $version->status)) }} · {{ $version->created_at?->format('d M Y H:i') }}<br>
+                                @endforeach
+                            </p>
+                        </div>
+                    </div>
                 @endif
             @endif
         </main>

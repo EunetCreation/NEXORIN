@@ -104,6 +104,38 @@ class Company extends Model
     }
 
     /**
+     * Get company-specific material categories.
+     */
+    public function materialCategories(): HasMany
+    {
+        return $this->hasMany(MaterialCategory::class);
+    }
+
+    /**
+     * Get company-specific material catalog items.
+     */
+    public function materials(): HasMany
+    {
+        return $this->hasMany(Material::class);
+    }
+
+    /**
+     * Get company suppliers.
+     */
+    public function suppliers(): HasMany
+    {
+        return $this->hasMany(Supplier::class);
+    }
+
+    /**
+     * Get company price books.
+     */
+    public function priceBooks(): HasMany
+    {
+        return $this->hasMany(PriceBook::class);
+    }
+
+    /**
      * Format the company phone number for display.
      */
     public function getFormattedPhoneAttribute(): ?string

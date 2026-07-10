@@ -50,7 +50,7 @@ class QuotationEngineTest extends TestCase
 
         $payload = (new QuotationEngine())->generate($project, $bom, $analysis);
 
-        $this->assertContains('BOQ pricing is not marked as priced. Quotation value may be incomplete.', $payload['warnings']);
+        $this->assertContains('BOQ pricing is not marked as priced. Resolve commercial review gates before issuing a quotation.', $payload['warnings']);
         $this->assertContains('BOQ grand price is zero. Generate BOQ pricing before issuing a quotation.', $payload['warnings']);
         $this->assertContains('Financial analysis is not marked as calculated. Financial summary may be incomplete.', $payload['warnings']);
         $this->assertContains('Technical calculation is not engineer verified. Quotation should remain a draft.', $payload['warnings']);

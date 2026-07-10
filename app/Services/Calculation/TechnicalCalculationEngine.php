@@ -212,11 +212,26 @@ class TechnicalCalculationEngine
         $stringCount = 0;
 
         if ($moduleCount > 0 && $minimumModulesPerString > 0 && $maximumModulesPerString >= $minimumModulesPerString) {
-            $modulesPerString = $moduleCount >= $maximumModulesPerString
-                ? $maximumModulesPerString
-                : max($minimumModulesPerString, $moduleCount);
-            $modulesPerString = min($modulesPerString, $moduleCount);
-            $stringCount = (int) ceil($moduleCount / max($modulesPerString, 1));
+            $availableStringInputs = max(1, $inverterCount * $inverterMpptCount);
+            $maxCandidateStrings = min($moduleCount, $availableStringInputs);
+
+            for ($candidateStrings = 1; $candidateStrings <= $maxCandidateStrings; $candidateStrings++) {
+                $candidateModulesPerString = (int) ceil($moduleCount / $candidateStrings);
+
+                if ($candidateModulesPerString >= $minimumModulesPerString && $candidateModulesPerString <= $maximumModulesPerString) {
+                    $stringCount = $candidateStrings;
+                    $modulesPerString = $candidateModulesPerString;
+                    break;
+                }
+            }
+
+            if ($stringCount === 0) {
+                $modulesPerString = $moduleCount >= $maximumModulesPerString
+                    ? $maximumModulesPerString
+                    : max($minimumModulesPerString, $moduleCount);
+                $modulesPerString = min($modulesPerString, $moduleCount);
+                $stringCount = (int) ceil($moduleCount / max($modulesPerString, 1));
+            }
         }
 
         if ($minimumModulesPerString > $maximumModulesPerString || $maximumModulesPerString === 0) {

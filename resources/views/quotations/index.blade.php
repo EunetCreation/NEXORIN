@@ -31,7 +31,7 @@
         <article class="quote-stat"><span>Projects</span><strong>{{ number_format($stats['projects']) }}</strong></article>
         <article class="quote-stat"><span>Ready</span><strong>{{ number_format($stats['ready']) }}</strong></article>
         <article class="quote-stat"><span>Draft</span><strong>{{ number_format($stats['draft']) }}</strong></article>
-        <article class="quote-stat"><span>Issued</span><strong>{{ number_format($stats['issued']) }}</strong></article>
+        <article class="quote-stat"><span>Sent</span><strong>{{ number_format($stats['issued']) }}</strong></article>
     </section>
 
     <section class="quote-card">
@@ -46,9 +46,13 @@
                     <option value="all" @selected($filters['status'] === 'all')>All</option>
                     <option value="not_generated" @selected($filters['status'] === 'not_generated')>Not generated</option>
                     <option value="draft" @selected($filters['status'] === 'draft')>Draft</option>
-                    <option value="issued" @selected($filters['status'] === 'issued')>Issued</option>
+                    <option value="internal_review" @selected($filters['status'] === 'internal_review')>Internal Review</option>
+                    <option value="approved" @selected($filters['status'] === 'approved')>Approved</option>
+                    <option value="sent" @selected($filters['status'] === 'sent')>Sent</option>
+                    <option value="issued" @selected($filters['status'] === 'issued')>Legacy Issued</option>
                     <option value="accepted" @selected($filters['status'] === 'accepted')>Accepted</option>
                     <option value="rejected" @selected($filters['status'] === 'rejected')>Rejected</option>
+                    <option value="cancelled" @selected($filters['status'] === 'cancelled')>Cancelled</option>
                     <option value="expired" @selected($filters['status'] === 'expired')>Expired</option>
                 </select>
             </div>

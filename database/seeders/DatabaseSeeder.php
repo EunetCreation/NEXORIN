@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             SuperAdminSeeder::class,
             DevelopmentCompanySeeder::class,
             DevelopmentRbacUsersSeeder::class,
+            MaterialCatalogSeeder::class,
         ]);
     }
 }

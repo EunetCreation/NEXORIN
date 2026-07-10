@@ -23,26 +23,48 @@ class QuotationPdfRenderer
     public function render(Quotation $quotation): string
     {
         if ($quotation->exists) {
-            $quotation->loadMissing(['items', 'project.customer', 'preparer', 'issuer']);
+            $quotation->loadMissing(['items', 'project.customer', 'preparer', 'approver', 'issuer', 'clientProposalPdfGenerator']);
         }
+
+        $snapshot = $this->snapshot($quotation);
+        $customer = $snapshot['customer'];
+        $project = $snapshot['project'];
+        $technical = $snapshot['technical_summary'];
+        $financial = $snapshot['financial_summary'];
+        $commercial = $snapshot['commercial_summary'];
+        $terms = $snapshot['terms'];
+        $warnings = $snapshot['warnings'];
+        $items = $snapshot['items'];
 
         $this->pages = [];
         $this->content = '';
         $this->newPage();
 
-        $this->drawHeader($quotation);
-        $this->sectionTitle('Customer and Project');
+        $this->drawHeader($quotation, $commercial);
+        $this->sectionTitle('Client Proposal Control');
         $this->twoColumnRows([
-            ['Customer', $this->value($quotation->customer_snapshot['name'] ?? $quotation->project?->customer?->name)],
-            ['Email', $this->value($quotation->customer_snapshot['email'] ?? $quotation->project?->customer?->email)],
-            ['Phone', $this->formatPhone($quotation->customer_snapshot['phone'] ?? $quotation->project?->customer?->phone)],
-            ['Project', $this->value($quotation->project_snapshot['name'] ?? $quotation->project?->name)],
-            ['Project No.', $this->value($quotation->project_snapshot['project_number'] ?? $quotation->project?->project_number)],
-            ['Site', $this->value($quotation->project_snapshot['site_address'] ?? $quotation->project?->site_address)],
+            ['Document', $this->value($quotation->version_display ?? $quotation->quote_number)],
+            ['Status', $quotation->status_label],
+            ['Prepared by', $this->value($quotation->preparer?->name)],
+            ['Approved by', $this->value($quotation->approver?->name)],
+            ['Approval date', $quotation->approved_at instanceof DateTimeInterface ? $quotation->approved_at->format('d M Y H:i') : '-'],
+            ['Snapshot hash', $this->truncate((string) ($quotation->snapshot_hash ?? '-'), 18)],
         ]);
 
+        $this->sectionTitle('Customer and Project');
+        $this->twoColumnRows([
+            ['Customer', $this->value($customer['name'] ?? $quotation->project?->customer?->name)],
+            ['Email', $this->value($customer['email'] ?? $quotation->project?->customer?->email)],
+            ['Phone', $this->formatPhone($customer['phone'] ?? $quotation->project?->customer?->phone)],
+            ['Project', $this->value($project['name'] ?? $quotation->project?->name)],
+            ['Project No.', $this->value($project['project_number'] ?? $quotation->project?->project_number)],
+            ['Site', $this->value($project['site_address'] ?? $quotation->project?->site_address)],
+        ]);
+
+        $this->sectionTitle('System Recommendation');
+        $this->paragraph('The proposed system is prepared from the approved quotation snapshot. Technical values are preliminary until final site verification, utility approval, and authorized engineering review are completed.');
+
         $this->sectionTitle('Technical Summary');
-        $technical = $quotation->technical_summary ?? [];
         $this->twoColumnRows([
             ['System type', $this->label($technical['system_type'] ?? null)],
             ['Installed PV', $this->number($technical['installed_pv_kw'] ?? null, 2).' kWp'],
@@ -53,9 +75,8 @@ class QuotationPdfRenderer
         ]);
 
         $this->sectionTitle('Financial Highlights');
-        $financial = $quotation->financial_summary ?? [];
         $this->twoColumnRows([
-            ['CAPEX', $this->money($financial['project_capex_idr'] ?? 0)],
+            ['Investment', $this->money($financial['project_capex_idr'] ?? ($commercial['grand_total_idr'] ?? 0))],
             ['First year saving', $this->money($financial['first_year_saving_idr'] ?? 0)],
             ['Simple payback', $this->nullableNumber($financial['simple_payback_years'] ?? null, 2, ' years')],
             ['ROI', $this->nullableNumber($financial['lifetime_roi_percent'] ?? null, 2, '%')],
@@ -63,12 +84,21 @@ class QuotationPdfRenderer
             ['LCOE', $this->nullableNumber($financial['lcoe_idr_per_kwh'] ?? null, 2, ' IDR/kWh')],
         ]);
 
+        $this->sectionTitle('Commercial Summary');
+        $this->twoColumnRows([
+            ['Subtotal', $this->money($commercial['subtotal_idr'] ?? 0)],
+            ['Discount', $this->money($commercial['discount_idr'] ?? 0)],
+            ['Tax mode', $this->label($commercial['tax_mode'] ?? 'exclusive')],
+            ['Tax', $this->money($commercial['tax_idr'] ?? 0)],
+            ['Rounding', $this->money($commercial['rounding_adjustment_idr'] ?? 0)],
+            ['Grand total', $this->money($commercial['grand_total_idr'] ?? 0)],
+        ]);
+
         $this->ensure(106);
-        $this->sectionTitle('Commercial Offer');
-        $this->drawItemsTable($quotation);
+        $this->sectionTitle('Client Safe BOQ');
+        $this->drawItemsTable($items, $commercial);
 
         $this->sectionTitle('Terms and Notes');
-        $terms = $quotation->terms ?? [];
         $this->termBlock('Payment terms', $terms['payment_terms'] ?? null);
         $this->termBlock('Delivery terms', $terms['delivery_terms'] ?? null);
         $this->termBlock('Warranty terms', $terms['warranty_terms'] ?? null);
@@ -78,15 +108,23 @@ class QuotationPdfRenderer
             $this->termBlock('Note', $terms['quotation_note']);
         }
 
-        if (! empty($quotation->warnings)) {
-            $this->sectionTitle('Warnings');
-            foreach ($quotation->warnings as $warning) {
+        if (! empty($warnings)) {
+            $this->sectionTitle('Client Notices');
+            foreach ($warnings as $warning) {
                 $this->bullet((string) $warning);
             }
         }
 
         $this->sectionTitle('Disclaimer');
-        $this->paragraph('This quotation is generated from NEXORIN preliminary engineering data, BOQ pricing, and financial analysis. Final implementation remains subject to site survey, utility approval, structural verification, product availability, and authorized engineer review.');
+        $this->paragraph('This proposal is generated from an approved NEXORIN quotation snapshot. It is client-facing and intentionally excludes internal unit cost, supplier cost, gross margin, and price resolver trace information. Final implementation remains subject to site survey, utility approval, structural verification, product availability, and authorized engineer review.');
+
+        $this->sectionTitle('Approval Block');
+        $this->twoColumnRows([
+            ['Prepared by', $this->value($quotation->preparer?->name)],
+            ['Approved by', $this->value($quotation->approver?->name)],
+            ['Approval notes', $this->value($quotation->approval_notes)],
+            ['PDF generated', $quotation->client_proposal_pdf_generated_at instanceof DateTimeInterface ? $quotation->client_proposal_pdf_generated_at->format('d M Y H:i') : '-'],
+        ]);
 
         $this->finishPage();
 
@@ -100,22 +138,76 @@ class QuotationPdfRenderer
         return trim($number, '-') . '.pdf';
     }
 
-    private function drawHeader(Quotation $quotation): void
+    public function clientFilename(Quotation $quotation): string
     {
-        $commercial = $quotation->commercial_summary ?? [];
-        $quoteNumber = (string) ($quotation->quote_number ?: 'Draft quotation');
+        $label = (string) ($quotation->version_label ?: $quotation->quote_number ?: 'quotation');
+        $number = preg_replace('/[^A-Za-z0-9\-_]+/', '-', $label);
+
+        return trim((string) $number, '-') . '-client-proposal.pdf';
+    }
+
+    /** @return array{customer: array<string, mixed>, project: array<string, mixed>, technical_summary: array<string, mixed>, financial_summary: array<string, mixed>, commercial_summary: array<string, mixed>, terms: array<string, mixed>, warnings: array<int, mixed>, items: array<int, array<string, mixed>>} */
+    private function snapshot(Quotation $quotation): array
+    {
+        $clientSnapshot = is_array($quotation->client_snapshot) ? $quotation->client_snapshot : [];
+
+        return [
+            'customer' => $clientSnapshot['customer'] ?? ($quotation->customer_snapshot ?? []),
+            'project' => $clientSnapshot['project'] ?? ($quotation->project_snapshot ?? []),
+            'technical_summary' => $clientSnapshot['technical_summary'] ?? ($quotation->technical_summary ?? []),
+            'financial_summary' => $clientSnapshot['financial_summary'] ?? ($quotation->financial_summary ?? []),
+            'commercial_summary' => $clientSnapshot['commercial_summary'] ?? ($quotation->commercial_summary ?? []),
+            'terms' => $clientSnapshot['terms'] ?? ($quotation->terms ?? []),
+            'warnings' => array_values($clientSnapshot['warnings'] ?? ($quotation->warnings ?? [])),
+            'items' => $this->clientItems($quotation, $clientSnapshot['items'] ?? null),
+        ];
+    }
+
+    /** @return array<int, array<string, mixed>> */
+    private function clientItems(Quotation $quotation, mixed $snapshotItems): array
+    {
+        if (is_array($snapshotItems) && $snapshotItems !== []) {
+            return array_values(array_map(fn (array $item): array => [
+                'category' => (string) ($item['category'] ?? ''),
+                'item_code' => (string) ($item['item_code'] ?? ''),
+                'item_name' => (string) ($item['item_name'] ?? 'Quotation item'),
+                'description' => (string) ($item['description'] ?? $item['item_name'] ?? 'Quotation item'),
+                'quantity' => $item['quantity'] ?? 0,
+                'unit' => (string) ($item['unit'] ?? 'unit'),
+                'unit_price_idr' => $item['unit_price_idr'] ?? 0,
+                'line_price_idr' => $item['line_price_idr'] ?? 0,
+            ], $snapshotItems));
+        }
+
+        return $quotation->items->map(fn ($item): array => [
+            'category' => (string) $item->category,
+            'item_code' => (string) $item->item_code,
+            'item_name' => (string) $item->item_name,
+            'description' => (string) ($item->description ?: $item->item_name),
+            'quantity' => $item->quantity,
+            'unit' => (string) $item->unit,
+            'unit_price_idr' => $item->unit_price_idr,
+            'line_price_idr' => $item->line_price_idr,
+        ])->values()->all();
+    }
+
+    /** @param array<string, mixed> $commercial */
+    private function drawHeader(Quotation $quotation, array $commercial): void
+    {
+        $quoteNumber = (string) ($quotation->version_display ?: $quotation->quote_number ?: 'Draft quotation');
         $status = strtoupper((string) ($quotation->status_label ?? $quotation->status ?? 'draft'));
         $validUntil = $quotation->valid_until instanceof DateTimeInterface ? $quotation->valid_until->format('d M Y') : $this->value($commercial['valid_until'] ?? null);
         $issuedAt = $quotation->issued_at instanceof DateTimeInterface ? $quotation->issued_at->format('d M Y H:i') : '-';
 
-        $this->rect(0, self::PAGE_HEIGHT - 122, self::PAGE_WIDTH, 122, '0.02 0.15 0.22', true);
-        $this->text(self::MARGIN, 792, 'NEXORIN', 22, 'F2', '1 1 1');
-        $this->text(self::MARGIN, 774, 'Solar Engineering and Quotation Platform', 9, 'F1', '0.80 0.93 0.92');
-        $this->text(390, 793, $quoteNumber, 14, 'F2', '1 1 1', 'right');
-        $this->text(390, 776, 'Revision '.$quotation->revision_number.' | '.$status, 9, 'F1', '0.80 0.93 0.92', 'right');
-        $this->text(390, 759, 'Valid until: '.$validUntil, 9, 'F1', '0.80 0.93 0.92', 'right');
-        $this->text(390, 742, 'Issued: '.$issuedAt, 9, 'F1', '0.80 0.93 0.92', 'right');
-        $this->y = 692;
+        $this->rect(0, self::PAGE_HEIGHT - 132, self::PAGE_WIDTH, 132, '0.02 0.15 0.22', true);
+        $this->text(self::MARGIN, 795, 'NEXORIN', 22, 'F2', '1 1 1');
+        $this->text(self::MARGIN, 776, 'Premium Client Proposal', 11, 'F2', '0.80 0.93 0.92');
+        $this->text(self::MARGIN, 760, 'Solar Engineering and Quotation Platform', 8.5, 'F1', '0.80 0.93 0.92');
+        $this->text(390, 795, $quoteNumber, 13, 'F2', '1 1 1', 'right');
+        $this->text(390, 777, 'Status: '.$status, 9, 'F1', '0.80 0.93 0.92', 'right');
+        $this->text(390, 760, 'Valid until: '.$validUntil, 9, 'F1', '0.80 0.93 0.92', 'right');
+        $this->text(390, 743, 'Sent: '.$issuedAt, 9, 'F1', '0.80 0.93 0.92', 'right');
+        $this->y = 686;
     }
 
     /** @param array<int, array{0:string,1:string}> $rows */
@@ -165,21 +257,25 @@ class QuotationPdfRenderer
         }
     }
 
-    private function drawItemsTable(Quotation $quotation): void
+    /**
+     * @param array<int, array<string, mixed>> $items
+     * @param array<string, mixed> $commercial
+     */
+    private function drawItemsTable(array $items, array $commercial): void
     {
         $this->ensure(70);
         $this->tableHeader();
 
-        foreach ($quotation->items as $item) {
-            $name = (string) $item->item_name;
-            $description = (string) ($item->description ?: $item->item_name);
+        foreach ($items as $item) {
+            $name = (string) ($item['item_name'] ?? 'Quotation item');
+            $description = (string) (($item['description'] ?? null) ?: $name);
             $nameLines = $this->wrap($name, 44);
             $descriptionLines = $this->wrap($description, 58);
             $height = max(34, 18 + (count($nameLines) * 10) + (count($descriptionLines) * 9));
 
             if ($this->y - $height < self::BOTTOM_MARGIN) {
                 $this->newPage();
-                $this->sectionTitle('Commercial Offer - continued');
+                $this->sectionTitle('Client Safe BOQ - continued');
                 $this->tableHeader();
             }
 
@@ -198,15 +294,14 @@ class QuotationPdfRenderer
                 $lineY -= 9;
             }
 
-            $this->text(290, $top - 12, $this->number($item->quantity, 3), 8.5, 'F1', '0.05 0.12 0.17', 'right');
-            $this->text(335, $top - 12, (string) $item->unit, 8.5);
-            $this->text(450, $top - 12, $this->money($item->unit_price_idr), 8.5, 'F1', '0.05 0.12 0.17', 'right');
-            $this->text(553, $top - 12, $this->money($item->line_price_idr), 8.5, 'F2', '0.05 0.12 0.17', 'right');
+            $this->text(290, $top - 12, $this->number($item['quantity'] ?? 0, 3), 8.5, 'F1', '0.05 0.12 0.17', 'right');
+            $this->text(335, $top - 12, (string) ($item['unit'] ?? 'unit'), 8.5);
+            $this->text(450, $top - 12, $this->money($item['unit_price_idr'] ?? 0), 8.5, 'F1', '0.05 0.12 0.17', 'right');
+            $this->text(553, $top - 12, $this->money($item['line_price_idr'] ?? 0), 8.5, 'F2', '0.05 0.12 0.17', 'right');
             $this->y -= $height + 4;
         }
 
-        $commercial = $quotation->commercial_summary ?? [];
-        $grandTotal = (float) ($commercial['grand_total_idr'] ?? $quotation->items->sum('line_price_idr'));
+        $grandTotal = (float) ($commercial['grand_total_idr'] ?? array_sum(array_map(fn (array $item): float => (float) ($item['line_price_idr'] ?? 0), $items)));
         $this->ensure(42);
         $this->rect(330, $this->y - 28, 223, 34, '0.02 0.15 0.22', true);
         $this->text(345, $this->y - 9, 'Grand Total', 11, 'F2', '1 1 1');
@@ -294,7 +389,7 @@ class QuotationPdfRenderer
 
         $pageNo = count($this->pages) + 1;
         $this->line(self::MARGIN, 40, 553, 40, '0.86 0.90 0.91');
-        $this->text(self::MARGIN, 25, 'Generated by NEXORIN - preliminary quotation document', 7.5, 'F1', '0.45 0.51 0.55');
+        $this->text(self::MARGIN, 25, 'Generated by NEXORIN - approved client proposal snapshot', 7.5, 'F1', '0.45 0.51 0.55');
         $this->text(553, 25, 'Page '.$pageNo, 7.5, 'F1', '0.45 0.51 0.55', 'right');
         $this->pages[] = $this->content;
         $this->content = '';

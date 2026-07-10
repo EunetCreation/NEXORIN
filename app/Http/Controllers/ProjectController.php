@@ -9,6 +9,7 @@ use App\Models\Customer;
 use App\Models\Project;
 use App\Models\User;
 use App\Support\ProjectCockpit;
+use App\Services\Report\ClientReleaseGate;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
@@ -257,7 +258,8 @@ class ProjectController extends Controller
     public function show(
         Request $request,
         Company $company,
-        Project $project
+        Project $project,
+        ClientReleaseGate $releaseGateService
     ): View {
         $this->ensureVisibleProject($request, $company, $project);
 
@@ -280,10 +282,13 @@ class ProjectController extends Controller
             'billOfMaterial.items',
             'financialAnalysis',
             'quotation.items',
+            'activeReleaseApproval.approver:id,name',
+            'releaseApprovals.approver:id,name',
         ]);
 
         $user = $request->user();
         $cockpit = ProjectCockpit::build($project);
+        $releaseGate = $releaseGateService->evaluate($project);
 
         return view('projects.show', [
             'company' => $company,
@@ -383,6 +388,9 @@ class ProjectController extends Controller
                     'quotation.view_own',
                 ]
             ),
+            'releaseGate' => $releaseGate,
+            'canApproveClientRelease' => $releaseGateService->userCanManageApproval($user, $company)
+                && ! $project->isArchived(),
         ]);
     }
 

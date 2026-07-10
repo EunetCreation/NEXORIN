@@ -1,690 +1,431 @@
 @extends('layouts.app')
 
 @section('title', 'Dashboard')
+@section('page-eyebrow', 'Command center')
+@section('page-heading', 'Dashboard')
 
-@section('page-heading', 'Dashboard Overview')
+@php
+    $roleLabel = $currentUser->isSuperAdmin()
+        ? 'Super Admin'
+        : ($currentUser->companyMemberships()
+            ->where('company_id', $currentCompany?->getKey())
+            ->where('status', 'active')
+            ->with('roles')
+            ->first()?->roles?->first()?->name ?? 'Company Member');
 
-@push('styles')
-<style>
-    .dashboard-grid {
-        display: grid;
-        gap: 22px;
-    }
+    $canCreateProject = $currentCompany
+        && $currentUser->hasAnyCompanyPermission($currentCompany, ['project.create', 'project.create_own']);
 
-    .dashboard-hero {
-        position: relative;
-        overflow: hidden;
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) auto;
-        align-items: center;
-        gap: 30px;
-        min-height: 220px;
-        padding: 34px 38px;
-        border: 1px solid rgba(7, 40, 61, 0.08);
-        border-radius: var(--radius-xl);
-        color: var(--white);
-        background:
-            radial-gradient(
-                circle at 85% 15%,
-                rgba(52, 214, 203, 0.26),
-                transparent 27%
-            ),
-            linear-gradient(
-                125deg,
-                var(--navy-950),
-                var(--navy-800)
-            );
-        box-shadow: var(--shadow-md);
-    }
+    $canViewProjects = $currentCompany
+        && $currentUser->hasAnyCompanyPermission($currentCompany, ['project.view', 'project.view_own']);
 
-    .dashboard-hero::after {
-        position: absolute;
-        right: -80px;
-        bottom: -120px;
-        width: 360px;
-        height: 360px;
-        content: "";
-        border: 1px solid rgba(52, 214, 203, 0.17);
-        border-radius: 50%;
-        box-shadow:
-            0 0 0 50px rgba(52, 214, 203, 0.035),
-            0 0 0 100px rgba(52, 214, 203, 0.025);
-    }
+    $canViewCatalog = $currentCompany
+        && $currentUser->hasAnyCompanyPermission($currentCompany, ['equipment.view', 'supplier.view', 'price.cost.view']);
 
-    .hero-copy {
-        position: relative;
-        z-index: 2;
-    }
+    $canViewQuotations = $currentCompany
+        && $currentUser->hasAnyCompanyPermission($currentCompany, ['quotation.view', 'quotation.view_own']);
 
-    .hero-eyebrow {
-        width: fit-content;
-        display: flex;
-        align-items: center;
-        gap: 9px;
-        margin-bottom: 17px;
-        padding: 8px 11px;
-        border: 1px solid rgba(52, 214, 203, 0.20);
-        border-radius: 999px;
-        color: var(--teal-400);
-        background: rgba(52, 214, 203, 0.08);
-        font-size: 9px;
-        font-weight: 800;
-        letter-spacing: 0.11em;
-        text-transform: uppercase;
-    }
+    $canViewEngineering = $currentCompany
+        && $currentUser->hasAnyCompanyPermission($currentCompany, ['calculation.view', 'calculation.view_own']);
 
-    .hero-eyebrow span {
-        width: 7px;
-        height: 7px;
-        border-radius: 50%;
-        background: var(--teal-400);
-        box-shadow: 0 0 12px rgba(52, 214, 203, 0.75);
-    }
+    $statusLabels = [
+        'draft' => 'Draft',
+        'survey' => 'Survey',
+        'engineering' => 'Engineering',
+        'quotation' => 'Quotation',
+        'approved' => 'Approved',
+        'completed' => 'Completed',
+        'cancelled' => 'Cancelled',
+    ];
 
-    .dashboard-hero h2 {
-        max-width: 690px;
-        margin: 0;
-        font-family: "Space Grotesk", sans-serif;
-        font-size: clamp(30px, 4vw, 48px);
-        line-height: 1.06;
-        letter-spacing: -0.045em;
-    }
+    $statusTones = [
+        'draft' => 'neutral',
+        'survey' => 'info',
+        'engineering' => 'warning',
+        'quotation' => 'purple',
+        'approved' => 'success',
+        'completed' => 'success',
+        'cancelled' => 'danger',
+    ];
 
-    .dashboard-hero h2 strong {
-        color: var(--teal-400);
-        font-weight: 700;
-    }
+    $systemLabels = [
+        'on_grid' => 'On-grid',
+        'hybrid' => 'Hybrid',
+        'off_grid' => 'Off-grid',
+        'undecided' => 'Undecided',
+    ];
 
-    .dashboard-hero p {
-        max-width: 670px;
-        margin: 18px 0 0;
-        color: rgba(255, 255, 255, 0.61);
-        font-size: 13px;
-        line-height: 1.75;
-    }
+    $quotationTones = [
+        'draft' => 'neutral',
+        'internal_review' => 'warning',
+        'approved' => 'success',
+        'sent' => 'info',
+        'issued' => 'purple',
+        'accepted' => 'success',
+        'rejected' => 'danger',
+        'cancelled' => 'danger',
+        'expired' => 'danger',
+        'locked' => 'neutral',
+    ];
 
-    .hero-metric {
-        position: relative;
-        z-index: 2;
-        min-width: 190px;
-        padding: 22px;
-        border: 1px solid rgba(255, 255, 255, 0.10);
-        border-radius: 20px;
-        background: rgba(255, 255, 255, 0.065);
-        backdrop-filter: blur(12px);
-    }
+    $formatCompactCurrency = function (float|int $value): string {
+        $value = (float) $value;
 
-    .hero-metric span {
-        display: block;
-        color: rgba(255, 255, 255, 0.45);
-        font-size: 9px;
-        font-weight: 700;
-        letter-spacing: 0.10em;
-        text-transform: uppercase;
-    }
+        return match (true) {
+            $value >= 1_000_000_000 => 'IDR '.number_format($value / 1_000_000_000, 1).'B',
+            $value >= 1_000_000 => 'IDR '.number_format($value / 1_000_000, 1).'M',
+            $value >= 1_000 => 'IDR '.number_format($value / 1_000, 0).'K',
+            default => 'IDR '.number_format($value, 0, ',', '.'),
+        };
+    };
 
-    .hero-metric strong {
-        display: block;
-        margin-top: 9px;
-        font-family: "Space Grotesk", sans-serif;
-        font-size: 32px;
-    }
-
-    .hero-metric small {
-        display: block;
-        margin-top: 6px;
-        color: var(--teal-400);
-        font-size: 10px;
-        font-weight: 700;
-    }
-
-    .metric-grid {
-        display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 18px;
-    }
-
-    .metric-card {
-        position: relative;
-        overflow: hidden;
-        min-height: 150px;
-        padding: 22px;
-        border: 1px solid rgba(7, 40, 61, 0.075);
-        border-radius: var(--radius-lg);
-        background: rgba(255, 255, 255, 0.90);
-        box-shadow: var(--shadow-sm);
-    }
-
-    .metric-card::after {
-        position: absolute;
-        right: -30px;
-        bottom: -38px;
-        width: 100px;
-        height: 100px;
-        content: "";
-        border-radius: 50%;
-        background: rgba(22, 190, 179, 0.055);
-    }
-
-    .metric-header {
-        position: relative;
-        z-index: 2;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 15px;
-    }
-
-    .metric-icon {
-        width: 42px;
-        height: 42px;
-        display: grid;
-        place-items: center;
-        border-radius: 13px;
-        color: var(--teal-600);
-        background: var(--teal-100);
-    }
-
-    .metric-icon svg {
-        width: 20px;
-        height: 20px;
-    }
-
-    .metric-status {
-        padding: 5px 8px;
-        border-radius: 999px;
-        color: var(--slate-500);
-        font-size: 8px;
-        font-weight: 800;
-        letter-spacing: 0.06em;
-        background: var(--slate-100);
-        text-transform: uppercase;
-    }
-
-    .metric-value {
-        position: relative;
-        z-index: 2;
-        display: block;
-        margin-top: 20px;
-        font-family: "Space Grotesk", sans-serif;
-        font-size: 30px;
-        line-height: 1;
-    }
-
-    .metric-label {
-        position: relative;
-        z-index: 2;
-        display: block;
-        margin-top: 9px;
-        color: var(--slate-600);
-        font-size: 11px;
-        font-weight: 600;
-    }
-
-    .dashboard-columns {
-        display: grid;
-        grid-template-columns: minmax(0, 1.45fr) minmax(320px, 0.55fr);
-        gap: 22px;
-    }
-
-    .panel-card {
-        padding: 25px;
-        border: 1px solid rgba(7, 40, 61, 0.075);
-        border-radius: var(--radius-lg);
-        background: rgba(255, 255, 255, 0.90);
-        box-shadow: var(--shadow-sm);
-    }
-
-    .panel-header {
-        display: flex;
-        align-items: flex-start;
-        justify-content: space-between;
-        gap: 16px;
-        margin-bottom: 22px;
-    }
-
-    .panel-title h3 {
-        margin: 0;
-        font-family: "Space Grotesk", sans-serif;
-        font-size: 18px;
-        letter-spacing: -0.025em;
-    }
-
-    .panel-title p {
-        margin: 7px 0 0;
-        color: var(--slate-500);
-        font-size: 11px;
-        line-height: 1.6;
-    }
-
-    .panel-badge {
-        padding: 7px 10px;
-        border-radius: 999px;
-        color: var(--teal-600);
-        font-size: 8px;
-        font-weight: 800;
-        letter-spacing: 0.08em;
-        background: var(--teal-100);
-        text-transform: uppercase;
-    }
-
-    .empty-state {
-        min-height: 230px;
-        display: grid;
-        place-items: center;
-        padding: 25px;
-        border: 1px dashed var(--slate-300);
-        border-radius: 18px;
-        text-align: center;
-        background:
-            linear-gradient(
-                135deg,
-                rgba(247, 250, 251, 0.9),
-                rgba(237, 243, 246, 0.6)
-            );
-    }
-
-    .empty-state-icon {
-        width: 58px;
-        height: 58px;
-        display: grid;
-        place-items: center;
-        margin: 0 auto 15px;
-        border-radius: 18px;
-        color: var(--teal-600);
-        background: var(--teal-100);
-    }
-
-    .empty-state-icon svg {
-        width: 27px;
-        height: 27px;
-    }
-
-    .empty-state strong {
-        display: block;
-        font-size: 13px;
-    }
-
-    .empty-state p {
-        max-width: 390px;
-        margin: 8px auto 0;
-        color: var(--slate-500);
-        font-size: 10px;
-        line-height: 1.65;
-    }
-
-    .readiness-list {
-        display: grid;
-        gap: 12px;
-    }
-
-    .readiness-item {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 13px;
-        border: 1px solid var(--slate-100);
-        border-radius: 15px;
-        background: var(--slate-50);
-    }
-
-    .readiness-icon {
-        width: 36px;
-        height: 36px;
-        flex: 0 0 36px;
-        display: grid;
-        place-items: center;
-        border-radius: 11px;
-        color: var(--teal-600);
-        background: var(--teal-100);
-    }
-
-    .readiness-icon svg {
-        width: 17px;
-        height: 17px;
-    }
-
-    .readiness-copy {
-        min-width: 0;
-        flex: 1;
-    }
-
-    .readiness-copy strong {
-        display: block;
-        font-size: 10px;
-    }
-
-    .readiness-copy span {
-        display: block;
-        margin-top: 4px;
-        color: var(--slate-500);
-        font-size: 9px;
-    }
-
-    .readiness-status {
-        color: var(--teal-600);
-        font-size: 8px;
-        font-weight: 800;
-        letter-spacing: 0.05em;
-        text-transform: uppercase;
-    }
-
-    @media (max-width: 1250px) {
-        .metric-grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-        }
-    }
-
-    @media (max-width: 900px) {
-        .dashboard-hero {
-            grid-template-columns: 1fr;
-        }
-
-        .hero-metric {
-            width: 100%;
-        }
-
-        .dashboard-columns {
-            grid-template-columns: 1fr;
-        }
-    }
-
-    @media (max-width: 620px) {
-        .dashboard-hero {
-            padding: 27px 23px;
-            border-radius: 22px;
-        }
-
-        .metric-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .panel-card {
-            padding: 20px;
-        }
-    }
-</style>
-@endpush
+    $pipelineTotal = max(1, $projectStatusCounts->sum());
+    $firstName = str($currentUser->name)->before(' ')->toString();
+    $greeting = now('Asia/Jakarta')->hour < 12
+        ? 'morning'
+        : (now('Asia/Jakarta')->hour < 18 ? 'afternoon' : 'evening');
+@endphp
 
 @section('content')
-    <div class="dashboard-grid">
-        <section class="dashboard-hero">
-            <div class="hero-copy">
-                <div class="hero-eyebrow">
-                    <span></span>
-                    Platform Ready
-                </div>
+<div class="dashboard-page">
+    <section class="dashboard-intro premium-intro" data-reveal>
+        <div class="dashboard-intro-copy">
+            <span class="dashboard-intro-kicker">
+                <span class="live-dot"></span>
+                {{ $currentCompany?->name ?? 'NEXORIN Workspace' }}
+            </span>
+            <h2>Good {{ $greeting }}, <span>{{ $firstName }}</span>.</h2>
+            <p>Track projects, engineering reviews, catalog readiness, and quotation activity from one focused workspace.</p>
+        </div>
 
-                <h2>
-                    Welcome back,
-                    <strong>{{ auth()->user()->name }}.</strong>
-                </h2>
+        <div class="dashboard-context" aria-label="Workspace context">
+            <span class="context-chip">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
+                    <path d="M12 3l7 3v5c0 4.8-2.9 8.2-7 10-4.1-1.8-7-5.2-7-10V6l7-3z"/>
+                    <path d="M9.5 12l1.7 1.7 3.5-4"/>
+                </svg>
+                {{ $roleLabel }}
+            </span>
+            <span class="context-chip context-chip-live">
+                <span class="context-status-dot"></span>
+                {{ $activeProjectsCount }} active project{{ $activeProjectsCount === 1 ? '' : 's' }}
+            </span>
+        </div>
+    </section>
 
-                <p>
-                    Manage photovoltaic projects, engineering calculations,
-                    quotation workflows, and company operations from one
-                    secure solar intelligence platform.
-                </p>
+    <section class="dashboard-metrics" aria-label="Workspace summary">
+        <article class="metric-card metric-card-accent" data-reveal data-premium-card>
+            <div class="metric-card-topline">
+                <span class="metric-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><path d="M4 19V9l8-5 8 5v10"/><path d="M8 19v-6h8v6"/><path d="M3 19h18"/></svg>
+                </span>
+                <span class="metric-trend">Live</span>
             </div>
+            <span class="metric-label">Active Projects</span>
+            <strong class="metric-number" data-counter="{{ $activeProjectsCount }}">{{ $activeProjectsCount }}</strong>
+            <span class="metric-caption">Projects moving through survey, engineering, or commercial review.</span>
+        </article>
 
-            <div class="hero-metric">
-                <span>System readiness</span>
-                <strong>100%</strong>
-                <small>Core services operational</small>
+        <article class="metric-card" data-reveal data-premium-card>
+            <div class="metric-card-topline">
+                <span class="metric-icon tone-warning">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.6L2.8 17a2 2 0 0 0 1.8 3h14.8a2 2 0 0 0 1.8-3L13.7 3.6a2 2 0 0 0-3.4 0z"/></svg>
+                </span>
+                <span class="metric-trend tone-warning">Review</span>
             </div>
-        </section>
+            <span class="metric-label">Needs Attention</span>
+            <strong class="metric-number" data-counter="{{ $needsReviewCount }}">{{ $needsReviewCount }}</strong>
+            <span class="metric-caption">Projects that still need engineering or workflow review.</span>
+        </article>
 
-        <section class="metric-grid">
-            <article class="metric-card">
-                <div class="metric-header">
-                    <div class="metric-icon">
-                        <svg
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="1.8"
-                            aria-hidden="true"
-                        >
-                            <path d="M4 19V9l8-5 8 5v10"/>
-                            <path d="M8 19v-6h8v6"/>
-                            <path d="M3 19h18"/>
-                        </svg>
-                    </div>
+        <article class="metric-card" data-reveal data-premium-card>
+            <div class="metric-card-topline">
+                <span class="metric-icon tone-blue">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><path d="M13 2L5 14h6l-1 8 8-12h-6z"/></svg>
+                </span>
+                <span class="metric-trend tone-blue">Capacity</span>
+            </div>
+            <span class="metric-label">Designed Capacity</span>
+            <strong class="metric-number"><span data-counter="{{ round($designedCapacityKw, 1) }}">{{ number_format($designedCapacityKw, 1) }}</span><small> kW</small></strong>
+            <span class="metric-caption">Stored inverter capacity across technical calculations.</span>
+        </article>
 
-                    <span class="metric-status">
-                        Ready
-                    </span>
-                </div>
+        <article class="metric-card metric-card-dark" data-reveal data-premium-card>
+            <div class="metric-card-topline">
+                <span class="metric-icon tone-light">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><path d="M12 3v18"/><path d="M17 7.5c0-1.9-2.2-3.5-5-3.5S7 5.6 7 7.5 9.2 11 12 11s5 1.6 5 3.5-2.2 3.5-5 3.5-5-1.6-5-3.5"/></svg>
+                </span>
+                <span class="metric-trend tone-light">Pipeline</span>
+            </div>
+            <span class="metric-label">Commercial Value</span>
+            <strong class="metric-number metric-currency">{{ $formatCompactCurrency($pipelineValue) }}</strong>
+            <span class="metric-caption">Current BOQ selling value recorded in the workspace.</span>
+        </article>
+    </section>
 
-                <strong class="metric-value">0</strong>
-                <span class="metric-label">Active Projects</span>
-            </article>
-
-            <article class="metric-card">
-                <div class="metric-header">
-                    <div class="metric-icon">
-                        <svg
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="1.8"
-                            aria-hidden="true"
-                        >
-                            <circle cx="12" cy="12" r="3"/>
-                            <path d="M12 3v2M12 19v2M3 12h2M19 12h2"/>
-                            <path d="M5.6 5.6L7 7M17 17l1.4 1.4M18.4 5.6L17 7M7 17l-1.4 1.4"/>
-                        </svg>
-                    </div>
-
-                    <span class="metric-status">
-                        Ready
-                    </span>
-                </div>
-
-                <strong class="metric-value">0 kWp</strong>
-                <span class="metric-label">Designed Capacity</span>
-            </article>
-
-            <article class="metric-card">
-                <div class="metric-header">
-                    <div class="metric-icon">
-                        <svg
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="1.8"
-                            aria-hidden="true"
-                        >
-                            <path d="M5 3h11l3 3v15H5z"/>
-                            <path d="M16 3v4h4M8 12h8M8 16h6"/>
-                        </svg>
-                    </div>
-
-                    <span class="metric-status">
-                        Ready
-                    </span>
-                </div>
-
-                <strong class="metric-value">0</strong>
-                <span class="metric-label">Quotations</span>
-            </article>
-
-            <article class="metric-card">
-                <div class="metric-header">
-                    <div class="metric-icon">
-                        <svg
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="1.8"
-                            aria-hidden="true"
-                        >
-                            <path d="M4 17l5-5 4 3 7-8"/>
-                            <path d="M16 7h4v4"/>
-                        </svg>
-                    </div>
-
-                    <span class="metric-status">
-                        Ready
-                    </span>
-                </div>
-
-                <strong class="metric-value">0 MWh</strong>
-                <span class="metric-label">Estimated Energy</span>
-            </article>
-        </section>
-
-        <section class="dashboard-columns">
-            <article class="panel-card">
-                <div class="panel-header">
-                    <div class="panel-title">
-                        <h3>Project Activity</h3>
-
-                        <p>
-                            Recent solar engineering activity will appear here.
-                        </p>
-                    </div>
-
-                    <span class="panel-badge">
-                        Live Overview
-                    </span>
-                </div>
-
-                <div class="empty-state">
+    <section class="dashboard-grid">
+        <div class="dashboard-main-column">
+            <article class="dashboard-card pipeline-card" data-reveal data-premium-card>
+                <header class="dashboard-card-header">
                     <div>
-                        <div class="empty-state-icon">
-                            <svg
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="1.8"
-                                aria-hidden="true"
-                            >
-                                <path d="M4 19V9l8-5 8 5v10"/>
-                                <path d="M8 19v-6h8v6"/>
-                                <path d="M3 19h18"/>
-                            </svg>
-                        </div>
-
-                        <strong>No project activity yet</strong>
-
-                        <p>
-                            Project data, capacity calculations, and quotation
-                            progress will appear after the project module is activated.
-                        </p>
+                        <span class="card-kicker">Portfolio overview</span>
+                        <h3>Project Pipeline</h3>
+                        <p>Distribution of projects across the existing NEXORIN workflow.</p>
                     </div>
+                    @if ($canViewProjects)
+                        <a href="{{ route('companies.projects.index', $currentCompany) }}" class="card-text-link">All projects <span>↗</span></a>
+                    @endif
+                </header>
+
+                <div class="pipeline-visual" aria-label="Project status distribution">
+                    @foreach (['draft', 'survey', 'engineering', 'quotation', 'approved', 'completed'] as $status)
+                        @php $count = (int) $projectStatusCounts->get($status, 0); @endphp
+                        <span
+                            class="pipeline-segment pipeline-{{ $status }}"
+                            style="--pipeline-weight: {{ max(0.5, ($count / $pipelineTotal) * 100) }}"
+                            title="{{ $statusLabels[$status] }}: {{ $count }}"
+                        ></span>
+                    @endforeach
+                </div>
+
+                <div class="pipeline-legend">
+                    @foreach (['draft', 'survey', 'engineering', 'quotation', 'approved', 'completed'] as $status)
+                        <div class="pipeline-legend-item">
+                            <span class="pipeline-dot pipeline-{{ $status }}"></span>
+                            <span>{{ $statusLabels[$status] }}</span>
+                            <strong>{{ $projectStatusCounts->get($status, 0) }}</strong>
+                        </div>
+                    @endforeach
                 </div>
             </article>
 
-            <article class="panel-card">
-                <div class="panel-header">
-                    <div class="panel-title">
-                        <h3>System Readiness</h3>
+            <article class="dashboard-card work-queue-card" data-reveal>
+                <header class="dashboard-card-header">
+                    <div>
+                        <span class="card-kicker">Continue working</span>
+                        <h3>Project Work Queue</h3>
+                        <p>Module readiness reflects stored project data. Warnings remain visible and still require review.</p>
+                    </div>
+                    <span class="card-count">{{ $projectQueue->count() }} recent</span>
+                </header>
 
-                        <p>
-                            Current status of the NEXORIN core foundation.
-                        </p>
+                @if ($projectQueue->isNotEmpty())
+                    <div class="work-queue-table-wrap">
+                        <table class="work-queue-table">
+                            <colgroup>
+                                <col class="queue-col-project">
+                                <col class="queue-col-stage">
+                                <col class="queue-col-system">
+                                <col class="queue-col-progress">
+                                <col class="queue-col-next">
+                                <col class="queue-col-action">
+                            </colgroup>
+                            <thead>
+                                <tr>
+                                    <th>Project</th>
+                                    <th>Stage</th>
+                                    <th>System</th>
+                                    <th>Data Readiness</th>
+                                    <th>Next Step</th>
+                                    <th><span class="sr-only">Open</span></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($projectQueue as $queueItem)
+                                    @php
+                                        $project = $queueItem['project'];
+                                        $status = $project->status ?? 'draft';
+                                        $nextStep = $queueItem['next_step'];
+                                    @endphp
+                                    <tr data-premium-row>
+                                        <td>
+                                            <div class="project-cell">
+                                                <span class="project-symbol" aria-hidden="true">
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                                        <path d="M4 15h16l-2-8H6l-2 8z"/>
+                                                        <path d="M8 7l-1 8M12 7v8M16 7l1 8M3 18h18M12 15v6"/>
+                                                    </svg>
+                                                </span>
+                                                <span class="project-cell-copy">
+                                                    <strong>{{ $project->name }}</strong>
+                                                    <small>{{ $project->customer?->name ?? 'No customer' }} · {{ $project->updated_at->diffForHumans() }}</small>
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td><span class="status-badge tone-{{ $statusTones[$status] ?? 'neutral' }}">{{ $statusLabels[$status] ?? str($status)->headline() }}</span></td>
+                                        <td><span class="system-label">{{ $systemLabels[$project->proposed_system ?? 'undecided'] ?? str($project->proposed_system)->headline() }}</span></td>
+                                        <td>
+                                            <div class="table-progress">
+                                                <div class="table-progress-track"><span data-progress="{{ $queueItem['completion_percent'] }}"></span></div>
+                                                <strong>
+                                                    {{ $queueItem['completion_percent'] >= 100
+                                                        ? 'Data ready'
+                                                        : $queueItem['completion_percent'].'% ready' }}
+                                                </strong>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="next-step-label">{{ $nextStep['label'] ?? 'Review' }}</span>
+                                            @if ($queueItem['warning_count'] > 0)
+                                                <small class="warning-note">{{ $queueItem['warning_count'] }} warning{{ $queueItem['warning_count'] > 1 ? 's' : '' }}</small>
+                                            @else
+                                                <small>{{ $nextStep['caption'] ?? 'Workflow complete' }}</small>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            <a href="{{ route('companies.projects.show', [$currentCompany, $project]) }}" class="row-action" aria-label="Open {{ $project->name }}">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @else
+                    <div class="dashboard-empty-state">
+                        <span class="empty-state-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19V9l8-5 8 5v10"/><path d="M8 19v-6h8v6"/><path d="M3 19h18"/></svg>
+                        </span>
+                        <h4>Your project queue is ready.</h4>
+                        <p>Create the first project without changing the current NEXORIN workflow.</p>
+                        @if ($canCreateProject)
+                            <a href="{{ route('companies.projects.create', $currentCompany) }}" class="dashboard-primary-button">Create Project</a>
+                        @endif
+                    </div>
+                @endif
+            </article>
+        </div>
+
+        <aside class="dashboard-side-column" aria-label="Workspace health and commercial activity">
+            <article class="readiness-card" data-reveal data-premium-card>
+                <div class="readiness-glow"></div>
+                <header>
+                    <span class="card-kicker light">Workspace health</span>
+                    <h3>Catalog Readiness</h3>
+                    <p>Approved materials and active commercial references available for BOQ generation.</p>
+                </header>
+
+                <div class="readiness-score-row">
+                    <div class="readiness-ring" style="--readiness: {{ $catalogReadinessPercent }}">
+                        <div>
+                            <strong data-counter="{{ $catalogReadinessPercent }}">{{ $catalogReadinessPercent }}</strong><span>%</span>
+                            <small>ready</small>
+                        </div>
+                    </div>
+
+                    <div class="readiness-summary">
+                        <strong>{{ $catalogApproved }} / {{ $catalogTotal }}</strong>
+                        <span>approved materials</span>
                     </div>
                 </div>
 
-                <div class="readiness-list">
-                    <div class="readiness-item">
-                        <div class="readiness-icon">
-                            <svg
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="1.8"
-                                aria-hidden="true"
-                            >
-                                <path d="M5 11l4 4L19 5"/>
-                                <path d="M12 22A10 10 0 1 0 12 2a10 10 0 0 0 0 20z"/>
-                            </svg>
-                        </div>
+                <div class="readiness-stats">
+                    <div><span>Price references</span><strong>{{ $priceReferenceCount }}</strong></div>
+                    <div><span>Open quotations</span><strong>{{ $quotationOpenCount }}</strong></div>
+                    <div><span>Review queue</span><strong>{{ $needsReviewCount }}</strong></div>
+                </div>
 
-                        <div class="readiness-copy">
-                            <strong>Authentication</strong>
-                            <span>Login, session, and logout</span>
-                        </div>
+                @if ($canViewCatalog)
+                    <a href="{{ route('companies.materials.index', $currentCompany) }}" class="readiness-action">
+                        Review catalog
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+                    </a>
+                @endif
+            </article>
 
-                        <span class="readiness-status">
-                            Active
-                        </span>
+            <article class="dashboard-card quotation-card" data-reveal data-premium-card>
+                <header class="dashboard-card-header compact">
+                    <div>
+                        <span class="card-kicker">Commercial queue</span>
+                        <h3>Recent Quotations</h3>
+                        <p>Latest quotation revisions and current release status.</p>
                     </div>
+                    @if ($canViewQuotations)
+                        <a href="{{ route('companies.quotations.index', $currentCompany) }}" class="card-icon-link" aria-label="View quotations">↗</a>
+                    @endif
+                </header>
 
-                    <div class="readiness-item">
-                        <div class="readiness-icon">
-                            <svg
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="1.8"
-                                aria-hidden="true"
-                            >
-                                <path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/>
-                                <path d="M9 12l2 2 4-4"/>
-                            </svg>
+                <div class="quotation-list">
+                    @forelse ($recentQuotations as $quotation)
+                        <a href="{{ route('companies.quotations.show', [$currentCompany, $quotation->project]) }}" class="quotation-list-item">
+                            <span class="quotation-symbol">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h9l3 3v15H6z"/><path d="M15 3v4h4M9 11h6M9 15h6"/></svg>
+                            </span>
+                            <span class="quotation-copy">
+                                <strong>{{ $quotation->quote_number ?: 'Draft quotation' }}</strong>
+                                <small>{{ $quotation->project?->name ?? 'Unlinked project' }}</small>
+                            </span>
+                            <span class="status-badge tone-{{ $quotationTones[$quotation->status] ?? 'neutral' }}">{{ $quotation->status_label }}</span>
+                        </a>
+                    @empty
+                        <div class="mini-empty-state">
+                            <strong>No quotation activity</strong>
+                            <span>Generated quotation revisions will appear here.</span>
                         </div>
-
-                        <div class="readiness-copy">
-                            <strong>Authorization</strong>
-                            <span>Roles and permissions</span>
-                        </div>
-
-                        <span class="readiness-status">
-                            Active
-                        </span>
-                    </div>
-
-                    <div class="readiness-item">
-                        <div class="readiness-icon">
-                            <svg
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="1.8"
-                                aria-hidden="true"
-                            >
-                                <path d="M4 21V5l8-3 8 3v16"/>
-                                <path d="M8 8h2M14 8h2M8 12h2M14 12h2"/>
-                            </svg>
-                        </div>
-
-                        <div class="readiness-copy">
-                            <strong>Multi-Company</strong>
-                            <span>Company membership access</span>
-                        </div>
-
-                        <span class="readiness-status">
-                            Active
-                        </span>
-                    </div>
-
-                    <div class="readiness-item">
-                        <div class="readiness-icon">
-                            <svg
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="1.8"
-                                aria-hidden="true"
-                            >
-                                <path d="M4 17l5-5 4 3 7-8"/>
-                                <path d="M16 7h4v4"/>
-                            </svg>
-                        </div>
-
-                        <div class="readiness-copy">
-                            <strong>Solar Modules</strong>
-                            <span>Project development stage</span>
-                        </div>
-
-                        <span class="readiness-status">
-                            Pending
-                        </span>
-                    </div>
+                    @endforelse
                 </div>
             </article>
-        </section>
-    </div>
+        </aside>
+
+        @if ($currentCompany)
+            <article class="dashboard-card command-dock-card" data-reveal>
+                <header class="dashboard-card-header compact command-dock-header">
+                    <div>
+                        <span class="card-kicker">Workspace shortcuts</span>
+                        <h3>Open the next module</h3>
+                    </div>
+                    <span class="command-dock-note">Fast access. Existing routes and workflow stay unchanged.</span>
+                </header>
+
+                <div class="command-dock-grid">
+                    @if ($canViewProjects)
+                        <a href="{{ route('companies.projects.index', $currentCompany) }}" class="command-dock-link">
+                            <span class="command-dock-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                                    <path d="M4 19V9l8-5 8 5v10"/><path d="M8 19v-6h8v6"/><path d="M3 19h18"/>
+                                </svg>
+                            </span>
+                            <span class="command-dock-copy"><strong>Projects</strong><small>Manage the project pipeline</small></span>
+                            <span class="command-dock-arrow">→</span>
+                        </a>
+                    @endif
+                    @if ($canViewCatalog)
+                        <a href="{{ route('companies.materials.index', $currentCompany) }}" class="command-dock-link">
+                            <span class="command-dock-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                                    <path d="M6 4h12a2 2 0 0 1 2 2v12l-4-2-4 2-4-2-4 2V6a2 2 0 0 1 2-2z"/><path d="M8 8h8M8 12h8"/>
+                                </svg>
+                            </span>
+                            <span class="command-dock-copy"><strong>Catalog</strong><small>Review material readiness</small></span>
+                            <span class="command-dock-arrow">→</span>
+                        </a>
+                    @endif
+                    @if ($canViewQuotations)
+                        <a href="{{ route('companies.quotations.index', $currentCompany) }}" class="command-dock-link">
+                            <span class="command-dock-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                                    <path d="M6 3h9l3 3v15H6z"/><path d="M15 3v4h4M9 11h6M9 15h6"/>
+                                </svg>
+                            </span>
+                            <span class="command-dock-copy"><strong>Quotations</strong><small>Review and release offers</small></span>
+                            <span class="command-dock-arrow">→</span>
+                        </a>
+                    @endif
+                    @if ($canViewEngineering)
+                        <a href="{{ route('companies.technical-calculations.index', $currentCompany) }}" class="command-dock-link">
+                            <span class="command-dock-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                                    <rect x="5" y="3" width="14" height="18" rx="3"/><path d="M8 7h8M8 11h3M13 11h3M8 15h3M13 15h3"/>
+                                </svg>
+                            </span>
+                            <span class="command-dock-copy"><strong>Engineering</strong><small>Inspect technical results</small></span>
+                            <span class="command-dock-arrow">→</span>
+                        </a>
+                    @endif
+                </div>
+            </article>
+        @endif
+    </section>
+</div>
 @endsection

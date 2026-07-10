@@ -40,6 +40,14 @@
     .bom-money-row{display:flex;justify-content:space-between;gap:16px;padding:10px 0;border-bottom:1px solid var(--slate-200);color:var(--slate-600)}
     .bom-money-row strong{color:var(--navy-900)}
     .bom-money-row.total{font-size:1.05rem;border-bottom:0;color:var(--navy-900)}
+    .bom-badge{display:inline-flex;align-items:center;padding:4px 8px;border-radius:999px;font-size:.7rem;font-weight:800;letter-spacing:.02em;border:1px solid var(--slate-200);background:var(--slate-50);color:var(--slate-600);white-space:nowrap}
+    .bom-badge.required{border-color:#bbf7d0;background:#f0fdf4;color:#166534}
+    .bom-badge.conditional{border-color:#fde68a;background:#fffbeb;color:#92400e}
+    .bom-badge.optional{border-color:#dbeafe;background:#eff6ff;color:#1d4ed8}
+    .bom-badge.service{border-color:#ccfbf1;background:#f0fdfa;color:#0f766e}
+    .bom-badge.excluded{border-color:#e5e7eb;background:#f9fafb;color:#475569}
+    .bom-badge.review{border-color:#fecaca;background:#fef2f2;color:#991b1b}
+    .bom-muted-note{display:block;margin-top:4px;color:var(--slate-500);font-size:.75rem;line-height:1.35}
     @media(max-width:1180px){.bom-layout{grid-template-columns:1fr}.bom-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
     @media(max-width:760px){.bom-hero{grid-template-columns:1fr;padding:26px}.bom-actions{justify-content:flex-start}.bom-grid,.bom-pricing-grid{grid-template-columns:1fr}.bom-head{display:grid}}
 </style>
@@ -51,7 +59,9 @@
         $warnings = $bom?->warnings ?? [];
         $pricingParameters = old()
             ?: ($bom?->pricing_parameters ?? $pricingDefaults);
-        $money = fn ($value) => 'IDR '.number_format((float) $value, 0, ',', '.');
+        $money = fn ($value) => ((float) $value > 0 ? 'IDR '.number_format((float) $value, 0, ',', '.') : 'Pending');
+        $moneyZero = fn ($value) => 'IDR '.number_format((float) $value, 0, ',', '.');
+        $label = \App\Support\BomBoqDictionary::class;
     @endphp
 
     <div class="bom-page">
@@ -59,10 +69,10 @@
             <div>
                 <div class="bom-kicker">{{ $project->project_number }} · {{ $project->customer?->name }}</div>
                 <h2>{{ $project->name }}</h2>
-                <p>Generate material quantity from technical calculation, then calculate BOQ pricing with material markup, labor, logistics, contingency, tax, and discount.</p>
+                <p>Build a complete project material, service, scope, and pricing draft from the latest engineering calculation. The BOQ separates customer cost, service scope, optional items, and utility responsibility.</p>
             </div>
             <div class="bom-actions">
-                <a href="{{ route('companies.boms.index', $company) }}" class="ui-button ui-button-secondary">BOM Directory</a>
+                <a href="{{ route('companies.boms.index', $company) }}" class="ui-button ui-button-secondary">BOQ Directory</a>
                 <a href="{{ route('companies.technical-calculations.show', [$company, $project]) }}" class="ui-button ui-button-secondary">Technical Calculation</a>
                 <a href="{{ route('companies.financial-analyses.show', [$company, $project]) }}" class="ui-button ui-button-secondary">Financial Analysis</a>
                 <a href="{{ route('companies.projects.show', [$company, $project]) }}" class="ui-button ui-button-secondary">Project Details</a>
@@ -99,8 +109,8 @@
             <main class="bom-card">
                 <div class="bom-head">
                     <div>
-                        <h3>Material and BOQ Draft</h3>
-                        <p class="bom-card-subtitle">Quantities come from technical calculation. Pricing uses the default MVP price book until supplier and product catalog modules are connected.</p>
+                        <h3>Professional BOM/BOQ Draft</h3>
+                        <p class="bom-card-subtitle">Quantities come from engineering inputs. The draft includes main equipment, small accessories, protection, grounding, services, permits, logistics, and scope notes.</p>
                     </div>
 
                     @if ($canGenerate)
@@ -133,8 +143,9 @@
                             <thead>
                                 <tr>
                                     <th>No</th>
-                                    <th>Category</th>
+                                    <th>Cost Group</th>
                                     <th>Item</th>
+                                    <th>Scope</th>
                                     <th>Specification</th>
                                     <th>Qty</th>
                                     <th>Unit</th>
@@ -152,20 +163,46 @@
                                 @foreach ($bom->items as $item)
                                     <tr>
                                         <td>{{ $loop->iteration }}</td>
-                                        <td>{{ strtoupper(str_replace('_', ' ', $item->category)) }}</td>
+                                        @php
+                                            $metadata = $item->metadata ?? [];
+                                            $scopeStatus = $metadata['scope_status'] ?? 'required';
+                                            $costGroup = $metadata['cost_group'] ?? $item->category;
+                                            $pricingState = $metadata['pricing_state'] ?? ($item->unit_price_idr > 0 ? 'priced' : 'pending');
+                                            $priceTrace = $metadata['pricing_source_trace'] ?? [];
+                                        @endphp
+                                        <td>
+                                            <div class="bom-primary">{{ $label::costGroupLabel($costGroup) }}</div>
+                                            <div class="bom-secondary">{{ $label::categoryLabel($item->category) }}</div>
+                                        </td>
                                         <td>
                                             <div class="bom-primary">{{ $item->item_name }}</div>
-                                            <div class="bom-secondary">{{ $item->item_code ?? '—' }}</div>
                                             @if ($item->description)
                                                 <div class="bom-secondary">{{ $item->description }}</div>
+                                            @endif
+                                            @if (! empty($metadata['calculation_basis']))
+                                                <span class="bom-muted-note">Basis: {{ $metadata['calculation_basis'] }}</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            <span class="bom-badge {{ $label::scopeTone($scopeStatus) }}">{{ $label::scopeLabel($scopeStatus) }}</span>
+                                            <span class="bom-muted-note">{{ $label::pricingStateLabel($pricingState) }}</span>
+                                            @if (! empty($priceTrace['price_book_code']))
+                                                <span class="bom-muted-note">Price source: {{ $priceTrace['price_book_code'] }} · {{ $priceTrace['supplier_name'] ?? 'Supplier not set' }}</span>
+                                            @elseif (($metadata['pricing_source'] ?? null) === 'manual_fallback')
+                                                <span class="bom-muted-note">Price source: manual fallback</span>
+                                            @elseif (($metadata['pricing_source'] ?? null) === 'missing_price')
+                                                <span class="bom-muted-note">Price source: missing</span>
                                             @endif
                                         </td>
                                         <td>
                                             @if (! empty($item->specification))
                                                 <ul class="bom-spec">
                                                     @foreach ($item->specification as $key => $value)
-                                                        <li><strong>{{ str_replace('_', ' ', $key) }}:</strong> {{ is_array($value) ? json_encode($value) : $value }}</li>
+                                                        <li><strong>{{ $label::specLabel($key) }}:</strong> {{ $label::value($value) }}</li>
                                                     @endforeach
+                                                    @if (isset($metadata['waste_factor_percent']) && (float) $metadata['waste_factor_percent'] > 0)
+                                                        <li><strong>Material allowance:</strong> {{ number_format((float) $metadata['waste_factor_percent'], 1) }}%</li>
+                                                    @endif
                                                 </ul>
                                             @else
                                                 —
@@ -191,21 +228,30 @@
 
             <aside class="bom-card">
                 <h3>BOQ Pricing</h3>
-                <p class="bom-card-subtitle">Apply MVP pricing to turn material quantities into a commercial draft.</p>
+                <p class="bom-card-subtitle">Apply company price books first. The engine keeps source trace, supplier validity, margin guard, discount guard, tax mode, and customer-safe selling totals for audit.</p>
 
                 @if ($bom)
                     <div class="bom-money-list">
+                        <div class="bom-money-row"><span>Pricing Status</span><strong>{{ $label::pricingStateLabel($summary['pricing_status'] ?? $bom->pricing_status) }}</strong></div>
+                        <div class="bom-money-row"><span>Commercial Guard</span><strong>Min margin {{ number_format((float) ($summary['min_margin_percent'] ?? $pricingParameters['min_margin_percent'] ?? 10), 2) }}% · Max discount {{ number_format((float) ($summary['max_discount_percent'] ?? $pricingParameters['max_discount_percent'] ?? 10), 2) }}%</strong></div>
                         @if ($canViewCost)
                             <div class="bom-money-row"><span>Material Cost</span><strong>{{ $money($bom->material_cost_subtotal_idr) }}</strong></div>
+                            <div class="bom-money-row"><span>Company Price Book Items</span><strong>{{ number_format((int) ($summary['company_price_book_item_count'] ?? 0)) }}</strong></div>
+                            <div class="bom-money-row"><span>Manual Fallback Items</span><strong>{{ number_format((int) ($summary['manual_fallback_item_count'] ?? 0)) }}</strong></div>
+                            <div class="bom-money-row"><span>Missing / Review Items</span><strong>{{ number_format((int) ($summary['missing_price_item_count'] ?? 0) + (int) ($summary['expired_price_item_count'] ?? 0) + (int) ($summary['unavailable_price_item_count'] ?? 0) + (int) ($summary['low_margin_item_count'] ?? 0) + (int) ($summary['discount_limit_exceeded_count'] ?? 0)) }}</strong></div>
                         @endif
                         @if ($canViewSelling)
                             <div class="bom-money-row"><span>Material Price</span><strong>{{ $money($bom->material_price_subtotal_idr) }}</strong></div>
+                            <div class="bom-money-row"><span>Commercial Subtotal</span><strong>{{ $money($summary['commercial_subtotal_idr'] ?? 0) }}</strong></div>
+                            <div class="bom-money-row"><span>Item Discount</span><strong>{{ $moneyZero($summary['item_discount_idr'] ?? 0) }}</strong></div>
                             <div class="bom-money-row"><span>Labor</span><strong>{{ $money($bom->labor_cost_idr) }}</strong></div>
                             <div class="bom-money-row"><span>Logistics</span><strong>{{ $money($bom->logistics_cost_idr) }}</strong></div>
                             <div class="bom-money-row"><span>Other Cost</span><strong>{{ $money($bom->other_cost_idr) }}</strong></div>
                             <div class="bom-money-row"><span>Contingency</span><strong>{{ $money($bom->contingency_cost_idr) }}</strong></div>
-                            <div class="bom-money-row"><span>Tax</span><strong>{{ $money($bom->tax_idr) }}</strong></div>
-                            <div class="bom-money-row"><span>Discount</span><strong>{{ $money($bom->discount_idr) }}</strong></div>
+                            <div class="bom-money-row"><span>Tax</span><strong>{{ $money($bom->tax_idr) }} · {{ ucfirst($summary['tax_mode'] ?? $pricingParameters['tax_mode'] ?? 'exclusive') }}</strong></div>
+                            <div class="bom-money-row"><span>Global Discount</span><strong>{{ $moneyZero($summary['global_discount_idr'] ?? 0) }}</strong></div>
+                            <div class="bom-money-row"><span>Total Discount</span><strong>{{ $moneyZero($bom->discount_idr) }}</strong></div>
+                            <div class="bom-money-row"><span>Rounding</span><strong>{{ $moneyZero($summary['rounding_adjustment_idr'] ?? 0) }}</strong></div>
                             <div class="bom-money-row total"><span>Grand Total</span><strong>{{ $money($bom->grand_price_idr) }}</strong></div>
                         @endif
                         @if ($canViewCost && $canViewSelling)
@@ -221,6 +267,14 @@
                             <div class="ui-field">
                                 <label class="ui-label">Material Markup %</label>
                                 <input class="ui-input" type="number" step="0.01" min="0" max="200" name="material_markup_percent" value="{{ $pricingParameters['material_markup_percent'] ?? 15 }}">
+                            </div>
+                            <div class="ui-field">
+                                <label class="ui-label">Minimum Margin %</label>
+                                <input class="ui-input" type="number" step="0.01" min="0" max="100" name="min_margin_percent" value="{{ $pricingParameters['min_margin_percent'] ?? 10 }}">
+                            </div>
+                            <div class="ui-field">
+                                <label class="ui-label">Max Discount %</label>
+                                <input class="ui-input" type="number" step="0.01" min="0" max="100" name="max_discount_percent" value="{{ $pricingParameters['max_discount_percent'] ?? 10 }}">
                             </div>
                             <div class="ui-field">
                                 <label class="ui-label">Labor Rate per kWp</label>
@@ -243,13 +297,32 @@
                                 <input class="ui-input" type="number" step="0.01" min="0" max="100" name="tax_percent" value="{{ $pricingParameters['tax_percent'] ?? 11 }}">
                             </div>
                             <div class="ui-field">
+                                <label class="ui-label">Tax Mode</label>
+                                <select class="ui-select" name="tax_mode">
+                                    <option value="exclusive" @selected(($pricingParameters['tax_mode'] ?? 'exclusive') === 'exclusive')>Tax exclusive</option>
+                                    <option value="inclusive" @selected(($pricingParameters['tax_mode'] ?? 'exclusive') === 'inclusive')>Tax inclusive</option>
+                                </select>
+                            </div>
+                            <div class="ui-field">
+                                <label class="ui-label">Rounding Unit</label>
+                                <select class="ui-select" name="rounding_unit_idr">
+                                    @foreach ([1, 100, 1000, 10000] as $roundingUnit)
+                                        <option value="{{ $roundingUnit }}" @selected((float) ($pricingParameters['rounding_unit_idr'] ?? 1) === (float) $roundingUnit)>IDR {{ number_format($roundingUnit, 0, ',', '.') }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="ui-field">
                                 <label class="ui-label">Discount %</label>
                                 <input class="ui-input" type="number" step="0.01" min="0" max="100" name="discount_percent" value="{{ $pricingParameters['discount_percent'] ?? 0 }}">
                             </div>
                         </div>
                         <div class="ui-field">
+                            <label class="ui-label">Tax Exempt Item Codes</label>
+                            <input class="ui-input" type="text" name="tax_exempt_item_codes" value="{{ is_array($pricingParameters['tax_exempt_item_codes'] ?? null) ? implode(', ', $pricingParameters['tax_exempt_item_codes']) : ($pricingParameters['tax_exempt_item_codes'] ?? '') }}" placeholder="Optional, comma separated item codes">
+                        </div>
+                        <div class="ui-field">
                             <label class="ui-label">Pricing Note</label>
-                            <textarea class="ui-input" name="pricing_note" rows="3" placeholder="Optional commercial note">{{ $pricingParameters['pricing_note'] ?? '' }}</textarea>
+                            <textarea class="ui-input" name="pricing_note" rows="3" placeholder="Optional commercial note for internal review or quotation context">{{ $pricingParameters['pricing_note'] ?? '' }}</textarea>
                         </div>
                         <button class="ui-button ui-button-primary" type="submit">Calculate BOQ Price</button>
                     </form>
@@ -260,17 +333,17 @@
         </div>
 
         <aside class="bom-card">
-            <h3>Source and Warnings</h3>
+            <h3>Project Checks</h3>
             <p class="bom-card-subtitle">
-                Generated from technical calculation status:
+                Generated from engineering status:
                 <strong>{{ $calculation?->result_status_label ?? 'Not calculated' }}</strong>.
             </p>
 
             <ul class="bom-warning-list" style="margin-top:18px">
                 @forelse ($warnings as $warning)
-                    <li>{{ $warning }}</li>
+                    <li>{{ is_array($warning) ? ($warning['message'] ?? $warning['title'] ?? json_encode($warning)) : $warning }}</li>
                 @empty
-                    <li class="ok">No BOM or BOQ warning recorded.</li>
+                    <li class="ok">No BOM/BOQ issue recorded.</li>
                 @endforelse
             </ul>
 
@@ -279,8 +352,8 @@
                 <div><strong>Generated at:</strong> {{ $bom?->generated_at?->format('d M Y, H:i') ?? '—' }}</div>
                 <div><strong>Priced by:</strong> {{ $bom?->pricer?->name ?? '—' }}</div>
                 <div><strong>Priced at:</strong> {{ $bom?->priced_at?->format('d M Y, H:i') ?? 'Not priced' }}</div>
-                <div><strong>Calculation run:</strong> {{ $calculation?->calculated_at?->format('d M Y, H:i') ?? '—' }}</div>
-                <div><strong>Calculation verified:</strong> {{ $calculation?->verified_at?->format('d M Y, H:i') ?? 'Pending' }}</div>
+                <div><strong>Engineering calculation:</strong> {{ $calculation?->calculated_at?->format('d M Y, H:i') ?? '—' }}</div>
+                <div><strong>Engineering verified:</strong> {{ $calculation?->verified_at?->format('d M Y, H:i') ?? 'Pending' }}</div>
             </div>
         </aside>
     </div>

@@ -281,7 +281,7 @@ class BillOfMaterialController extends Controller
             }
 
             $bom->fill([
-                'pricing_status' => 'priced',
+                'pricing_status' => $payload['summary']['pricing_status'] ?? 'priced',
                 'summary' => $payload['summary'],
                 'warnings' => array_values(array_unique(array_merge($bom->warnings ?? [], $payload['warnings']))),
                 'material_cost_subtotal_idr' => $payload['summary']['material_cost_subtotal_idr'],
@@ -307,7 +307,7 @@ class BillOfMaterialController extends Controller
 
         return redirect()
             ->route('companies.boms.show', [$company, $project])
-            ->with('success', 'BOQ pricing calculated from the default MVP price book.');
+            ->with('success', 'BOQ pricing calculated using the company price resolver and fallback price book.');
     }
 
     private function nextBomNumber(Company $company): string

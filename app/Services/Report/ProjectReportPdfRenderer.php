@@ -24,6 +24,8 @@ class ProjectReportPdfRenderer
 
     private float $y = 0.0;
 
+    private string $footerContext = '';
+
     public function render(Project $project): string
     {
         if ($project->exists) {
@@ -44,9 +46,12 @@ class ProjectReportPdfRenderer
 
         $this->pages = [];
         $this->content = '';
+        $this->footerContext = $this->value($project->project_number ?: $project->name);
         $this->newPage();
 
         $this->drawCover($project);
+        $this->newPage();
+        $this->drawExecutiveSummary($project);
         $this->drawProjectProfile($project);
         $this->drawInputSummaries($project);
         $this->drawRecommendation($project);
@@ -73,42 +78,93 @@ class ProjectReportPdfRenderer
     {
         $company = $this->relation($project, 'company');
         $customer = $this->relation($project, 'customer');
+        $calculation = $this->relation($project, 'technicalCalculation');
+        $analysis = $this->relation($project, 'financialAnalysis');
+        $quotation = $this->relation($project, 'quotation');
+        $bom = $this->relation($project, 'billOfMaterial');
+        $result = is_array($calculation?->results ?? null) ? $calculation->results : [];
+        $commercial = is_array($quotation?->commercial_summary ?? null) ? $quotation->commercial_summary : [];
 
-        $this->rect(0, self::PAGE_HEIGHT - 190, self::PAGE_WIDTH, 190, '0.02 0.15 0.22', true);
-        $this->rect(0, self::PAGE_HEIGHT - 190, self::PAGE_WIDTH, 42, '0.03 0.43 0.39', true);
-        $this->text(self::MARGIN, 765, 'NEXORIN', 24, 'F2', '1 1 1');
-        $this->text(self::MARGIN, 742, 'Solar Engineering and Project Report', 11, 'F1', '0.76 0.96 0.94');
-        $this->text(553, 765, 'PROJECT REPORT', 12, 'F2', '1 1 1', 'right');
-        $this->text(553, 744, now()->format('d M Y'), 9, 'F1', '0.76 0.96 0.94', 'right');
+        $this->rect(0, 0, self::PAGE_WIDTH, self::PAGE_HEIGHT, '0.98 0.99 1', true);
+        $this->rect(0, 650, self::PAGE_WIDTH, 192, '0.02 0.15 0.22', true);
+        $this->rect(0, 650, 190, 192, '0.03 0.43 0.39', true);
+        $this->rect(0, 650, self::PAGE_WIDTH, 18, '0.03 0.43 0.39', true);
 
-        $this->y = 635;
-        $this->text(self::MARGIN, $this->y, $this->value($project->name), 22, 'F2', '0.02 0.15 0.22');
-        $this->y -= 20;
-        $this->paragraph('Integrated technical, commercial, and financial summary generated from the NEXORIN project workflow.');
-        $this->y -= 16;
+        $this->text(self::MARGIN, 792, 'NEXORIN', 27, 'F2', '1 1 1');
+        $this->text(self::MARGIN, 768, 'Solar Engineering and Project Report', 11, 'F1', '0.76 0.96 0.94');
+        $this->text(553, 792, 'ENGINEERING REPORT', 12, 'F2', '1 1 1', 'right');
+        $this->text(553, 772, 'Generated '.$this->dateTime(now()), 8.5, 'F1', '0.76 0.96 0.94', 'right');
 
-        $this->twoColumnRows([
-            ['Project number', $project->project_number],
-            ['Company', $company?->name],
-            ['Customer', $customer?->name],
-            ['Building type', $this->label($project->building_type)],
-            ['Proposed system', $this->label($project->proposed_system)],
-            ['Project status', $this->label($project->status)],
-            ['Site', $project->site_address],
-            ['City', trim($this->value($project->city).' '.$this->value($project->province))],
+        $this->y = 610;
+        $this->text(self::MARGIN, $this->y, $this->value($project->name), 24, 'F2', '0.02 0.15 0.22');
+        $this->y -= 23;
+        $this->paragraph('Integrated engineering, commercial, and financial report for rooftop PV planning. This document consolidates workflow inputs, assumptions, formulas, warnings, overrides, and commercial outputs in one controlled report.');
+
+        $this->y -= 12;
+        $this->drawCoverMetaCard($project, $company?->name, $customer?->name);
+
+        $this->y -= 14;
+        $this->drawMetricGrid([
+            ['label' => 'Installed PV', 'value' => $this->nullableNumber($result['installed_pv_kw'] ?? null, 2, ' kWp'), 'caption' => 'Effective design capacity'],
+            ['label' => 'Annual Energy', 'value' => $this->nullableNumber($result['annual_energy_kwh'] ?? $analysis?->annual_energy_kwh, 0, ' kWh/year'), 'caption' => 'Estimated production'],
+            ['label' => 'CAPEX', 'value' => $this->moneyOrPending($analysis?->project_capex_idr), 'caption' => 'Financial input'],
+            ['label' => 'Grand Price', 'value' => $this->moneyOrPending($commercial['grand_total_idr'] ?? $bom?->grand_price_idr ?? null), 'caption' => 'Customer-facing amount'],
         ]);
 
-        $this->y -= 18;
-        $this->rect(self::MARGIN, $this->y - 65, 511, 82, '0.92 0.97 0.97', true);
-        $this->text(58, $this->y, 'Report scope', 11, 'F2', '0.02 0.15 0.22');
-        $this->y -= 17;
-        $this->paragraph('This report summarizes project data, load analysis, solar profile, roof survey, system recommendation, technical calculation, BOM/BOQ, financial analysis, quotation, assumptions, and warnings.');
-        $this->y -= 24;
+        $this->y -= 12;
+        $this->rect(self::MARGIN, $this->y - 82, 511, 92, '0.92 0.97 0.97', true);
+        $this->rect(self::MARGIN, $this->y - 82, 511, 92, '0.78 0.86 0.86', false);
+        $this->text(58, $this->y - 10, 'Document classification', 10.5, 'F2', '0.02 0.15 0.22');
+        $this->y -= 28;
+        $this->paragraph('Status: '.$this->reportStatus($project).'. Use this report for preliminary engineering review, proposal validation, and project decision support. It does not replace site verification, utility approval, structural assessment, commissioning, or professional engineering responsibility.');
+
+        $this->y = 92;
+        $this->text(self::MARGIN, $this->y, 'Prepared for', 8, 'F2', '0.45 0.51 0.55');
+        $this->text(self::MARGIN, $this->y - 15, $this->value($customer?->name), 11, 'F2', '0.02 0.15 0.22');
+        $this->text(553, $this->y, 'Prepared by', 8, 'F2', '0.45 0.51 0.55', 'right');
+        $this->text(553, $this->y - 15, $this->value($company?->name ?: 'NEXORIN'), 11, 'F2', '0.02 0.15 0.22', 'right');
+    }
+
+    private function drawExecutiveSummary(Project $project): void
+    {
+        $this->sectionTitle('1. Executive Summary');
+
+        $calculation = $this->relation($project, 'technicalCalculation');
+        $bom = $this->relation($project, 'billOfMaterial');
+        $analysis = $this->relation($project, 'financialAnalysis');
+        $quotation = $this->relation($project, 'quotation');
+        $result = is_array($calculation?->results ?? null) ? $calculation->results : [];
+        $commercial = is_array($quotation?->commercial_summary ?? null) ? $quotation->commercial_summary : [];
+        $warningRecords = $this->combinedWarningRecords($project);
+        $severityCounts = $this->severityCounts($warningRecords);
+
+        $this->drawMetricGrid([
+            ['label' => 'System Type', 'value' => $this->label($calculation?->system_type ?? $project->proposed_system), 'caption' => 'Recommended or calculated configuration'],
+            ['label' => 'PV Capacity', 'value' => $this->nullableNumber($result['installed_pv_kw'] ?? null, 2, ' kWp'), 'caption' => 'Installed DC capacity'],
+            ['label' => 'Payback', 'value' => $this->nullableNumber($analysis?->simple_payback_years, 2, ' years'), 'caption' => 'Simple payback period'],
+            ['label' => 'Report Health', 'value' => $this->healthLabel($severityCounts), 'caption' => 'Based on active warnings'],
+        ]);
+
+        $this->miniTitle('Document control');
+        $this->twoColumnRows([
+            ['Project number', $project->project_number],
+            ['Project status', $this->label($project->status)],
+            ['Engineering status', $calculation?->result_status_label],
+            ['BOM/BOQ status', $bom ? $bom->status_label.' / '.$this->label($bom->pricing_status) : null],
+            ['Financial status', $analysis?->status_label],
+            ['Quotation status', $quotation?->status_label],
+            ['Report revision', $this->reportRevision($quotation)],
+            ['Generated at', $this->dateTime(now())],
+        ]);
+
+        $this->miniTitle('Executive interpretation');
+        $this->paragraph($this->executiveInterpretation($project, $severityCounts));
+        $this->drawSeveritySummary($severityCounts);
     }
 
     private function drawProjectProfile(Project $project): void
     {
-        $this->sectionTitle('1. Customer and Project Information');
+        $this->sectionTitle('2. Customer and Project Information');
 
         $customer = $this->relation($project, 'customer');
         $this->twoColumnRows([
@@ -125,7 +181,7 @@ class ProjectReportPdfRenderer
 
     private function drawInputSummaries(Project $project): void
     {
-        $this->sectionTitle('2. Input Data Summary');
+        $this->sectionTitle('3. Input Data Summary');
 
         $load = $this->relation($project, 'loadAnalysis');
         $loadSummary = $load ? $load->calculateSummary() : [];
@@ -171,7 +227,7 @@ class ProjectReportPdfRenderer
     private function drawRecommendation(Project $project): void
     {
         $recommendation = $this->relation($project, 'systemRecommendation');
-        $this->sectionTitle('3. System Recommendation');
+        $this->sectionTitle('4. System Recommendation');
 
         if (! $recommendation) {
             $this->paragraph('System recommendation has not been generated for this project.');
@@ -202,7 +258,7 @@ class ProjectReportPdfRenderer
     private function drawTechnicalCalculation(Project $project): void
     {
         $calculation = $this->relation($project, 'technicalCalculation');
-        $this->sectionTitle('4. Technical Calculation');
+        $this->sectionTitle('5. Technical Calculation');
 
         if (! $calculation) {
             $this->paragraph('Technical calculation has not been run for this project.');
@@ -370,7 +426,7 @@ class ProjectReportPdfRenderer
     private function drawBomBoq(Project $project): void
     {
         $bom = $this->relation($project, 'billOfMaterial');
-        $this->sectionTitle('5. BOM and BOQ Summary');
+        $this->sectionTitle('6. BOM and BOQ Summary');
 
         if (! $bom) {
             $this->paragraph('BOM/BOQ has not been generated for this project.');
@@ -405,7 +461,7 @@ class ProjectReportPdfRenderer
     private function drawFinancialAnalysis(Project $project): void
     {
         $analysis = $this->relation($project, 'financialAnalysis');
-        $this->sectionTitle('6. Financial Analysis');
+        $this->sectionTitle('7. Financial Analysis');
 
         if (! $analysis) {
             $this->paragraph('Financial analysis has not been calculated for this project.');
@@ -445,7 +501,7 @@ class ProjectReportPdfRenderer
     private function drawQuotationSummary(Project $project): void
     {
         $quotation = $this->relation($project, 'quotation');
-        $this->sectionTitle('7. Quotation Summary');
+        $this->sectionTitle('8. Quotation Summary');
 
         if (! $quotation) {
             $this->paragraph('Quotation has not been generated for this project.');
@@ -475,19 +531,291 @@ class ProjectReportPdfRenderer
 
     private function drawWarningsAndDisclaimer(Project $project): void
     {
-        $this->sectionTitle('8. Combined Warnings and Disclaimer');
+        $this->ensure(260);
+        $this->sectionTitle('9. Warning Matrix and Disclaimer');
 
-        $warnings = $this->combinedWarnings($project);
+        $warnings = $this->combinedWarningRecords($project);
+        $severityCounts = $this->severityCounts($warnings);
+        $this->drawSeveritySummary($severityCounts);
+
         if ($warnings === []) {
             $this->paragraph('No major warnings were recorded by the generated modules. The result still requires engineering review before procurement or construction.');
         } else {
-            foreach (array_slice($warnings, 0, 18) as $warning) {
-                $this->bullet($warning);
+            $this->ensure(210);
+            $this->miniTitle('Warning matrix');
+            foreach (array_slice($warnings, 0, 12) as $warning) {
+                $this->warningPanel($warning);
             }
         }
 
-        $this->miniTitle('Disclaimer');
+        $this->miniTitle('Professional responsibility and limitation');
         $this->paragraph('This report is a preliminary engineering and commercial document generated by NEXORIN. It supports decision-making but does not replace site verification, utility approval, structural assessment, commissioning, or professional engineering responsibility. All results must be reviewed by qualified personnel before procurement or construction.');
+        $this->drawSignatureBlock($project);
+    }
+
+    private function drawCoverMetaCard(Project $project, mixed $companyName, mixed $customerName): void
+    {
+        $this->ensure(76);
+        $this->rect(self::MARGIN, $this->y - 66, 511, 76, '1 1 1', true);
+        $this->rect(self::MARGIN, $this->y - 66, 511, 76, '0.84 0.89 0.90', false);
+        $this->line(self::MARGIN, $this->y + 10, 553, $this->y + 10, '0.03 0.43 0.39');
+
+        $this->text(58, $this->y - 8, 'Project', 7.8, 'F2', '0.45 0.51 0.55');
+        $this->text(58, $this->y - 23, $this->value($project->project_number), 10.5, 'F2', '0.02 0.15 0.22');
+        $this->text(58, $this->y - 39, $this->label($project->building_type).' | '.$this->label($project->proposed_system), 8.5, 'F1', '0.35 0.43 0.48');
+
+        $this->text(222, $this->y - 8, 'Company', 7.8, 'F2', '0.45 0.51 0.55');
+        $this->text(222, $this->y - 23, $this->value($companyName), 10.5, 'F2', '0.02 0.15 0.22');
+        $this->text(222, $this->y - 39, 'Project owner data scope', 8.5, 'F1', '0.35 0.43 0.48');
+
+        $this->text(386, $this->y - 8, 'Customer', 7.8, 'F2', '0.45 0.51 0.55');
+        $this->text(386, $this->y - 23, $this->value($customerName), 10.5, 'F2', '0.02 0.15 0.22');
+        $this->text(386, $this->y - 39, $this->value($project->city).' '.$this->value($project->province), 8.5, 'F1', '0.35 0.43 0.48');
+
+        $this->y -= 82;
+    }
+
+    /** @param array<int, array{label:string,value:string,caption:string}> $cards */
+    private function drawMetricGrid(array $cards): void
+    {
+        if ($cards === []) {
+            return;
+        }
+
+        $columns = 4;
+        $gap = 9.0;
+        $width = (511 - ($gap * ($columns - 1))) / $columns;
+        $height = 70.0;
+        $x0 = self::MARGIN;
+
+        foreach (array_chunk($cards, $columns) as $row) {
+            $this->ensure($height + 8);
+            $top = $this->y;
+
+            foreach ($row as $index => $card) {
+                $this->metricCard(
+                    $x0 + (($width + $gap) * $index),
+                    $top,
+                    $width,
+                    $height,
+                    $card['label'],
+                    $card['value'],
+                    $card['caption']
+                );
+            }
+
+            $this->y -= $height + 14;
+        }
+    }
+
+    private function metricCard(float $x, float $top, float $width, float $height, string $label, string $value, string $caption): void
+    {
+        $this->rect($x, $top - $height, $width, $height, '1 1 1', true);
+        $this->rect($x, $top - $height, $width, $height, '0.84 0.89 0.90', false);
+        $this->rect($x, $top - 4, $width, 4, '0.03 0.43 0.39', true);
+        $this->text($x + 8, $top - 17, $label, 7.4, 'F2', '0.45 0.51 0.55');
+
+        $valueLines = $this->wrap($value, $this->charLimit($width - 16, 12));
+        $this->text($x + 8, $top - 34, $valueLines[0] ?? '-', 12, 'F2', '0.02 0.15 0.22');
+
+        if (isset($valueLines[1])) {
+            $this->text($x + 8, $top - 47, $valueLines[1], 8.2, 'F1', '0.05 0.12 0.17');
+            return;
+        }
+
+        $captionY = $top - 50;
+        foreach (array_slice($this->wrap($caption, $this->charLimit($width - 16, 7.2)), 0, 2) as $line) {
+            $this->text($x + 8, $captionY, $line, 7.2, 'F1', '0.35 0.43 0.48');
+            $captionY -= 8;
+        }
+    }
+
+    private function drawSeveritySummary(array $counts): void
+    {
+        $this->miniTitle('Warning severity summary');
+        $this->drawMetricGrid([
+            ['label' => 'Critical', 'value' => (string) ($counts['critical'] ?? 0), 'caption' => 'Must be resolved'],
+            ['label' => 'Warning', 'value' => (string) ($counts['warning'] ?? 0), 'caption' => 'Requires review'],
+            ['label' => 'Caution', 'value' => (string) ($counts['caution'] ?? 0), 'caption' => 'Check assumptions'],
+            ['label' => 'Info', 'value' => (string) ($counts['info'] ?? 0), 'caption' => 'Advisory note'],
+        ]);
+    }
+
+    /** @param array{code:string,severity:string,title:string,message:string,recommendation:string,source:string} $warning */
+    private function warningPanel(array $warning): void
+    {
+        $height = 70.0;
+        $messageLines = $this->wrap($warning['message'] ?? '-', 88);
+        $recommendationLines = $this->wrap('Recommendation: '.($warning['recommendation'] ?? '-'), 88);
+        $height = max($height, 28 + ((count($messageLines) + count($recommendationLines)) * 9));
+        $this->ensure($height + 8);
+
+        [$fill, $accent] = $this->severityPalette($warning['severity'] ?? 'info');
+        $top = $this->y;
+        $this->rect(self::MARGIN, $top - $height, 511, $height, $fill, true);
+        $this->rect(self::MARGIN, $top - $height, 511, $height, '0.84 0.89 0.90', false);
+        $this->rect(self::MARGIN, $top - $height, 6, $height, $accent, true);
+
+        $this->text(56, $top - 16, '['.strtoupper($warning['severity'] ?? 'info').'] '.$this->value($warning['title'] ?? 'Project Notice'), 9.5, 'F2', '0.02 0.15 0.22');
+        $this->text(553, $top - 16, $this->sourceLabel($warning['source'] ?? 'system'), 7.5, 'F2', '0.45 0.51 0.55', 'right');
+
+        $lineY = $top - 31;
+        foreach ($messageLines as $line) {
+            $this->text(56, $lineY, $line, 8.2, 'F1', '0.28 0.34 0.38');
+            $lineY -= 9;
+        }
+
+        foreach ($recommendationLines as $line) {
+            $this->text(56, $lineY, $line, 8.1, 'F1', '0.35 0.43 0.48');
+            $lineY -= 9;
+        }
+
+        $this->y -= $height + 8;
+    }
+
+    private function drawSignatureBlock(Project $project): void
+    {
+        $this->ensure(110);
+        $this->miniTitle('Review and approval');
+
+        $boxTop = $this->y;
+        $boxWidth = 242.0;
+        $boxHeight = 82.0;
+        $leftX = self::MARGIN;
+        $rightX = 311.0;
+
+        foreach ([[$leftX, 'Prepared by', 'Sales / Engineering Representative'], [$rightX, 'Reviewed by', 'Qualified Engineer / Company Approver']] as $box) {
+            [$x, $title, $role] = $box;
+            $this->rect($x, $boxTop - $boxHeight, $boxWidth, $boxHeight, '1 1 1', true);
+            $this->rect($x, $boxTop - $boxHeight, $boxWidth, $boxHeight, '0.84 0.89 0.90', false);
+            $this->text($x + 10, $boxTop - 17, $title, 9, 'F2', '0.02 0.15 0.22');
+            $this->text($x + 10, $boxTop - 33, $role, 7.8, 'F1', '0.45 0.51 0.55');
+            $this->line($x + 10, $boxTop - 62, $x + $boxWidth - 10, $boxTop - 62, '0.45 0.51 0.55');
+            $this->text($x + 10, $boxTop - 75, 'Name, signature, and date', 7.4, 'F1', '0.45 0.51 0.55');
+        }
+
+        $this->y -= $boxHeight + 12;
+    }
+
+    /** @return array<int, array{code:string,severity:string,title:string,message:string,recommendation:string,source:string}> */
+    private function combinedWarningRecords(Project $project): array
+    {
+        $records = [];
+        $roof = $this->relation($project, 'roofSiteSurvey');
+        $recommendation = $this->relation($project, 'systemRecommendation');
+        $calculation = $this->relation($project, 'technicalCalculation');
+        $bom = $this->relation($project, 'billOfMaterial');
+        $analysis = $this->relation($project, 'financialAnalysis');
+        $quotation = $this->relation($project, 'quotation');
+
+        foreach ([
+            'roof_site_survey' => $roof?->calculateSummary()['warnings'] ?? [],
+            'system_recommendation' => $recommendation?->warnings ?? [],
+            'technical_calculation' => $calculation?->warnings ?? [],
+            'bom_boq' => $bom?->warnings ?? [],
+            'financial_analysis' => $analysis?->warnings ?? [],
+            'quotation' => $quotation?->warnings ?? [],
+        ] as $source => $group) {
+            if (is_array($group)) {
+                foreach (CalculationWarning::normalizeList($group, $source) as $warning) {
+                    $records[] = $warning;
+                }
+            }
+        }
+
+        return CalculationWarning::unique($records);
+    }
+
+    /** @param array<int, array<string, mixed>> $warnings */
+    private function severityCounts(array $warnings): array
+    {
+        $counts = ['critical' => 0, 'warning' => 0, 'caution' => 0, 'info' => 0];
+
+        foreach ($warnings as $warning) {
+            $severity = (string) ($warning['severity'] ?? 'info');
+            if (! array_key_exists($severity, $counts)) {
+                $severity = 'info';
+            }
+            $counts[$severity]++;
+        }
+
+        return $counts;
+    }
+
+    private function healthLabel(array $counts): string
+    {
+        if (($counts['critical'] ?? 0) > 0) {
+            return 'Critical Review';
+        }
+
+        if (($counts['warning'] ?? 0) > 0) {
+            return 'Review Required';
+        }
+
+        if (($counts['caution'] ?? 0) > 0) {
+            return 'Caution';
+        }
+
+        return 'Clear';
+    }
+
+    private function executiveInterpretation(Project $project, array $severityCounts): string
+    {
+        $calculation = $this->relation($project, 'technicalCalculation');
+        $bom = $this->relation($project, 'billOfMaterial');
+        $analysis = $this->relation($project, 'financialAnalysis');
+        $quotation = $this->relation($project, 'quotation');
+
+        $parts = [];
+        $parts[] = 'The project workflow currently indicates '.$this->healthLabel($severityCounts).' based on the active warning matrix.';
+        $parts[] = $calculation ? 'Technical calculation status is '.$this->label($calculation->result_status_label).'.' : 'Technical calculation has not been completed.';
+        $parts[] = $bom ? 'BOM/BOQ status is '.$this->label($bom->status_label).' with '.$this->label($bom->pricing_status).' pricing status.' : 'BOM/BOQ has not been generated.';
+        $parts[] = $analysis ? 'Financial analysis is '.$this->label($analysis->status_label).' with simple payback of '.$this->nullableNumber($analysis->simple_payback_years, 2, ' years').'.' : 'Financial analysis has not been calculated.';
+        $parts[] = $quotation ? 'Quotation status is '.$this->label($quotation->status_label).'.' : 'Quotation has not been generated.';
+
+        return implode(' ', $parts);
+    }
+
+    private function reportStatus(Project $project): string
+    {
+        $calculation = $this->relation($project, 'technicalCalculation');
+        $status = $calculation?->result_status_label ?: $this->label($project->status);
+
+        return $this->value($status);
+    }
+
+    private function reportRevision(mixed $quotation): string
+    {
+        if (! $quotation) {
+            return 'R0 - project report';
+        }
+
+        return 'R'.(int) ($quotation->revision_number ?? 0).' - aligned with quotation '.$this->value($quotation->quote_number ?? null);
+    }
+
+    private function moneyOrPending(mixed $value): string
+    {
+        if ($value === null || $value === '') {
+            return 'Pending';
+        }
+
+        return $this->money($value);
+    }
+
+    /** @return array{0:string,1:string} */
+    private function severityPalette(string $severity): array
+    {
+        return match ($severity) {
+            'critical' => ['0.99 0.94 0.94', '0.72 0.12 0.12'],
+            'warning' => ['1 0.97 0.88', '0.80 0.40 0.05'],
+            'caution' => ['0.96 0.98 0.90', '0.42 0.55 0.10'],
+            default => ['0.92 0.97 0.97', '0.03 0.43 0.39'],
+        };
+    }
+
+    private function sourceLabel(string $source): string
+    {
+        return $this->label($source);
     }
 
     private function drawBomItems(mixed $items): void
@@ -720,7 +1048,11 @@ class ProjectReportPdfRenderer
 
         $pageNo = count($this->pages) + 1;
         $this->line(self::MARGIN, 40, 553, 40, '0.86 0.90 0.91');
-        $this->text(self::MARGIN, 25, 'Generated by NEXORIN - preliminary project report', 7.5, 'F1', '0.45 0.51 0.55');
+        $footer = 'Generated by NEXORIN - engineering project report';
+        if ($this->footerContext !== '-') {
+            $footer .= ' | '.$this->footerContext;
+        }
+        $this->text(self::MARGIN, 25, $footer, 7.5, 'F1', '0.45 0.51 0.55');
         $this->text(553, 25, 'Page '.$pageNo, 7.5, 'F1', '0.45 0.51 0.55', 'right');
         $this->pages[] = $this->content;
         $this->content = '';

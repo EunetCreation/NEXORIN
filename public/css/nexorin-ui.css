@@ -784,7 +784,8 @@
     background: var(--white);
 }
 
-.ui-info-item dt {
+.ui-info-item dt,
+.ui-info-item span {
     color: var(--slate-500);
     font-size: 8px;
     font-weight: 800;
@@ -792,7 +793,9 @@
     text-transform: uppercase;
 }
 
-.ui-info-item dd {
+.ui-info-item dd,
+.ui-info-item strong {
+    display: block;
     margin: 8px 0 0;
     color: var(--slate-800);
     font-size: 11px;

@@ -206,10 +206,12 @@ class LoadAnalysis extends Model
      * @param  array<int, LoadAppliance>  $appliances
      * @return array<int, float>
      */
-    public function calculateHourlyProfile(array $appliances = []): array
+    public function calculateHourlyProfile(?array $appliances = null): array
     {
-        if ($appliances === []) {
-            $appliances = $this->appliances()->get()->all();
+        if ($appliances === null) {
+            $appliances = $this->relationLoaded('appliances')
+                ? $this->appliances->all()
+                : $this->appliances()->get()->all();
         }
 
         $profile = array_fill(0, 24, 0.0);

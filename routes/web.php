@@ -1,19 +1,26 @@
 <?php
 
-use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\BillOfMaterialController;
+use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ElectricityBillController;
 use App\Http\Controllers\FinancialAnalysisController;
 use App\Http\Controllers\LoadAnalysisController;
 use App\Http\Controllers\LoadApplianceController;
 use App\Http\Controllers\LocationSolarController;
+use App\Http\Controllers\MaterialCatalogController;
+use App\Http\Controllers\MaterialDatasheetController;
+use App\Http\Controllers\PriceBookBulkItemController;
+use App\Http\Controllers\PriceBookController;
+use App\Http\Controllers\PriceBookItemController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectReportController;
 use App\Http\Controllers\QuotationController;
 use App\Http\Controllers\RoofSiteSurveyController;
 use App\Http\Controllers\RoofSiteSurveyPhotoController;
 use App\Http\Controllers\RoofSurfaceController;
+use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\SystemRecommendationController;
 use App\Http\Controllers\TechnicalCalculationController;
 use App\Http\Controllers\UserController;
@@ -41,7 +48,7 @@ Route::get('/', function () {
 */
 
 Route::middleware(['auth', 'user.active'])->group(function () {
-    Route::view('/dashboard', 'dashboard')->name('dashboard');
+    Route::get('/dashboard', DashboardController::class)->name('dashboard');
 
     Route::middleware('system.super_admin')->group(function () {
         Route::patch(
@@ -259,7 +266,6 @@ Route::middleware(['auth', 'user.active'])->group(function () {
                 ->middleware('company.permission:price.cost.update,price.selling.update')
                 ->name('boms.price');
 
-
             Route::get('/financial-analyses', [FinancialAnalysisController::class, 'index'])
                 ->middleware('company.permission:calculation.view,price.selling.view,quotation.view,calculation.view_own,quotation.view_own')
                 ->name('financial-analyses.index');
@@ -271,6 +277,150 @@ Route::middleware(['auth', 'user.active'])->group(function () {
             Route::post('/projects/{project}/financial-analysis/calculate', [FinancialAnalysisController::class, 'calculate'])
                 ->middleware('company.permission:price.selling.update,quotation.create')
                 ->name('financial-analyses.calculate');
+
+            Route::get('/material-catalog', [MaterialCatalogController::class, 'index'])
+                ->middleware('company.permission:equipment.view')
+                ->name('materials.index');
+
+            Route::get('/material-catalog/create', [MaterialCatalogController::class, 'create'])
+                ->middleware('company.permission:equipment.create')
+                ->name('materials.create');
+
+            Route::post('/material-catalog', [MaterialCatalogController::class, 'store'])
+                ->middleware('company.permission:equipment.create')
+                ->name('materials.store');
+
+            Route::get('/material-catalog/{material}', [MaterialCatalogController::class, 'show'])
+                ->middleware('company.permission:equipment.view')
+                ->name('materials.show');
+
+            Route::get('/material-catalog/{material}/edit', [MaterialCatalogController::class, 'edit'])
+                ->middleware('company.permission:equipment.update')
+                ->name('materials.edit');
+
+            Route::put('/material-catalog/{material}', [MaterialCatalogController::class, 'update'])
+                ->middleware('company.permission:equipment.update')
+                ->name('materials.update');
+
+            Route::patch('/material-catalog/{material}/activate', [MaterialCatalogController::class, 'activate'])
+                ->middleware('company.permission:equipment.update')
+                ->name('materials.activate');
+
+            Route::patch('/material-catalog/{material}/approve', [MaterialCatalogController::class, 'approve'])
+                ->middleware('company.permission:equipment.update')
+                ->name('materials.approve');
+
+            Route::post('/material-catalog/{material}/datasheets', [MaterialDatasheetController::class, 'store'])
+                ->middleware('company.permission:equipment.update')
+                ->name('materials.datasheets.store');
+
+            Route::post('/material-catalog/{material}/datasheets/{datasheet}/apply', [MaterialDatasheetController::class, 'applyParsedSpecs'])
+                ->middleware('company.permission:equipment.update')
+                ->name('materials.datasheets.apply');
+
+            Route::delete('/material-catalog/{material}/datasheets/{datasheet}', [MaterialDatasheetController::class, 'archive'])
+                ->middleware('company.permission:equipment.update')
+                ->name('materials.datasheets.archive');
+
+            Route::delete('/material-catalog/{material}', [MaterialCatalogController::class, 'archive'])
+                ->middleware('company.permission:equipment.delete')
+                ->name('materials.archive');
+
+            Route::get('/suppliers', [SupplierController::class, 'index'])
+                ->middleware('company.permission:supplier.view')
+                ->name('suppliers.index');
+
+            Route::get('/suppliers/create', [SupplierController::class, 'create'])
+                ->middleware('company.permission:supplier.create')
+                ->name('suppliers.create');
+
+            Route::post('/suppliers', [SupplierController::class, 'store'])
+                ->middleware('company.permission:supplier.create')
+                ->name('suppliers.store');
+
+            Route::get('/suppliers/{supplier}', [SupplierController::class, 'show'])
+                ->middleware('company.permission:supplier.view')
+                ->name('suppliers.show');
+
+            Route::get('/suppliers/{supplier}/edit', [SupplierController::class, 'edit'])
+                ->middleware('company.permission:supplier.update')
+                ->name('suppliers.edit');
+
+            Route::put('/suppliers/{supplier}', [SupplierController::class, 'update'])
+                ->middleware('company.permission:supplier.update')
+                ->name('suppliers.update');
+
+            Route::patch('/suppliers/{supplier}/activate', [SupplierController::class, 'activate'])
+                ->middleware('company.permission:supplier.update')
+                ->name('suppliers.activate');
+
+            Route::delete('/suppliers/{supplier}', [SupplierController::class, 'archive'])
+                ->middleware('company.permission:supplier.delete')
+                ->name('suppliers.archive');
+
+            Route::get('/price-books', [PriceBookController::class, 'index'])
+                ->middleware('company.permission:price.cost.view')
+                ->name('price-books.index');
+
+            Route::get('/price-books/create', [PriceBookController::class, 'create'])
+                ->middleware('company.permission:price.cost.update')
+                ->name('price-books.create');
+
+            Route::post('/price-books', [PriceBookController::class, 'store'])
+                ->middleware('company.permission:price.cost.update')
+                ->name('price-books.store');
+
+            Route::get('/price-books/{priceBook}', [PriceBookController::class, 'show'])
+                ->middleware('company.permission:price.cost.view')
+                ->name('price-books.show');
+
+            Route::get('/price-books/{priceBook}/edit', [PriceBookController::class, 'edit'])
+                ->middleware('company.permission:price.cost.update')
+                ->name('price-books.edit');
+
+            Route::put('/price-books/{priceBook}', [PriceBookController::class, 'update'])
+                ->middleware('company.permission:price.cost.update')
+                ->name('price-books.update');
+
+            Route::patch('/price-books/{priceBook}/activate', [PriceBookController::class, 'activate'])
+                ->middleware('company.permission:price.cost.update')
+                ->name('price-books.activate');
+
+            Route::delete('/price-books/{priceBook}', [PriceBookController::class, 'archive'])
+                ->middleware('company.permission:price.cost.update')
+                ->name('price-books.archive');
+
+            Route::post('/price-books/{priceBook}/items', [PriceBookItemController::class, 'store'])
+                ->middleware('company.permission:price.cost.update')
+                ->name('price-books.items.store');
+
+            Route::patch('/price-books/{priceBook}/items/bulk-update', [PriceBookBulkItemController::class, 'bulkUpdate'])
+                ->middleware('company.permission:price.cost.update')
+                ->name('price-books.items.bulk-update');
+
+            Route::get('/price-books/{priceBook}/items/import', [PriceBookBulkItemController::class, 'importForm'])
+                ->middleware('company.permission:price.cost.update')
+                ->name('price-books.items.import.form');
+
+            Route::post('/price-books/{priceBook}/items/import/preview', [PriceBookBulkItemController::class, 'previewImport'])
+                ->middleware('company.permission:price.cost.update')
+                ->name('price-books.items.import.preview');
+
+            Route::post('/price-books/{priceBook}/items/import/commit', [PriceBookBulkItemController::class, 'commitImport'])
+                ->middleware('company.permission:price.cost.update')
+                ->name('price-books.items.import.commit');
+
+            Route::get('/price-books/{priceBook}/items/{priceBookItem}/edit', [PriceBookItemController::class, 'edit'])
+                ->middleware('company.permission:price.cost.update')
+                ->name('price-books.items.edit');
+
+            Route::put('/price-books/{priceBook}/items/{priceBookItem}', [PriceBookItemController::class, 'update'])
+                ->middleware('company.permission:price.cost.update')
+                ->name('price-books.items.update');
+
+            Route::delete('/price-books/{priceBook}/items/{priceBookItem}', [PriceBookItemController::class, 'destroy'])
+                ->middleware('company.permission:price.cost.update')
+                ->name('price-books.items.destroy');
 
             Route::get('/quotations', [QuotationController::class, 'index'])
                 ->middleware('company.permission:quotation.view,quotation.view_own')
@@ -288,13 +438,57 @@ Route::middleware(['auth', 'user.active'])->group(function () {
                 ->middleware('company.permission:project.view,project.view_own,calculation.view,calculation.view_own,price.selling.view,quotation.view,quotation.view_own')
                 ->name('projects.report.pdf');
 
+            Route::get('/projects/{project}/report/premium-preview', [ProjectReportController::class, 'premiumPreview'])
+                ->middleware('company.permission:project.view,project.view_own,calculation.view,calculation.view_own,price.selling.view,quotation.view,quotation.view_own')
+                ->name('projects.report.premium.preview');
+
+            Route::get('/projects/{project}/report/premium-pdf', [ProjectReportController::class, 'premiumPdf'])
+                ->middleware('company.permission:project.view,project.view_own,calculation.view,calculation.view_own,price.selling.view,quotation.view,quotation.view_own')
+                ->name('projects.report.premium.pdf');
+
+            Route::get('/projects/{project}/report/client-proposal-preview', [ProjectReportController::class, 'clientProposalPreview'])
+                ->middleware('company.permission:project.view,project.view_own,calculation.view,calculation.view_own,price.selling.view,quotation.view,quotation.view_own')
+                ->name('projects.report.client-proposal.preview');
+
+            Route::get('/projects/{project}/report/client-proposal-pdf', [ProjectReportController::class, 'clientProposalPdf'])
+                ->middleware('company.permission:project.view,project.view_own,calculation.view,calculation.view_own,price.selling.view,quotation.view,quotation.view_own')
+                ->name('projects.report.client-proposal.pdf');
+
+            Route::get('/projects/{project}/report/client-proposal-final-pdf', [ProjectReportController::class, 'clientProposalFinalPdf'])
+                ->middleware('company.permission:project.view,project.view_own,calculation.view,calculation.view_own,price.selling.view,quotation.view,quotation.view_own')
+                ->name('projects.report.client-proposal.final-pdf');
+
+            Route::post('/projects/{project}/report/client-release/approve', [ProjectReportController::class, 'approveClientRelease'])
+                ->middleware('company.permission:quotation.send,report.export')
+                ->name('projects.report.client-release.approve');
+
+            Route::delete('/projects/{project}/report/client-release/revoke', [ProjectReportController::class, 'revokeClientRelease'])
+                ->middleware('company.permission:quotation.send,report.export')
+                ->name('projects.report.client-release.revoke');
+
             Route::post('/projects/{project}/quotation/generate', [QuotationController::class, 'generate'])
                 ->middleware('company.permission:quotation.create,quotation.update')
                 ->name('quotations.generate');
 
+            Route::patch('/projects/{project}/quotation/approve', [QuotationController::class, 'approve'])
+                ->middleware('company.permission:quotation.send')
+                ->name('quotations.approve');
+
             Route::patch('/projects/{project}/quotation/issue', [QuotationController::class, 'issue'])
                 ->middleware('company.permission:quotation.send')
                 ->name('quotations.issue');
+
+            Route::patch('/projects/{project}/quotation/accept', [QuotationController::class, 'accept'])
+                ->middleware('company.permission:quotation.send')
+                ->name('quotations.accept');
+
+            Route::patch('/projects/{project}/quotation/reject', [QuotationController::class, 'reject'])
+                ->middleware('company.permission:quotation.send')
+                ->name('quotations.reject');
+
+            Route::patch('/projects/{project}/quotation/cancel', [QuotationController::class, 'cancel'])
+                ->middleware('company.permission:quotation.send')
+                ->name('quotations.cancel');
 
             Route::get('/projects', [ProjectController::class, 'index'])
                 ->middleware('company.permission:project.view,project.view_own')

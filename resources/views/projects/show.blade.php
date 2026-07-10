@@ -36,6 +36,7 @@
     .cockpit-warning-list{display:grid;gap:10px;max-height:420px;overflow:auto;padding-right:4px}.cockpit-warning-item{padding:14px;border:1px solid var(--slate-100);border-left-width:4px;border-radius:16px;background:#fff}.cockpit-warning-item.critical{border-left-color:#be3345}.cockpit-warning-item.warning{border-left-color:#f5a800}.cockpit-warning-item.caution{border-left-color:#f1c75b}.cockpit-warning-item.info{border-left-color:#4a90c5}.cockpit-warning-item header{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.cockpit-warning-item strong{color:var(--navy-900);font-size:.82rem}.cockpit-warning-item p{margin:7px 0 0;color:var(--slate-600);font-size:.75rem;line-height:1.55}.cockpit-warning-item small{display:block;margin-top:8px;color:var(--slate-400);font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em}
     .cockpit-action-list{display:grid;gap:10px}.cockpit-action{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:center;padding:14px;border:1px solid var(--slate-100);border-radius:17px;text-decoration:none;background:var(--slate-50);transition:transform .18s ease,border-color .18s ease,background .18s ease}.cockpit-action:hover{transform:translateY(-1px);border-color:rgba(22,190,179,.28);background:#fff}.cockpit-action strong{display:block;color:var(--navy-900);font-size:.82rem}.cockpit-action span{display:block;margin-top:4px;color:var(--slate-500);font-size:.72rem;line-height:1.35}.cockpit-action b{color:var(--teal-600);font-size:.7rem;text-transform:uppercase;letter-spacing:.06em}
     .cockpit-next{padding:16px;border:1px solid rgba(22,190,179,.22);border-radius:18px;background:var(--teal-100)}.cockpit-next span{display:block;color:#087f77;font-size:.66rem;font-weight:850;text-transform:uppercase;letter-spacing:.07em}.cockpit-next strong{display:block;margin-top:6px;color:var(--navy-900);font-size:.95rem}.cockpit-next p{margin:6px 0 0;color:var(--slate-700);font-size:.75rem;line-height:1.5}
+    .release-gate-panel{display:grid;gap:14px}.release-gate-status{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:16px;border-radius:18px;background:var(--slate-50);border:1px solid var(--slate-100)}.release-gate-status h4{margin:0;color:var(--navy-900);font:700 1rem/1.2 "Space Grotesk",sans-serif}.release-gate-status p{margin:6px 0 0;color:var(--slate-500);font-size:.74rem;line-height:1.5}.release-gate-issues{display:grid;gap:8px}.release-gate-issue{padding:12px;border-radius:14px;border:1px solid var(--slate-100);background:#fff}.release-gate-issue strong{display:block;color:var(--navy-900);font-size:.78rem}.release-gate-issue span{display:block;margin-top:4px;color:var(--slate-500);font-size:.7rem;line-height:1.45}.release-gate-issue.critical{border-color:#ffd2d9;background:#fff0f2}.release-gate-issue.warning{border-color:#f4dc9b;background:#fff7df}.release-gate-approval{display:grid;gap:10px}.release-gate-approval textarea{width:100%;min-height:80px;resize:vertical}.release-gate-approved{padding:12px;border-radius:14px;border:1px solid rgba(22,190,179,.22);background:var(--teal-100);color:var(--slate-700);font-size:.74rem;line-height:1.5}.release-gate-approved strong{color:var(--navy-900)}.release-gate-history{display:grid;gap:8px;padding-top:2px}.release-gate-history h5{margin:0;color:var(--navy-900);font:700 .78rem/1.2 "Space Grotesk",sans-serif}.release-gate-history-item{padding:10px 11px;border:1px solid var(--slate-100);border-radius:13px;background:var(--slate-50)}.release-gate-history-item strong{display:block;color:var(--slate-800);font-size:.72rem}.release-gate-history-item span{display:block;margin-top:3px;color:var(--slate-500);font-size:.66rem;line-height:1.4}.release-gate-history-item.active{border-color:rgba(22,190,179,.24);background:var(--teal-100)}.release-gate-history-item.revoked{background:#fff7df;border-color:#f4dc9b}.release-gate-meta{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.release-gate-meta div{padding:10px 11px;border:1px solid var(--slate-100);border-radius:13px;background:#fff}.release-gate-meta span{display:block;color:var(--slate-500);font-size:.65rem;text-transform:uppercase;letter-spacing:.06em}.release-gate-meta strong{display:block;margin-top:4px;color:var(--navy-900);font-size:.74rem}.release-gate-locked{padding:12px;border:1px dashed var(--slate-200);border-radius:14px;background:var(--slate-50);color:var(--slate-500);font-size:.72rem;line-height:1.45}.cockpit-action.disabled{pointer-events:none;opacity:.62;background:#fff}.cockpit-action.disabled b{color:var(--slate-400)}
     .cockpit-profile-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;overflow:hidden;border:1px solid var(--slate-100);border-radius:18px;background:var(--slate-100)}.cockpit-profile-item{min-height:86px;padding:15px;background:#fff}.cockpit-profile-item.wide{grid-column:span 2}.cockpit-profile-item dt{color:var(--slate-500);font-size:.64rem;font-weight:850;text-transform:uppercase;letter-spacing:.07em}.cockpit-profile-item dd{margin:8px 0 0;color:var(--slate-800);font-size:.8rem;font-weight:650;line-height:1.55;overflow-wrap:anywhere}
 
     .cockpit-insight-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:18px}.cockpit-insight{position:relative;overflow:hidden;min-height:130px;padding:16px;border:1px solid var(--slate-100);border-radius:20px;background:linear-gradient(180deg,#fff,var(--slate-50));transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}.cockpit-insight:hover{transform:translateY(-2px);border-color:rgba(22,190,179,.24);box-shadow:0 16px 30px rgba(3,21,34,.08)}.cockpit-insight:before{content:"";position:absolute;inset:0 auto 0 0;width:4px;background:var(--slate-300)}.cockpit-insight.ready:before{background:var(--teal-500)}.cockpit-insight.progress:before{background:#4a90c5}.cockpit-insight.info:before{background:#7aa3bd}.cockpit-insight.caution:before{background:#f1c75b}.cockpit-insight.warning:before{background:#f5a800}.cockpit-insight.critical:before{background:#be3345}.cockpit-insight.muted{opacity:.72}.cockpit-insight b{display:inline-flex;margin-bottom:12px;padding:6px 9px;border-radius:999px;background:var(--slate-100);color:var(--slate-700);font-size:.64rem;text-transform:uppercase;letter-spacing:.065em}.cockpit-insight h4{margin:0;color:var(--navy-900);font:700 .9rem/1.25 "Space Grotesk",sans-serif}.cockpit-insight p{margin:7px 0 0;color:var(--slate-600);font-size:.73rem;line-height:1.5}.cockpit-chart-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(320px,.75fr);gap:16px}.cockpit-chart-panel{min-width:0;padding:18px;border:1px solid var(--slate-100);border-radius:22px;background:#fff}.cockpit-chart-panel h4{margin:0;color:var(--navy-900);font:700 .96rem/1.2 "Space Grotesk",sans-serif}.cockpit-chart-panel p{margin:6px 0 0;color:var(--slate-500);font-size:.74rem;line-height:1.5}.cockpit-cashflow{display:grid;gap:10px;margin-top:16px}.cockpit-cashflow-row{display:grid;grid-template-columns:42px minmax(0,1fr) 122px;gap:12px;align-items:center}.cockpit-cashflow-row span{color:var(--slate-500);font-size:.68rem;font-weight:800}.cockpit-cashflow-bars{display:grid;gap:5px}.cockpit-bar-track{height:9px;overflow:hidden;border-radius:999px;background:var(--slate-100)}.cockpit-bar{height:100%;min-width:4px;border-radius:inherit;background:linear-gradient(90deg,var(--teal-500),#9df4ec)}.cockpit-bar.net{background:linear-gradient(90deg,#4a90c5,#9ed4fb)}.cockpit-bar.cumulative{background:linear-gradient(90deg,#2f9f69,#b8efcd)}.cockpit-cashflow-row strong{color:var(--slate-800);font-size:.68rem;text-align:right}.cockpit-gauge-list{display:grid;gap:14px;margin-top:16px}.cockpit-gauge-head{display:flex;justify-content:space-between;gap:12px;align-items:center}.cockpit-gauge-head strong{color:var(--navy-900);font-size:.78rem}.cockpit-gauge-head span{color:var(--teal-600);font-size:.78rem;font-weight:850}.cockpit-gauge-track{height:10px;overflow:hidden;border-radius:999px;background:var(--slate-100)}.cockpit-gauge-fill{height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--teal-500),#9df4ec)}.cockpit-gauge.ready .cockpit-gauge-fill{background:linear-gradient(90deg,var(--teal-500),#9df4ec)}.cockpit-gauge.caution .cockpit-gauge-fill,.cockpit-gauge.warning .cockpit-gauge-fill{background:linear-gradient(90deg,#f5a800,#ffe29a)}.cockpit-gauge.critical .cockpit-gauge-fill{background:linear-gradient(90deg,#be3345,#ff9fac)}.cockpit-gauge.muted .cockpit-gauge-fill{background:var(--slate-300)}.cockpit-gauge p{margin:6px 0 0;color:var(--slate-500);font-size:.68rem;line-height:1.45}.cockpit-energy-strip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:16px}.cockpit-energy-pill{padding:13px;border-radius:16px;background:var(--slate-50);border:1px solid var(--slate-100)}.cockpit-energy-pill span{display:block;color:var(--slate-500);font-size:.64rem;font-weight:850;text-transform:uppercase;letter-spacing:.06em}.cockpit-energy-pill strong{display:block;margin-top:7px;color:var(--navy-900);font-size:.82rem}.cockpit-animated{animation:cockpitFloat 520ms ease both}@keyframes cockpitFloat{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
@@ -387,6 +388,107 @@
                     </div>
                 </section>
 
+                @if ($canViewReports)
+                    <section class="cockpit-card">
+                        <div class="cockpit-card-head">
+                            <div>
+                                <h3>Client Release Gate</h3>
+                                <p>Approves whether the Client Proposal PDF may be released without draft watermark.</p>
+                            </div>
+                            <span class="cockpit-chip {{ $releaseGate['tone'] ?? 'warning' }}">{{ $releaseGate['status'] ?? 'Review Required' }}</span>
+                        </div>
+                        <div class="cockpit-card-body">
+                            <div class="release-gate-panel">
+                                <div class="release-gate-status">
+                                    <div>
+                                        <h4>{{ $releaseGate['ready'] ? 'Ready for client release' : 'Not ready for final client release' }}</h4>
+                                        <p>{{ $releaseGate['next_action'] ?? 'Review the release gate before sending the client proposal.' }}</p>
+                                    </div>
+                                    <span class="cockpit-chip {{ $releaseGate['ready'] ? 'ready' : (($releaseGate['tone'] ?? '') === 'critical' ? 'critical' : 'warning') }}">{{ $releaseGate['issue_count'] ?? 0 }} issue{{ ($releaseGate['issue_count'] ?? 0) === 1 ? '' : 's' }}</span>
+                                </div>
+
+                                <div class="release-gate-meta">
+                                    <div><span>Release Status</span><strong>{{ $releaseGate['status'] ?? 'Review Required' }}</strong></div>
+                                    <div><span>Approval Status</span><strong>{{ $releaseGate['approval_status_label'] ?? 'Approval Required' }}</strong></div>
+                                    <div><span>Engineering Issues</span><strong>{{ $releaseGate['engineering_issue_count'] ?? 0 }}</strong></div>
+                                    <div><span>Commercial Issues</span><strong>{{ $releaseGate['commercial_issue_count'] ?? 0 }}</strong></div>
+                                </div>
+
+                                @if (! empty($releaseGate['approval']))
+                                    <div class="release-gate-approved">
+                                        <strong>{{ $releaseGate['approval']['status_label'] ?? 'Approval recorded' }}</strong><br>
+                                        Approved by {{ $releaseGate['approval']['approved_by'] ?? 'System' }} at {{ $releaseGate['approval']['approved_at'] ?? 'unknown time' }}.
+                                        @if (! empty($releaseGate['approval_stale']))
+                                            <br><strong>Approval is stale.</strong> Re-approve after current data is reviewed.
+                                        @endif
+                                    </div>
+                                @endif
+
+                                @if (! empty($releaseGate['issues']))
+                                    <div class="release-gate-issues">
+                                        @foreach (array_slice($releaseGate['issues'], 0, 5) as $issue)
+                                            <div class="release-gate-issue {{ $issue['severity'] ?? 'warning' }}">
+                                                <strong>{{ $issue['title'] }}</strong>
+                                                <span>{{ $issue['detail'] }}</span>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @else
+                                    <div class="release-gate-issue">
+                                        <strong>All gate checks passed.</strong>
+                                        <span>{{ $releaseGate['ready'] ? 'Final Client Proposal PDF is available.' : 'The remaining step is explicit client release approval.' }}</span>
+                                    </div>
+                                @endif
+
+                                @if ($canApproveClientRelease)
+                                    <div class="release-gate-approval">
+                                        @if (! $releaseGate['ready'] && ($releaseGate['approval_allowed'] ?? false))
+                                            <form method="POST" action="{{ route('companies.projects.report.client-release.approve', [$company, $project]) }}">
+                                                @csrf
+                                                <label class="ui-label">Approval Notes</label>
+                                                <textarea class="ui-textarea" name="notes" placeholder="Optional release note for audit trail"></textarea>
+                                                <button class="ui-button ui-button-primary" type="submit" data-confirm="Approve this project for client release?">Approve Client Release</button>
+                                            </form>
+                                        @elseif (! $releaseGate['ready'])
+                                            <div class="release-gate-locked">Approval is locked until all engineering and commercial gate issues are resolved.</div>
+                                        @endif
+
+                                        @if (! empty($releaseGate['approval']))
+                                            <form method="POST" action="{{ route('companies.projects.report.client-release.revoke', [$company, $project]) }}">
+                                                @csrf
+                                                @method('DELETE')
+                                                <label class="ui-label">Revoke Reason</label>
+                                                <textarea class="ui-textarea" name="revoke_reason" required placeholder="Required reason, e.g. Pricing changed after client discussion."></textarea>
+                                                <button class="ui-button ui-button-secondary" type="submit" data-confirm="Revoke client release approval?">Revoke Approval</button>
+                                            </form>
+                                        @endif
+                                    </div>
+                                @endif
+
+                                @if ($project->releaseApprovals->isNotEmpty())
+                                    <div class="release-gate-history">
+                                        <h5>Release approval history</h5>
+                                        @foreach ($project->releaseApprovals->take(3) as $approvalRecord)
+                                            <div class="release-gate-history-item {{ $approvalRecord->status }}">
+                                                <strong>{{ $approvalRecord->status_label }} · {{ $approvalRecord->approved_at?->format('d M Y, H:i') ?? 'No approval time' }}</strong>
+                                                <span>
+                                                    Approved by {{ $approvalRecord->approver?->name ?? 'System' }}
+                                                    @if ($approvalRecord->revoked_at)
+                                                        · revoked {{ $approvalRecord->revoked_at->format('d M Y, H:i') }}
+                                                    @endif
+                                                </span>
+                                                @if ($approvalRecord->notes || $approvalRecord->revoke_reason)
+                                                    <span>{{ $approvalRecord->notes ?: $approvalRecord->revoke_reason }}</span>
+                                                @endif
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    </section>
+                @endif
+
                 <section class="cockpit-card">
                     <div class="cockpit-card-head">
                         <div>
@@ -424,7 +526,15 @@
                                 @if ($project->quotation)
                                     <a class="cockpit-action" href="{{ route('companies.quotations.pdf', [$company, $project]) }}"><span><strong>Quotation PDF</strong><span>Download customer quotation document.</span></span><b>PDF</b></a>
                                 @endif
-                                <a class="cockpit-action" href="{{ route('companies.projects.report.pdf', [$company, $project]) }}"><span><strong>Project Report PDF</strong><span>Download technical, commercial, and financial report.</span></span><b>PDF</b></a>
+                                <a class="cockpit-action" href="{{ route('companies.projects.report.premium.pdf', [$company, $project]) }}"><span><strong>Internal Engineering Report</strong><span>Download the full internal report with technical warnings, controlled scope, and catalog review.</span></span><b>PDF+</b></a>
+                                <a class="cockpit-action" href="{{ route('companies.projects.report.premium.preview', [$company, $project]) }}" target="_blank" rel="noopener"><span><strong>Internal Report Preview</strong><span>Open the browser-rendered internal engineering report before export.</span></span><b>View</b></a>
+                                <a class="cockpit-action" href="{{ route('companies.projects.report.client-proposal.preview', [$company, $project]) }}" target="_blank" rel="noopener"><span><strong>Client Proposal Preview</strong><span>Preview the customer-facing proposal before sending.</span></span><b>View</b></a>
+                                <a class="cockpit-action" href="{{ route('companies.projects.report.client-proposal.pdf', [$company, $project]) }}"><span><strong>Draft Proposal PDF</strong><span>Download the customer-facing draft. It keeps the release watermark until approved.</span></span><b>Draft</b></a>
+                                @if ($releaseGate['ready'] ?? false)
+                                    <a class="cockpit-action" href="{{ route('companies.projects.report.client-proposal.final-pdf', [$company, $project]) }}"><span><strong>Final Client Proposal PDF</strong><span>Download the approved client proposal without draft watermark.</span></span><b>Final</b></a>
+                                @else
+                                    <span class="cockpit-action disabled"><span><strong>Final Client Proposal PDF</strong><span>Locked until Client Release Gate is Ready for Client Release.</span></span><b>Locked</b></span>
+                                @endif
                             @endif
                         </div>
                     </div>
