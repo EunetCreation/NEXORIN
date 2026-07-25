@@ -8,7 +8,7 @@ use App\Support\CalculationWarning;
 
 class TechnicalCalculationEngine
 {
-    public const VERSION = 'nexorin-technical-lv-v1.3.0';
+    public const VERSION = 'nexorin-technical-lv-v1.4.0';
 
     /**
      * Calculate preliminary low-voltage rooftop PV technical design values.
@@ -210,19 +210,53 @@ class TechnicalCalculationEngine
 
         $modulesPerString = 0;
         $stringCount = 0;
+        $stringModuleCounts = [];
 
         if ($moduleCount > 0 && $minimumModulesPerString > 0 && $maximumModulesPerString >= $minimumModulesPerString) {
             $availableStringInputs = max(1, $inverterCount * $inverterMpptCount);
             $maxCandidateStrings = min($moduleCount, $availableStringInputs);
 
-            for ($candidateStrings = 1; $candidateStrings <= $maxCandidateStrings; $candidateStrings++) {
-                $candidateModulesPerString = (int) ceil($moduleCount / $candidateStrings);
+            $validArchitectures = [];
 
-                if ($candidateModulesPerString >= $minimumModulesPerString && $candidateModulesPerString <= $maximumModulesPerString) {
-                    $stringCount = $candidateStrings;
-                    $modulesPerString = $candidateModulesPerString;
-                    break;
+            for ($candidateStrings = 1; $candidateStrings <= $maxCandidateStrings; $candidateStrings++) {
+                $candidateDistribution = $this->distributeModules($moduleCount, $candidateStrings);
+                $candidateMinimum = min($candidateDistribution);
+                $candidateMaximum = max($candidateDistribution);
+
+                if ($candidateMinimum < $minimumModulesPerString || $candidateMaximum > $maximumModulesPerString) {
+                    continue;
                 }
+
+                /*
+                 * Prefer an architecture that can be divided evenly across the
+                 * physical inverter units. This prevents a technically valid but
+                 * operationally poor result such as five strings across two equal
+                 * inverters when six balanced strings are also voltage-compatible.
+                 * Among equally balanced choices, fewer strings are preferred to
+                 * keep the preliminary BOS simple.
+                 */
+                $validArchitectures[] = [
+                    'string_count' => $candidateStrings,
+                    'distribution' => $candidateDistribution,
+                    'maximum' => $candidateMaximum,
+                    'balance_penalty' => $inverterCount > 1 && $candidateStrings % $inverterCount !== 0 ? 1 : 0,
+                ];
+            }
+
+            if ($validArchitectures !== []) {
+                usort($validArchitectures, static fn (array $left, array $right): int => [
+                    $left['balance_penalty'],
+                    $left['string_count'],
+                ] <=> [
+                    $right['balance_penalty'],
+                    $right['string_count'],
+                ]);
+
+                $selectedArchitecture = $validArchitectures[0];
+                $stringCount = (int) $selectedArchitecture['string_count'];
+                $stringModuleCounts = $selectedArchitecture['distribution'];
+                // Voltage checks use the longest string as the conservative case.
+                $modulesPerString = (int) $selectedArchitecture['maximum'];
             }
 
             if ($stringCount === 0) {
@@ -231,6 +265,8 @@ class TechnicalCalculationEngine
                     : max($minimumModulesPerString, $moduleCount);
                 $modulesPerString = min($modulesPerString, $moduleCount);
                 $stringCount = (int) ceil($moduleCount / max($modulesPerString, 1));
+                $stringModuleCounts = $this->distributeModules($moduleCount, $stringCount);
+                $modulesPerString = $stringModuleCounts !== [] ? max($stringModuleCounts) : $modulesPerString;
             }
         }
 
@@ -272,6 +308,20 @@ class TechnicalCalculationEngine
 
         $stringVocColdV = $modulesPerString * $moduleVocCold;
         $stringVmpHotV = $modulesPerString * $moduleVmpHot;
+        $inverterStringAssignments = $this->inverterStringAssignments(
+            $stringModuleCounts,
+            $inverterCount,
+            $inverterMpptCount,
+            $moduleWp,
+            $inverterAcPowerKw,
+            $moduleVocCold,
+            $moduleVmpHot
+        );
+        $usedMpptInputs = collect($inverterStringAssignments)->sum(
+            fn (array $assignment): int => (int) ($assignment['used_mppt_count'] ?? 0)
+        );
+        $acNominalVoltageV = $supplyPhase === 'three_phase' ? 400.0 : 230.0;
+        $inverterUnitRatedCurrentA = $this->acCurrent($inverterAcPowerKw, $supplyPhase, $inverterEfficiency);
         $estimatedDailyGenerationKwh = $installedPvKw * $psh * $effectivePerformanceRatio;
         $annualEnergyKwh = $estimatedDailyGenerationKwh * 365;
         $targetAnnualEnergyKwh = $targetDailyEnergyKwh * 365;
@@ -343,10 +393,21 @@ class TechnicalCalculationEngine
             );
         }
 
+        $inverterFeederBreakerA = $this->nextStandardRating($inverterUnitRatedCurrentA * 1.25);
+        $mainAcBreakerA = $this->nextStandardRating($acCurrentA * 1.25);
+        $acCombinerBusA = $this->nextStandardRating($mainAcBreakerA * 1.25);
+
         $protection = [
             'dc_isolator_a' => $this->nextStandardRating($dcInputCurrentA),
             'dc_fuse_a' => $this->nextStandardRating($moduleIsc * 1.56),
-            'ac_breaker_a' => $this->nextStandardRating($acCurrentA * 1.25),
+            // Backward-compatible key. APP67L.3-R4 treats this as the inverter
+            // feeder rating, not the aggregate plant-main rating.
+            'ac_breaker_a' => $inverterFeederBreakerA,
+            'inverter_feeder_breaker_a' => $inverterFeederBreakerA,
+            'inverter_feeder_isolator_a' => $inverterFeederBreakerA,
+            'main_ac_breaker_a' => $mainAcBreakerA,
+            'pcc_isolator_a' => $mainAcBreakerA,
+            'ac_combiner_bus_a' => $acCombinerBusA,
             'dc_spd' => $inverterMaxDcVoltageV > 1000 ? 'Type 2 DC SPD 1500 Vdc' : 'Type 2 DC SPD 1000 Vdc',
             'ac_spd' => $supplyPhase === 'three_phase' ? 'Type 2 AC SPD 3P+N' : 'Type 2 AC SPD 1P+N',
         ];
@@ -377,6 +438,14 @@ class TechnicalCalculationEngine
             'maximum_modules_per_string' => $maximumModulesPerString,
             'modules_per_string' => $modulesPerString,
             'string_count' => $stringCount,
+            'string_module_counts' => $stringModuleCounts,
+            'string_distribution_label' => $this->stringDistributionLabel($stringModuleCounts),
+            'inverter_string_assignments' => $inverterStringAssignments,
+            'available_mppt_inputs' => $availableMpptInputs,
+            'used_mppt_inputs' => $usedMpptInputs,
+            'inverter_unit_ac_kw' => round($inverterAcPowerKw, 3),
+            'inverter_unit_rated_current_a' => round($inverterUnitRatedCurrentA, 3),
+            'ac_nominal_voltage_v' => round($acNominalVoltageV, 1),
             'string_voc_cold_v' => round($stringVocColdV, 3),
             'string_vmp_hot_v' => round($stringVmpHotV, 3),
             'dc_input_current_a' => round($dcInputCurrentA, 3),
@@ -473,6 +542,103 @@ class TechnicalCalculationEngine
             'warnings' => CalculationWarning::unique($warnings),
             'source_snapshot' => $sources,
         ];
+    }
+
+    /**
+     * Assign the actual string distribution to physical inverter and MPPT
+     * instances. No synthetic modules or aggregate-only tracker rows are
+     * introduced. The allocation remains deterministic for audit and SLD use.
+     *
+     * @param  array<int, int>  $stringModuleCounts
+     * @return array<int, array<string, mixed>>
+     */
+    private function inverterStringAssignments(
+        array $stringModuleCounts,
+        int $inverterCount,
+        int $mpptCount,
+        float $moduleWp,
+        float $inverterAcPowerKw,
+        float $moduleVocCold,
+        float $moduleVmpHot
+    ): array {
+        if ($stringModuleCounts === [] || $inverterCount <= 0 || $mpptCount <= 0) {
+            return [];
+        }
+
+        $assignments = [];
+        for ($inverterIndex = 1; $inverterIndex <= $inverterCount; $inverterIndex++) {
+            $assignments[$inverterIndex] = [
+                'inverter_index' => $inverterIndex,
+                'tag' => sprintf('INV-%02d', $inverterIndex),
+                'rated_ac_kw' => round($inverterAcPowerKw, 3),
+                'available_mppt_count' => $mpptCount,
+                'used_mppt_count' => 0,
+                'assigned_module_count' => 0,
+                'assigned_dc_kw' => 0.0,
+                'dc_ac_ratio' => 0.0,
+                'strings' => [],
+            ];
+        }
+
+        foreach (array_values($stringModuleCounts) as $stringOffset => $modules) {
+            $inverterIndex = ($stringOffset % $inverterCount) + 1;
+            $currentCount = count($assignments[$inverterIndex]['strings']);
+            $mpptIndex = ($currentCount % $mpptCount) + 1;
+            $stringIndex = $stringOffset + 1;
+            $dcKw = ($modules * $moduleWp) / 1000;
+
+            $assignments[$inverterIndex]['strings'][] = [
+                'string_index' => $stringIndex,
+                'tag' => sprintf('STR-%02d', $stringIndex),
+                'modules' => $modules,
+                'mppt_index' => $mpptIndex,
+                'mppt_label' => sprintf('MPPT-%02d', $mpptIndex),
+                'dc_kw' => round($dcKw, 3),
+                'voc_cold_v' => round($modules * $moduleVocCold, 3),
+                'vmp_hot_v' => round($modules * $moduleVmpHot, 3),
+            ];
+            $assignments[$inverterIndex]['assigned_module_count'] += $modules;
+            $assignments[$inverterIndex]['assigned_dc_kw'] += $dcKw;
+        }
+
+        foreach ($assignments as &$assignment) {
+            $assignment['used_mppt_count'] = count(array_unique(array_column($assignment['strings'], 'mppt_index')));
+            $assignment['assigned_dc_kw'] = round((float) $assignment['assigned_dc_kw'], 3);
+            $assignment['dc_ac_ratio'] = $inverterAcPowerKw > 0
+                ? round((float) $assignment['assigned_dc_kw'] / $inverterAcPowerKw, 3)
+                : 0.0;
+        }
+        unset($assignment);
+
+        return array_values($assignments);
+    }
+
+    /** @param array<int, int> $counts */
+    private function stringDistributionLabel(array $counts): string
+    {
+        return $counts === [] ? 'String allocation pending' : implode(' + ', $counts).' modules';
+    }
+
+    /**
+     * Distribute every module across the selected strings without inventing
+     * modules. The first strings receive one extra module when the total is
+     * not evenly divisible (for example 13 modules becomes [7, 6]).
+     *
+     * @return array<int, int>
+     */
+    private function distributeModules(int $moduleCount, int $stringCount): array
+    {
+        if ($moduleCount <= 0 || $stringCount <= 0) {
+            return [];
+        }
+
+        $base = intdiv($moduleCount, $stringCount);
+        $remainder = $moduleCount % $stringCount;
+
+        return array_map(
+            static fn (int $index): int => $base + ($index < $remainder ? 1 : 0),
+            range(0, $stringCount - 1)
+        );
     }
 
     /**

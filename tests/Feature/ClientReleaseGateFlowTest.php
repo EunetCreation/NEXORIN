@@ -174,9 +174,8 @@ class ClientReleaseGateFlowTest extends TestCase
         $admin = $this->createCompanyUser('company_admin');
 
         $this->actingAs($admin)
-            ->from(route('companies.projects.show', [$this->company, $this->project]))
             ->get(route('companies.projects.report.client-proposal.final-pdf', [$this->company, $this->project]))
-            ->assertRedirect(route('companies.projects.show', [$this->company, $this->project]))
+            ->assertRedirect(route('companies.projects.report.client-proposal.preview', [$this->company, $this->project]))
             ->assertSessionHas('error');
     }
 

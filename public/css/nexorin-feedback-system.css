@@ -1,0 +1,731 @@
+/* ==========================================================================
+   NEXORIN Controlled Feedback System 46A
+   Shared flash, validation, warning, and confirmation language.
+   Loaded after module styles so every workspace inherits the locked 42A
+   typography, material depth, and interaction hierarchy without changing
+   business rules or form behavior.
+   ========================================================================== */
+
+:root {
+    --nxf-display: var(--nxeng-display, "Fraunces", Georgia, serif);
+    --nxf-body: var(--nxeng-body, "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif);
+    --nxf-data: var(--nxeng-data, "JetBrains Mono", "SFMono-Regular", Consolas, monospace);
+    --nxf-navy: #062734;
+    --nxf-ink: #173247;
+    --nxf-muted: #708598;
+    --nxf-line: rgba(100, 139, 154, .22);
+    --nxf-teal: var(--nxeng-teal, #13aaa2);
+    --nxf-teal-deep: var(--nxeng-teal-deep, #0a7f7a);
+    --nxf-orange: var(--nxeng-orange, #f3a04f);
+    --nxf-danger: #b8493f;
+    --nxf-danger-deep: #8d332d;
+    --nxf-warning: #c57a19;
+    --nxf-warning-deep: #88500c;
+    --nxf-info: var(--nxeng-blue, #3978d8);
+    --nxf-ease: var(--nxeng-ease, cubic-bezier(.2, .8, .2, 1));
+}
+
+/* --------------------------------------------------------------------------
+   Premium feedback banner
+   -------------------------------------------------------------------------- */
+.nx-feedback {
+    --nxf-accent: var(--nxf-info);
+    --nxf-accent-deep: #245cae;
+    --nxf-soft: #eef5ff;
+    --nxf-soft-2: #f8fbff;
+    position: relative;
+    display: grid;
+    grid-template-columns: 46px minmax(0, 1fr) auto;
+    gap: 14px;
+    align-items: start;
+    overflow: hidden;
+    margin: 0 0 14px;
+    padding: 15px 16px;
+    border: 1px solid color-mix(in srgb, var(--nxf-accent) 28%, transparent);
+    border-radius: 18px;
+    background:
+        linear-gradient(135deg, color-mix(in srgb, var(--nxf-soft) 78%, #fff), var(--nxf-soft-2));
+    color: var(--nxf-ink);
+    box-shadow: 0 14px 36px rgba(18, 44, 58, .07);
+    isolation: isolate;
+    animation: nxf-enter .34s var(--nxf-ease) both;
+}
+
+.nx-feedback::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 4px;
+    background: linear-gradient(180deg, var(--nxf-accent), color-mix(in srgb, var(--nxf-accent) 45%, #fff));
+}
+
+.nx-feedback::after {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    width: 180px;
+    height: 180px;
+    right: -90px;
+    top: -112px;
+    border-radius: 50%;
+    border: 1px solid color-mix(in srgb, var(--nxf-accent) 18%, transparent);
+    box-shadow: 0 0 0 30px color-mix(in srgb, var(--nxf-accent) 4%, transparent);
+    pointer-events: none;
+}
+
+.nx-feedback--success {
+    --nxf-accent: var(--nxf-teal);
+    --nxf-accent-deep: var(--nxf-teal-deep);
+    --nxf-soft: #e9f8f5;
+    --nxf-soft-2: #f8fdfc;
+}
+
+.nx-feedback--warning {
+    --nxf-accent: var(--nxf-orange);
+    --nxf-accent-deep: var(--nxf-warning-deep);
+    --nxf-soft: #fff5e7;
+    --nxf-soft-2: #fffaf3;
+}
+
+.nx-feedback--danger {
+    --nxf-accent: var(--nxf-danger);
+    --nxf-accent-deep: var(--nxf-danger-deep);
+    --nxf-soft: #fff0ee;
+    --nxf-soft-2: #fff9f8;
+}
+
+.nx-feedback-icon {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: 1px solid color-mix(in srgb, var(--nxf-accent) 22%, transparent);
+    border-radius: 14px;
+    color: var(--nxf-accent-deep);
+    background: color-mix(in srgb, var(--nxf-accent) 10%, #fff);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.76);
+}
+
+.nx-feedback-icon svg {
+    width: 21px;
+    height: 21px;
+}
+
+.nx-feedback-body {
+    min-width: 0;
+    padding-top: 1px;
+}
+
+.nx-feedback-kicker {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--nxf-accent-deep);
+    font-family: var(--nxf-data);
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: .14em;
+    line-height: 1.25;
+    text-transform: uppercase;
+}
+
+.nx-feedback-title {
+    display: block;
+    margin: 0;
+    color: var(--nxf-navy);
+    font-family: var(--nxf-display);
+    font-size: clamp(18px, 1.45vw, 23px);
+    font-weight: 650;
+    letter-spacing: -.025em;
+    line-height: 1.08;
+}
+
+.nx-feedback-copy,
+.nx-feedback-body > p {
+    margin: 5px 0 0;
+    color: var(--nxf-muted);
+    font-family: var(--nxf-body);
+    font-size: 10px;
+    line-height: 1.58;
+}
+
+.nx-feedback-list {
+    display: grid;
+    gap: 6px;
+    margin: 8px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.nx-feedback-list li {
+    position: relative;
+    padding-left: 14px;
+    color: color-mix(in srgb, var(--nxf-ink) 78%, #fff);
+    font-family: var(--nxf-body);
+    font-size: 9.5px;
+    line-height: 1.52;
+}
+
+.nx-feedback-list li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: .58em;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--nxf-accent);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--nxf-accent) 9%, transparent);
+}
+
+.nx-feedback-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-top: 10px;
+}
+
+.nx-feedback-meta > span {
+    display: grid;
+    gap: 2px;
+    min-width: 132px;
+    padding: 7px 9px;
+    border: 1px solid color-mix(in srgb, var(--nxf-accent) 16%, transparent);
+    border-radius: 10px;
+    background: rgba(255,255,255,.62);
+}
+
+.nx-feedback-meta small,
+.nx-feedback-meta b {
+    font-family: var(--nxf-data);
+    font-variant-numeric: tabular-nums;
+}
+
+.nx-feedback-meta small {
+    color: var(--nxf-muted);
+    font-size: 7px;
+    font-weight: 800;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+}
+
+.nx-feedback-meta b {
+    color: var(--nxf-ink);
+    font-size: 8px;
+    line-height: 1.35;
+}
+
+.nx-feedback-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    align-self: center;
+}
+
+.nx-feedback-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 38px;
+    padding: 0 13px;
+    border: 0;
+    border-radius: 12px;
+    color: #fff;
+    background: linear-gradient(135deg, var(--nxf-accent-deep), var(--nxf-accent));
+    box-shadow: 0 10px 22px color-mix(in srgb, var(--nxf-accent) 20%, transparent);
+    font-family: var(--nxf-body);
+    font-size: 9px;
+    font-weight: 800;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: transform .18s var(--nxf-ease), box-shadow .18s ease;
+}
+
+.nx-feedback-action:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 14px 26px color-mix(in srgb, var(--nxf-accent) 26%, transparent);
+}
+
+.nx-feedback-action svg { width: 15px; height: 15px; }
+
+.nx-feedback-close {
+    display: grid;
+    place-items: center;
+    align-self: start;
+    width: 30px;
+    height: 30px;
+    margin: -2px -2px 0 0;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    color: var(--nxf-muted);
+    background: transparent;
+    cursor: pointer;
+    transition: background .18s ease, color .18s ease, border-color .18s ease;
+}
+
+.nx-feedback-close:hover {
+    border-color: color-mix(in srgb, var(--nxf-accent) 18%, transparent);
+    color: var(--nxf-accent-deep);
+    background: rgba(255,255,255,.7);
+}
+
+.nx-feedback-close svg { width: 15px; height: 15px; }
+.nx-feedback.is-leaving { animation: nxf-leave .2s ease forwards; }
+
+/* --------------------------------------------------------------------------
+   Compatibility pass for existing module validation banners.
+   The selectors are intentionally scoped to authenticated workspace content.
+   -------------------------------------------------------------------------- */
+.app-content .ui-alert,
+.app-content .nxbom-alert,
+.app-content .nxtc-alert,
+.app-content .rss-validation-alert,
+.app-content .solar-validation-alert,
+.app-content .nxrec-validation-summary,
+.app-content .quote-alert,
+.app-content .fin-alert {
+    font-family: var(--nxf-body) !important;
+    border-radius: 17px !important;
+    box-shadow: 0 13px 32px rgba(18, 44, 58, .065) !important;
+}
+
+.app-content .ui-alert {
+    align-items: center;
+    gap: 12px;
+    min-height: 58px;
+    margin-bottom: 14px;
+    padding: 12px 44px 12px 13px;
+    border-left-width: 4px;
+    font-size: 10px;
+    line-height: 1.55;
+}
+
+.app-content .ui-alert svg { width: 20px; height: 20px; }
+.app-content .ui-alert-success {
+    color: #126a54;
+    border-color: rgba(19,170,162,.28);
+    background: linear-gradient(135deg, #eaf8f5, #f8fdfc);
+}
+.app-content .ui-alert-warning {
+    color: #88500c;
+    border-color: rgba(243,160,79,.34);
+    background: linear-gradient(135deg, #fff3e2, #fffaf3);
+}
+.app-content .ui-alert-error {
+    color: #8d332d;
+    border-color: rgba(184,73,63,.30);
+    background: linear-gradient(135deg, #fff0ee, #fff9f8);
+}
+
+.app-content .nxtc-alert,
+.app-content .rss-validation-alert,
+.app-content .solar-validation-alert {
+    border-width: 1px 1px 1px 4px !important;
+}
+
+.app-content .nxtc-alert strong,
+.app-content .rss-validation-alert strong,
+.app-content .solar-validation-alert strong,
+.app-content .nxrec-validation-summary strong,
+.app-content .quote-alert strong,
+.app-content .fin-alert strong {
+    font-family: var(--nxf-display) !important;
+    font-size: 16px !important;
+    font-weight: 650 !important;
+    letter-spacing: -.02em;
+    line-height: 1.12;
+}
+
+.app-content .nxtc-alert p,
+.app-content .nxtc-alert li,
+.app-content .rss-validation-alert p,
+.app-content .solar-validation-alert p,
+.app-content .nxrec-validation-summary li,
+.app-content .quote-alert,
+.app-content .quote-alert li,
+.app-content .fin-alert,
+.app-content .fin-alert li {
+    font-family: var(--nxf-body) !important;
+    font-size: 9.5px !important;
+    line-height: 1.55 !important;
+}
+
+.app-content .rss-validation-alert,
+.app-content .solar-validation-alert {
+    gap: 12px !important;
+    padding: 13px 15px !important;
+    border-color: rgba(184,73,63,.28) !important;
+    color: var(--nxf-danger-deep) !important;
+    background: linear-gradient(135deg, #fff0ee, #fff9f8) !important;
+}
+
+.app-content .rss-validation-alert > span,
+.app-content .solar-validation-alert > span {
+    width: 40px !important;
+    height: 40px !important;
+    border: 1px solid rgba(184,73,63,.15);
+    border-radius: 13px !important;
+    color: var(--nxf-danger-deep);
+    background: rgba(184,73,63,.08) !important;
+}
+
+.app-content .quote-alert,
+.app-content .fin-alert {
+    padding: 14px 16px !important;
+    border: 1px solid rgba(243,160,79,.32) !important;
+    border-left-width: 4px !important;
+    border-radius: 17px !important;
+    color: var(--nxf-warning-deep) !important;
+    background: linear-gradient(135deg, #fff3e2, #fffaf3) !important;
+    box-shadow: 0 13px 32px rgba(18, 44, 58, .065) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Controlled confirmation dialog. Replaces generic browser confirms for all
+   in-app actions while preserving the same submit and navigation behavior.
+   -------------------------------------------------------------------------- */
+.nx-confirm-overlay[hidden] { display: none; }
+
+.nx-confirm-overlay {
+    position: fixed;
+    z-index: 5000;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 22px;
+    background: rgba(2, 20, 29, .66);
+    backdrop-filter: blur(12px) saturate(.92);
+    opacity: 0;
+    transition: opacity .2s ease;
+}
+
+.nx-confirm-overlay.is-visible { opacity: 1; }
+
+.nx-confirm-card {
+    --nxc-accent: var(--nxf-orange);
+    --nxc-accent-deep: var(--nxf-warning-deep);
+    width: min(500px, calc(100vw - 32px));
+    overflow: hidden;
+    border: 1px solid rgba(113, 198, 196, .22);
+    border-radius: 24px;
+    background:
+        linear-gradient(rgba(19,170,162,.055) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(19,170,162,.055) 1px, transparent 1px),
+        linear-gradient(180deg, #ffffff 0%, #f6fafb 100%);
+    background-size: 30px 30px, 30px 30px, auto;
+    box-shadow: 0 34px 90px rgba(0, 14, 22, .34);
+    transform: translateY(10px) scale(.985);
+    transition: transform .24s var(--nxf-ease);
+}
+
+.nx-confirm-overlay.is-visible .nx-confirm-card { transform: none; }
+.nx-confirm-card.is-danger { --nxc-accent: var(--nxf-danger); --nxc-accent-deep: var(--nxf-danger-deep); }
+.nx-confirm-card.is-decision { --nxc-accent: var(--nxf-teal); --nxc-accent-deep: var(--nxf-teal-deep); }
+
+.nx-confirm-head {
+    display: grid;
+    grid-template-columns: 48px minmax(0, 1fr);
+    gap: 13px;
+    padding: 20px 20px 14px;
+}
+
+.nx-confirm-icon {
+    display: grid;
+    place-items: center;
+    width: 46px;
+    height: 46px;
+    border: 1px solid color-mix(in srgb, var(--nxc-accent) 20%, transparent);
+    border-radius: 15px;
+    color: var(--nxc-accent-deep);
+    background: color-mix(in srgb, var(--nxc-accent) 10%, #fff);
+}
+
+.nx-confirm-icon svg { width: 22px; height: 22px; }
+
+.nx-confirm-kicker {
+    display: block;
+    margin-bottom: 5px;
+    color: var(--nxc-accent-deep);
+    font-family: var(--nxf-data);
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+}
+
+.nx-confirm-card h2 {
+    margin: 0;
+    color: var(--nxf-navy);
+    font-family: var(--nxf-display);
+    font-size: 25px;
+    font-weight: 650;
+    letter-spacing: -.035em;
+    line-height: 1.05;
+}
+
+.nx-confirm-card p {
+    margin: 7px 0 0;
+    color: var(--nxf-muted);
+    font-family: var(--nxf-body);
+    font-size: 10px;
+    line-height: 1.58;
+}
+
+.nx-confirm-context {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin: 0 20px;
+    padding: 11px;
+    border: 1px solid rgba(98, 137, 153, .18);
+    border-radius: 14px;
+    background: rgba(255,255,255,.66);
+}
+
+.nx-confirm-context span {
+    display: grid;
+    gap: 3px;
+    min-width: 0;
+}
+
+.nx-confirm-context small,
+.nx-confirm-context strong {
+    font-family: var(--nxf-data);
+    font-variant-numeric: tabular-nums;
+}
+
+.nx-confirm-context small {
+    color: var(--nxf-muted);
+    font-size: 7px;
+    font-weight: 800;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+}
+
+.nx-confirm-context strong {
+    overflow: hidden;
+    color: var(--nxf-ink);
+    font-size: 8px;
+    line-height: 1.4;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.nx-confirm-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 9px;
+    padding: 16px 20px 20px;
+}
+
+.nx-confirm-actions button {
+    min-height: 39px;
+    padding: 0 14px;
+    border-radius: 12px;
+    font-family: var(--nxf-body);
+    font-size: 9px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.nx-confirm-cancel {
+    border: 1px solid rgba(98,137,153,.24);
+    color: var(--nxf-muted);
+    background: #fff;
+}
+
+.nx-confirm-proceed {
+    border: 0;
+    color: #fff;
+    background: linear-gradient(135deg, var(--nxc-accent-deep), var(--nxc-accent));
+    box-shadow: 0 11px 24px color-mix(in srgb, var(--nxc-accent) 22%, transparent);
+}
+
+.nx-confirm-proceed:focus-visible,
+.nx-confirm-cancel:focus-visible,
+.nx-feedback-action:focus-visible,
+.nx-feedback-close:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--nxf-teal) 22%, transparent);
+    outline-offset: 2px;
+}
+
+body.nx-confirm-open { overflow: hidden; }
+
+html[data-theme="dark"] .nx-feedback {
+    --nxf-soft: rgba(13, 39, 49, .94);
+    --nxf-soft-2: rgba(8, 29, 38, .97);
+    color: #dce9ed;
+    box-shadow: 0 16px 42px rgba(0,0,0,.2);
+}
+html[data-theme="dark"] .nx-feedback-title,
+html[data-theme="dark"] .nx-feedback-meta b { color: #edf6f8; }
+html[data-theme="dark"] .nx-feedback-copy,
+html[data-theme="dark"] .nx-feedback-body > p,
+html[data-theme="dark"] .nx-feedback-list li { color: #a9bdc7; }
+html[data-theme="dark"] .nx-feedback-icon,
+html[data-theme="dark"] .nx-feedback-meta > span,
+html[data-theme="dark"] .nx-feedback-close:hover { background: rgba(255,255,255,.045); }
+html[data-theme="dark"] .nx-confirm-card {
+    border-color: rgba(113,198,196,.16);
+    background:
+        linear-gradient(rgba(19,170,162,.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(19,170,162,.045) 1px, transparent 1px),
+        linear-gradient(180deg, #142a34 0%, #0d2029 100%);
+    background-size: 30px 30px, 30px 30px, auto;
+}
+html[data-theme="dark"] .nx-confirm-card h2,
+html[data-theme="dark"] .nx-confirm-context strong { color: #e8f2f5; }
+html[data-theme="dark"] .nx-confirm-card p,
+html[data-theme="dark"] .nx-confirm-context small { color: #9ab0ba; }
+html[data-theme="dark"] .nx-confirm-context,
+html[data-theme="dark"] .nx-confirm-cancel { background: rgba(255,255,255,.035); }
+html[data-theme="dark"] .nx-confirm-cancel { color: #b6c6cd; border-color: rgba(255,255,255,.11); }
+
+@keyframes nxf-enter {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: none; }
+}
+
+@keyframes nxf-leave {
+    to { opacity: 0; transform: translateY(-5px); }
+}
+
+@media (max-width: 760px) {
+    .nx-feedback {
+        grid-template-columns: 42px minmax(0, 1fr);
+        padding: 13px;
+    }
+    .nx-feedback-icon { width: 40px; height: 40px; border-radius: 13px; }
+    .nx-feedback-actions,
+    .nx-feedback-close { grid-column: 2; justify-self: start; }
+    .nx-feedback-close { position: absolute; top: 9px; right: 9px; }
+    .nx-feedback-meta { display: grid; grid-template-columns: 1fr; }
+    .nx-feedback-meta > span { min-width: 0; }
+    .nx-confirm-context { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 520px) {
+    .nx-confirm-overlay { padding: 14px; }
+    .nx-confirm-head { grid-template-columns: 42px minmax(0, 1fr); padding: 17px 16px 12px; }
+    .nx-confirm-icon { width: 40px; height: 40px; border-radius: 13px; }
+    .nx-confirm-card h2 { font-size: 22px; }
+    .nx-confirm-context { margin-inline: 16px; }
+    .nx-confirm-actions { flex-direction: column-reverse; padding: 14px 16px 17px; }
+    .nx-confirm-actions button { width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .nx-feedback,
+    .nx-feedback.is-leaving,
+    .nx-confirm-overlay,
+    .nx-confirm-card,
+    .nx-feedback-action { animation: none !important; transition: none !important; }
+}
+
+/* ========================================================================== 
+   Global consistency 55A · legacy feedback compatibility bridge
+   Module-specific warning names retain their semantics while sharing the
+   controlled NEXORIN feedback material, spacing, typography, and dark mode.
+   ========================================================================== */
+:is(.ui-alert, .solar-validation-alert, .rss-validation-alert, .nxtc-alert, .nxmc-alert, .nxrec-stale-alert, .nxrec-blocker-panel, .nxrec-validation-summary) {
+    position: relative;
+    min-width: 0;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 13px;
+    align-items: start;
+    padding: 15px 17px;
+    border: 1px solid rgba(208, 145, 48, .28);
+    border-radius: 18px;
+    color: #6f4b16;
+    background: linear-gradient(135deg, rgba(255, 250, 239, .98), rgba(255, 246, 226, .95));
+    box-shadow: 0 14px 34px rgba(83, 56, 18, .06), inset 3px 0 0 #d9962f;
+    font-family: "Inter", system-ui, sans-serif;
+}
+
+:is(.solar-validation-alert, .rss-validation-alert, .nxtc-alert.is-danger, .nxrec-blocker-panel, .nxrec-validation-summary) {
+    border-color: rgba(206, 81, 75, .27);
+    color: #803d39;
+    background: linear-gradient(135deg, rgba(255, 247, 246, .98), rgba(255, 238, 236, .95));
+    box-shadow: 0 14px 34px rgba(94, 39, 36, .06), inset 3px 0 0 #ce514b;
+}
+
+:is(.nxtc-alert.is-success, .nxmc-alert.is-success) {
+    border-color: rgba(27, 150, 110, .25);
+    color: #1d6f56;
+    background: linear-gradient(135deg, rgba(244, 253, 249, .98), rgba(230, 249, 240, .95));
+    box-shadow: 0 14px 34px rgba(24, 89, 68, .06), inset 3px 0 0 #1b966e;
+}
+
+:is(.ui-alert, .solar-validation-alert, .rss-validation-alert, .nxtc-alert, .nxmc-alert, .nxrec-stale-alert, .nxrec-blocker-panel, .nxrec-validation-summary) :is(strong, h3, h4) {
+    margin: 0;
+    color: currentColor;
+    font-family: "Inter", system-ui, sans-serif;
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1.35;
+}
+
+:is(.ui-alert, .solar-validation-alert, .rss-validation-alert, .nxtc-alert, .nxmc-alert, .nxrec-stale-alert, .nxrec-blocker-panel, .nxrec-validation-summary) :is(p, ul) {
+    margin: 5px 0 0;
+    color: color-mix(in srgb, currentColor 76%, #607486 24%);
+    font-size: 10px;
+    line-height: 1.65;
+}
+
+:is(.nxtc-alert-icon, .nxmc-alert-icon, .solar-validation-alert > svg, .rss-validation-alert > svg) {
+    width: 34px;
+    height: 34px;
+    display: grid;
+    place-items: center;
+    border-radius: 11px;
+    color: currentColor;
+    background: rgba(255, 255, 255, .58);
+}
+
+:is(.nxtc-alert-icon, .nxmc-alert-icon, .solar-validation-alert > svg, .rss-validation-alert > svg) svg,
+:is(.nxtc-alert-icon, .nxmc-alert-icon) { width: 34px; height: 34px; }
+:is(.nxtc-alert-icon, .nxmc-alert-icon) > svg { width: 18px; height: 18px; }
+
+html[data-theme="dark"] :is(.ui-alert, .solar-validation-alert, .rss-validation-alert, .nxtc-alert, .nxmc-alert, .nxrec-stale-alert, .nxrec-blocker-panel, .nxrec-validation-summary) {
+    color: #e5c481;
+    border-color: rgba(223, 163, 69, .26);
+    background: linear-gradient(135deg, rgba(81, 56, 19, .34), rgba(45, 38, 24, .58));
+    box-shadow: 0 16px 38px rgba(0, 8, 13, .24), inset 3px 0 0 #d99a36;
+}
+
+html[data-theme="dark"] :is(.solar-validation-alert, .rss-validation-alert, .nxtc-alert.is-danger, .nxrec-blocker-panel, .nxrec-validation-summary) {
+    color: #f0a7a1;
+    border-color: rgba(224, 95, 87, .25);
+    background: linear-gradient(135deg, rgba(88, 34, 31, .36), rgba(49, 27, 27, .58));
+    box-shadow: 0 16px 38px rgba(0, 8, 13, .24), inset 3px 0 0 #d75d55;
+}
+
+html[data-theme="dark"] :is(.nxtc-alert.is-success, .nxmc-alert.is-success) {
+    color: #84dbc0;
+    border-color: rgba(63, 191, 149, .24);
+    background: linear-gradient(135deg, rgba(20, 82, 63, .34), rgba(22, 49, 41, .58));
+    box-shadow: 0 16px 38px rgba(0, 8, 13, .24), inset 3px 0 0 #31aa80;
+}
+
+@media (max-width: 640px) {
+    :is(.ui-alert, .solar-validation-alert, .rss-validation-alert, .nxtc-alert, .nxmc-alert, .nxrec-stale-alert, .nxrec-blocker-panel, .nxrec-validation-summary) {
+        grid-template-columns: 1fr;
+        padding: 14px;
+        border-radius: 16px;
+    }
+}
+
+/* Preserve complex recommendation layouts while normalizing their material. */
+.nxrec-blocker-panel { display: block; }
+.nxrec-blocker-panel > header { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 13px; align-items: start; }
+.nxrec-blocker-panel > ol { margin: 13px 0 0; }
+.nxrec-stale-alert { grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; }
+.nxrec-stale-alert > a { align-self: center; }
+.nxrec-validation-summary { display: block; }
+
+@media (max-width: 640px) {
+    .nxrec-stale-alert { grid-template-columns: 1fr; }
+}

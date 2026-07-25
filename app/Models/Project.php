@@ -150,6 +150,22 @@ class Project extends Model
         return $this->hasOne(TechnicalCalculation::class);
     }
 
+    /** Get the project's SLD revisions, newest first. */
+    public function sldRevisions(): HasMany
+    {
+        return $this->hasMany(ProjectSldRevision::class)
+            ->latest('revision')
+            ->latest('id');
+    }
+
+    /** Get the current, non-superseded SLD revision. */
+    public function currentSldRevision(): HasOne
+    {
+        return $this->hasOne(ProjectSldRevision::class)
+            ->where('status', '!=', 'superseded')
+            ->latestOfMany('revision');
+    }
+
     /** Get technical calculation overrides attached to this project. */
     public function overrides(): HasMany
     {

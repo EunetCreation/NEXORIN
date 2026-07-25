@@ -6,7 +6,7 @@ use App\Models\Material;
 
 class MaterialCatalogStandards
 {
-    public const PARSER_VERSION = '10I-B-text-v1';
+    public const PARSER_VERSION = '64C-exact-category-ux-v1';
 
     /**
      * Return required technical specification keys for a material category.
@@ -19,83 +19,7 @@ class MaterialCatalogStandards
      */
     public static function requiredSpecKeysFor(Material $material): array
     {
-        return match (self::categoryCode($material)) {
-            'PV_MODULE' => [
-                'module_power_wp',
-                'voc',
-                'vmp',
-                'isc',
-                'imp',
-                'temp_coeff_voc',
-                'length_mm',
-                'width_mm',
-                'weight_kg',
-                'max_system_voltage',
-                'product_warranty_years',
-                'performance_warranty_years',
-            ],
-            'POWER_CONVERSION' => [
-                'inverter_type',
-                'rated_ac_power_kw',
-                'max_dc_voltage',
-                'startup_voltage',
-                'mppt_count',
-                'mppt_voltage_min',
-                'mppt_voltage_max',
-                'max_input_current_per_mppt',
-                'phase_type',
-                'anti_islanding',
-                'ip_rating',
-                'warranty_years',
-            ],
-            'BATTERY_ESS' => [
-                'battery_chemistry',
-                'capacity_kwh',
-                'usable_capacity_kwh',
-                'dod_percent',
-                'cycle_life',
-                'max_charge_current_a',
-                'max_discharge_current_a',
-                'communication_protocol',
-                'operating_temperature',
-                'fire_safety_required',
-            ],
-            'DC_ELECTRICAL' => [
-                'device_or_cable_type',
-                'rated_voltage',
-                'rated_current',
-                'standard',
-                'ip_rating',
-            ],
-            'AC_ELECTRICAL' => [
-                'device_type',
-                'rated_voltage',
-                'rated_current',
-                'breaking_capacity_ka',
-                'poles',
-                'standard',
-            ],
-            'MOUNTING_STRUCTURE' => [
-                'mounting_type',
-                'material_grade',
-                'wind_speed_rating',
-                'corrosion_class',
-                'roof_penetration',
-            ],
-            'MONITORING' => [
-                'protocol',
-                'communication_port',
-                'measured_parameter',
-                'accuracy_class',
-            ],
-            'GROUNDING_SAFETY' => [
-                'device_or_material_type',
-                'rated_voltage',
-                'standard',
-                'safety_scope',
-            ],
-            default => [],
-        };
+        return ProfessionalSpecificationSchema::requiredKeysFor($material);
     }
 
     /**
@@ -105,13 +29,13 @@ class MaterialCatalogStandards
      */
     public static function requiredCertificateTypesFor(Material $material): array
     {
-        return match (self::categoryCode($material)) {
-            'PV_MODULE' => ['IEC 61215', 'IEC 61730'],
-            'POWER_CONVERSION' => ['IEC 62109'],
-            'BATTERY_ESS' => ['UN38.3', 'IEC 62619'],
-            'DC_ELECTRICAL', 'AC_ELECTRICAL' => ['IEC'],
-            default => [],
-        };
+        return array_values(ProfessionalCatalogProfile::for($material)['certificates'] ?? []);
+    }
+
+    /** @return array<int, string> */
+    public static function requiredDocumentTypesFor(Material $material): array
+    {
+        return array_values(ProfessionalCatalogProfile::for($material)['documents'] ?? []);
     }
 
     /**
@@ -137,6 +61,19 @@ class MaterialCatalogStandards
             'inverter_type' => 'Inverter Type',
             'rated_ac_power_kw' => 'Rated AC Power',
             'max_dc_voltage' => 'Maximum DC Voltage',
+            'max_dc_power_kwp' => 'Maximum DC Power',
+            'strings_per_mppt' => 'Strings per MPPT',
+            'rated_ac_current_a' => 'Rated AC Current',
+            'max_ac_apparent_power_kva' => 'Maximum AC Apparent Power',
+            'dc_input_count' => 'DC Input Count',
+            'bms_protocol' => 'BMS Protocol',
+            'max_pv_power_kwp' => 'Maximum PV Power',
+            'can_profile' => 'CAN Profile',
+            'rs485_protocol' => 'RS485 Protocol',
+            'dc_isolator_rating_a' => 'DC Isolator Rating',
+            'ct_ratio' => 'CT Ratio',
+            'ppe_category' => 'PPE Category',
+            'supplier_sku' => 'Supplier SKU',
             'startup_voltage' => 'Startup Voltage',
             'mppt_count' => 'MPPT Count',
             'mppt_voltage_min' => 'MPPT Voltage Minimum',
@@ -179,22 +116,45 @@ class MaterialCatalogStandards
 
     public static function labelFor(string $key): string
     {
-        return self::labels()[$key] ?? str($key)->replace('_', ' ')->title()->toString();
+        if (isset(self::labels()[$key])) {
+            return self::labels()[$key];
+        }
+
+        $displayKey = preg_replace(
+            '/_(kg_m2|kg_m|mm2|kwp|kva|kwh|wp|kw|ah|kv|ka|kn|hz|m2|m3|kg|kpa|pa|bar|mm|ms|ns|mbps|nm|db|ohm|percent|days|hours|months|years|minutes|seconds|s|m|v|a|w)$/',
+            '',
+            $key
+        ) ?: $key;
+
+        $label = str($displayKey)->replace('_', ' ')->title()->toString();
+        $acronyms = [
+            'Ac' => 'AC', 'Dc' => 'DC', 'Pv' => 'PV', 'Mppt' => 'MPPT', 'Bms' => 'BMS',
+            'Can' => 'CAN', 'Rs485' => 'RS485', 'Mqtt' => 'MQTT', 'Ip' => 'IP', 'Iec' => 'IEC',
+            'Ct' => 'CT', 'Ppe' => 'PPE', 'Hse' => 'HSE', 'Slo' => 'SLO', 'Sku' => 'SKU',
+            'Moq' => 'MOQ', 'Mlpe' => 'MLPE', 'Lvmdp' => 'LVMDP', 'Acdb' => 'ACDB',
+            'Dcdb' => 'DCDB', 'Ats' => 'ATS', 'Sts' => 'STS', 'Amf' => 'AMF',
+            'Lps' => 'LPS', 'Vpn' => 'VPN', 'Wifi' => 'Wi-Fi',
+        ];
+
+        return collect(explode(' ', $label))
+            ->map(fn (string $word): string => $acronyms[$word] ?? $word)
+            ->implode(' ');
     }
 
     public static function categoryCode(Material $material): string
     {
-        $category = strtoupper((string) $material->category?->code);
+        $code = ProfessionalCatalogProfile::rootCodeFor($material);
 
-        if ($category !== '') {
-            return $category;
+        if ($code !== '') {
+            return $code;
         }
 
         $type = strtoupper((string) $material->material_type);
 
         return match (true) {
             str_contains($type, 'PV') || str_contains($type, 'MODULE') => 'PV_MODULE',
-            str_contains($type, 'INVERTER') || str_contains($type, 'PCS') => 'POWER_CONVERSION',
+            str_contains($type, 'HYBRID') || str_contains($type, 'OFF-GRID') || str_contains($type, 'OFFGRID') => 'INVERTER_HYBRID_OFFGRID',
+            str_contains($type, 'INVERTER') || str_contains($type, 'PCS') => 'INVERTER_ON_GRID',
             str_contains($type, 'BATTERY') || str_contains($type, 'ESS') => 'BATTERY_ESS',
             str_contains($type, 'DC') || str_contains($type, 'CABLE') => 'DC_ELECTRICAL',
             str_contains($type, 'AC') || str_contains($type, 'PANEL') => 'AC_ELECTRICAL',
@@ -294,17 +254,51 @@ class MaterialCatalogStandards
     public static function unitFor(string $key): ?string
     {
         return match (true) {
+            str_ends_with($key, '_kg_m2') => 'kg/m²',
+            str_ends_with($key, '_kg_m') => 'kg/m',
+            str_ends_with($key, '_mm2') => 'mm²',
+            str_ends_with($key, '_kwp') => 'kWp',
+            str_ends_with($key, '_kva') => 'kVA',
+            str_ends_with($key, '_kwh') => 'kWh',
             str_ends_with($key, '_wp') => 'Wp',
             str_ends_with($key, '_kw') => 'kW',
-            str_ends_with($key, '_kwh') => 'kWh',
-            str_ends_with($key, '_percent') => '%',
-            str_ends_with($key, '_mm') => 'mm',
+            str_ends_with($key, '_ah') => 'Ah',
+            str_ends_with($key, '_kv') => 'kV',
+            str_ends_with($key, '_ka') => 'kA',
+            str_ends_with($key, '_kn') => 'kN',
+            str_ends_with($key, '_hz') => 'Hz',
+            str_ends_with($key, '_m2') => 'm²',
+            str_ends_with($key, '_m3') => 'm³',
             str_ends_with($key, '_kg') => 'kg',
+            str_ends_with($key, '_kpa') => 'kPa',
+            str_ends_with($key, '_pa') => 'Pa',
+            str_ends_with($key, '_bar') => 'bar',
+            str_ends_with($key, '_mm') => 'mm',
+            str_ends_with($key, '_ms') => 'ms',
+            str_ends_with($key, '_ns') => 'ns',
+            str_ends_with($key, '_mbps') => 'Mbps',
+            str_ends_with($key, '_nm') => 'nm',
+            str_ends_with($key, '_db') => 'dB',
+            str_ends_with($key, '_ohm') => 'Ω',
+            str_ends_with($key, '_percent') => '%',
+            str_ends_with($key, '_days') => 'days',
+            str_ends_with($key, '_hours') => 'hours',
+            str_ends_with($key, '_months') => 'months',
+            str_ends_with($key, '_years') => 'years',
+            str_ends_with($key, '_minutes') => 'minutes',
+            str_ends_with($key, '_seconds') => 'seconds',
+            str_ends_with($key, '_s') => 's',
+            str_ends_with($key, '_m') => 'm',
+            str_ends_with($key, '_v') => 'V',
+            str_ends_with($key, '_a') => 'A',
+            str_ends_with($key, '_w') => 'W',
             str_contains($key, 'voltage') || in_array($key, ['voc', 'vmp'], true) => 'V',
             str_contains($key, 'current') || in_array($key, ['isc', 'imp'], true) => 'A',
             str_contains($key, 'warranty') => 'years',
             $key === 'cycle_life' => 'cycles',
+            $key === 'c_rate' => 'C',
             default => null,
         };
     }
+
 }

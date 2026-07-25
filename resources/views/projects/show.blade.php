@@ -1,49 +1,17 @@
 @extends('layouts.app')
 
 @section('title', $project->name)
-@section('page-eyebrow', 'Company workspace')
+@section('page-eyebrow', 'Project command center')
 @section('page-heading', 'Project Cockpit')
 
 @push('styles')
-<style>
-    .cockpit-page{display:grid;gap:24px;min-width:0}
-    .cockpit-hero{position:relative;overflow:hidden;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:24px;align-items:end;padding:34px 36px;border-radius:30px;color:#fff;background:radial-gradient(circle at 88% 8%,rgba(52,214,203,.24),transparent 30%),linear-gradient(135deg,#031522 0%,#07334d 56%,#0d6a70 100%);box-shadow:var(--shadow-lg)}
-    .cockpit-hero:after{content:"";position:absolute;right:-80px;bottom:-120px;width:320px;height:320px;border-radius:50%;background:rgba(255,255,255,.08)}
-    .cockpit-hero-main,.cockpit-hero-side{position:relative;z-index:1}
-    .cockpit-kicker{display:inline-flex;gap:8px;align-items:center;color:#61efe6;font-size:.72rem;font-weight:850;letter-spacing:.13em;text-transform:uppercase}
-    .cockpit-title{max-width:900px;margin:10px 0 9px;font:700 clamp(2.2rem,4vw,4.2rem)/.98 "Space Grotesk",sans-serif;letter-spacing:-.055em}
-    .cockpit-subtitle{max-width:820px;margin:0;color:rgba(255,255,255,.72);font-size:.98rem;line-height:1.65}
-    .cockpit-hero-badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
-    .cockpit-hero-side{min-width:260px;display:grid;gap:12px;justify-items:end;text-align:right}
-    .cockpit-health{padding:15px 16px;border:1px solid rgba(255,255,255,.16);border-radius:18px;background:rgba(255,255,255,.10);backdrop-filter:blur(10px)}
-    .cockpit-health span{display:block;color:rgba(255,255,255,.64);font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em}
-    .cockpit-health strong{display:block;margin-top:5px;font:700 1.05rem/1.2 "Space Grotesk",sans-serif}
-    .cockpit-progress-shell{width:min(360px,100%);height:10px;overflow:hidden;border-radius:999px;background:rgba(255,255,255,.16)}
-    .cockpit-progress-bar{height:100%;border-radius:inherit;background:linear-gradient(90deg,#34d6cb,#b4fff7)}
-    .cockpit-progress-note{color:rgba(255,255,255,.72);font-size:.8rem}
-    .cockpit-actions{display:flex;flex-wrap:wrap;gap:9px;justify-content:flex-end}.cockpit-actions .ui-button-secondary{color:#fff;border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.09)}
-    .cockpit-layout{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(360px,.75fr);gap:24px;align-items:start;min-width:0}
-    .cockpit-main{display:grid;gap:24px;min-width:0}.cockpit-side{display:grid;gap:24px;min-width:0}
-    .cockpit-card{min-width:0;border:1px solid rgba(7,40,61,.08);border-radius:26px;background:rgba(255,255,255,.94);box-shadow:var(--shadow-sm)}
-    .cockpit-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:24px 24px 0}.cockpit-card-head h3{margin:0;color:var(--navy-900);font:700 1.18rem/1.2 "Space Grotesk",sans-serif;letter-spacing:-.035em}.cockpit-card-head p{margin:7px 0 0;color:var(--slate-500);font-size:.82rem;line-height:1.55}.cockpit-card-body{padding:22px 24px 24px}
-    .cockpit-chip{display:inline-flex;align-items:center;gap:7px;padding:7px 10px;border-radius:999px;font-size:.68rem;font-weight:850;letter-spacing:.045em;text-transform:uppercase;background:var(--slate-100);color:var(--slate-600)}
-    .cockpit-chip:before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}.cockpit-chip.ready{color:#087f77;background:var(--teal-100)}.cockpit-chip.progress{color:#315d82;background:#e8f3fb}.cockpit-chip.warning{color:#9a6a09;background:#fff4d1}.cockpit-chip.critical{color:#9b2d3d;background:#fff0f2}.cockpit-chip.info{color:#566c7d;background:var(--slate-100)}
-    .cockpit-workflow{display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:10px}.cockpit-step{position:relative;min-width:0;padding:14px 10px;border:1px solid var(--slate-100);border-radius:18px;background:var(--slate-50);transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}.cockpit-step:hover{transform:translateY(-2px);border-color:rgba(22,190,179,.26);box-shadow:0 14px 28px rgba(3,21,34,.07)}
-    .cockpit-step-index{width:30px;height:30px;display:grid;place-items:center;margin-bottom:10px;border-radius:12px;color:var(--slate-500);font-size:.75rem;font-weight:900;background:var(--slate-200)}.cockpit-step strong{display:block;overflow:hidden;color:var(--slate-800);font-size:.78rem;text-overflow:ellipsis;white-space:nowrap}.cockpit-step small{display:block;margin-top:4px;color:var(--slate-500);font-size:.66rem;line-height:1.35}.cockpit-step em{display:block;margin-top:9px;color:var(--slate-600);font-size:.68rem;font-style:normal;font-weight:750;line-height:1.3}
-    .cockpit-step.complete{background:rgba(223,248,245,.72);border-color:rgba(22,190,179,.18)}.cockpit-step.complete .cockpit-step-index{color:#fff;background:var(--teal-500)}.cockpit-step.locked{background:#e2f6ea;border-color:#b7edd0}.cockpit-step.locked .cockpit-step-index{color:#fff;background:#3a9a64}.cockpit-step.current{background:#e8f3fb;border-color:#bfe1f6}.cockpit-step.current .cockpit-step-index{color:#fff;background:#4a90c5}.cockpit-step.warning{background:#fff7df;border-color:#f6d98b}.cockpit-step.warning .cockpit-step-index{color:#4d3904;background:#f5c542}.cockpit-step.missing{opacity:.78}
-    .cockpit-summary-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.cockpit-summary-card{min-width:0;padding:18px;border:1px solid var(--slate-100);border-radius:20px;background:linear-gradient(180deg,#fff,var(--slate-50))}.cockpit-summary-card h4{margin:0 0 14px;color:var(--navy-900);font:700 1rem/1.2 "Space Grotesk",sans-serif}.cockpit-kv{display:grid;gap:9px}.cockpit-kv-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding-bottom:9px;border-bottom:1px solid var(--slate-100)}.cockpit-kv-row:last-child{padding-bottom:0;border-bottom:0}.cockpit-kv-row span{color:var(--slate-500);font-size:.72rem;font-weight:750}.cockpit-kv-row strong{color:var(--slate-800);font-size:.78rem;text-align:right;overflow-wrap:anywhere}.cockpit-kv-row.highlight strong{color:#087f77;font-size:.9rem}
-    .cockpit-warning-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:16px}.cockpit-warning-count{padding:14px;border-radius:17px;border:1px solid var(--slate-100);background:var(--slate-50)}.cockpit-warning-count span{display:block;color:var(--slate-500);font-size:.65rem;font-weight:850;text-transform:uppercase;letter-spacing:.06em}.cockpit-warning-count strong{display:block;margin-top:6px;color:var(--navy-900);font:700 1.35rem/1 "Space Grotesk",sans-serif}.cockpit-warning-count.critical{background:#fff0f2;border-color:#ffd2d9}.cockpit-warning-count.warning{background:#fff7df;border-color:#f4dc9b}.cockpit-warning-count.caution{background:#fff9ec;border-color:#f4e5b7}.cockpit-warning-count.info{background:#eef6fb;border-color:#d4eaf7}
-    .cockpit-warning-list{display:grid;gap:10px;max-height:420px;overflow:auto;padding-right:4px}.cockpit-warning-item{padding:14px;border:1px solid var(--slate-100);border-left-width:4px;border-radius:16px;background:#fff}.cockpit-warning-item.critical{border-left-color:#be3345}.cockpit-warning-item.warning{border-left-color:#f5a800}.cockpit-warning-item.caution{border-left-color:#f1c75b}.cockpit-warning-item.info{border-left-color:#4a90c5}.cockpit-warning-item header{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.cockpit-warning-item strong{color:var(--navy-900);font-size:.82rem}.cockpit-warning-item p{margin:7px 0 0;color:var(--slate-600);font-size:.75rem;line-height:1.55}.cockpit-warning-item small{display:block;margin-top:8px;color:var(--slate-400);font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em}
-    .cockpit-action-list{display:grid;gap:10px}.cockpit-action{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:center;padding:14px;border:1px solid var(--slate-100);border-radius:17px;text-decoration:none;background:var(--slate-50);transition:transform .18s ease,border-color .18s ease,background .18s ease}.cockpit-action:hover{transform:translateY(-1px);border-color:rgba(22,190,179,.28);background:#fff}.cockpit-action strong{display:block;color:var(--navy-900);font-size:.82rem}.cockpit-action span{display:block;margin-top:4px;color:var(--slate-500);font-size:.72rem;line-height:1.35}.cockpit-action b{color:var(--teal-600);font-size:.7rem;text-transform:uppercase;letter-spacing:.06em}
-    .cockpit-next{padding:16px;border:1px solid rgba(22,190,179,.22);border-radius:18px;background:var(--teal-100)}.cockpit-next span{display:block;color:#087f77;font-size:.66rem;font-weight:850;text-transform:uppercase;letter-spacing:.07em}.cockpit-next strong{display:block;margin-top:6px;color:var(--navy-900);font-size:.95rem}.cockpit-next p{margin:6px 0 0;color:var(--slate-700);font-size:.75rem;line-height:1.5}
-    .release-gate-panel{display:grid;gap:14px}.release-gate-status{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:16px;border-radius:18px;background:var(--slate-50);border:1px solid var(--slate-100)}.release-gate-status h4{margin:0;color:var(--navy-900);font:700 1rem/1.2 "Space Grotesk",sans-serif}.release-gate-status p{margin:6px 0 0;color:var(--slate-500);font-size:.74rem;line-height:1.5}.release-gate-issues{display:grid;gap:8px}.release-gate-issue{padding:12px;border-radius:14px;border:1px solid var(--slate-100);background:#fff}.release-gate-issue strong{display:block;color:var(--navy-900);font-size:.78rem}.release-gate-issue span{display:block;margin-top:4px;color:var(--slate-500);font-size:.7rem;line-height:1.45}.release-gate-issue.critical{border-color:#ffd2d9;background:#fff0f2}.release-gate-issue.warning{border-color:#f4dc9b;background:#fff7df}.release-gate-approval{display:grid;gap:10px}.release-gate-approval textarea{width:100%;min-height:80px;resize:vertical}.release-gate-approved{padding:12px;border-radius:14px;border:1px solid rgba(22,190,179,.22);background:var(--teal-100);color:var(--slate-700);font-size:.74rem;line-height:1.5}.release-gate-approved strong{color:var(--navy-900)}.release-gate-history{display:grid;gap:8px;padding-top:2px}.release-gate-history h5{margin:0;color:var(--navy-900);font:700 .78rem/1.2 "Space Grotesk",sans-serif}.release-gate-history-item{padding:10px 11px;border:1px solid var(--slate-100);border-radius:13px;background:var(--slate-50)}.release-gate-history-item strong{display:block;color:var(--slate-800);font-size:.72rem}.release-gate-history-item span{display:block;margin-top:3px;color:var(--slate-500);font-size:.66rem;line-height:1.4}.release-gate-history-item.active{border-color:rgba(22,190,179,.24);background:var(--teal-100)}.release-gate-history-item.revoked{background:#fff7df;border-color:#f4dc9b}.release-gate-meta{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.release-gate-meta div{padding:10px 11px;border:1px solid var(--slate-100);border-radius:13px;background:#fff}.release-gate-meta span{display:block;color:var(--slate-500);font-size:.65rem;text-transform:uppercase;letter-spacing:.06em}.release-gate-meta strong{display:block;margin-top:4px;color:var(--navy-900);font-size:.74rem}.release-gate-locked{padding:12px;border:1px dashed var(--slate-200);border-radius:14px;background:var(--slate-50);color:var(--slate-500);font-size:.72rem;line-height:1.45}.cockpit-action.disabled{pointer-events:none;opacity:.62;background:#fff}.cockpit-action.disabled b{color:var(--slate-400)}
-    .cockpit-profile-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;overflow:hidden;border:1px solid var(--slate-100);border-radius:18px;background:var(--slate-100)}.cockpit-profile-item{min-height:86px;padding:15px;background:#fff}.cockpit-profile-item.wide{grid-column:span 2}.cockpit-profile-item dt{color:var(--slate-500);font-size:.64rem;font-weight:850;text-transform:uppercase;letter-spacing:.07em}.cockpit-profile-item dd{margin:8px 0 0;color:var(--slate-800);font-size:.8rem;font-weight:650;line-height:1.55;overflow-wrap:anywhere}
+    <link href="{{ asset('css/nexorin-cockpit.css') }}?v=55a" rel="stylesheet">
+    <link href="{{ asset('css/nexorin-project-flow.css') }}?v=55a" rel="stylesheet">
+@endpush
 
-    .cockpit-insight-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:18px}.cockpit-insight{position:relative;overflow:hidden;min-height:130px;padding:16px;border:1px solid var(--slate-100);border-radius:20px;background:linear-gradient(180deg,#fff,var(--slate-50));transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}.cockpit-insight:hover{transform:translateY(-2px);border-color:rgba(22,190,179,.24);box-shadow:0 16px 30px rgba(3,21,34,.08)}.cockpit-insight:before{content:"";position:absolute;inset:0 auto 0 0;width:4px;background:var(--slate-300)}.cockpit-insight.ready:before{background:var(--teal-500)}.cockpit-insight.progress:before{background:#4a90c5}.cockpit-insight.info:before{background:#7aa3bd}.cockpit-insight.caution:before{background:#f1c75b}.cockpit-insight.warning:before{background:#f5a800}.cockpit-insight.critical:before{background:#be3345}.cockpit-insight.muted{opacity:.72}.cockpit-insight b{display:inline-flex;margin-bottom:12px;padding:6px 9px;border-radius:999px;background:var(--slate-100);color:var(--slate-700);font-size:.64rem;text-transform:uppercase;letter-spacing:.065em}.cockpit-insight h4{margin:0;color:var(--navy-900);font:700 .9rem/1.25 "Space Grotesk",sans-serif}.cockpit-insight p{margin:7px 0 0;color:var(--slate-600);font-size:.73rem;line-height:1.5}.cockpit-chart-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(320px,.75fr);gap:16px}.cockpit-chart-panel{min-width:0;padding:18px;border:1px solid var(--slate-100);border-radius:22px;background:#fff}.cockpit-chart-panel h4{margin:0;color:var(--navy-900);font:700 .96rem/1.2 "Space Grotesk",sans-serif}.cockpit-chart-panel p{margin:6px 0 0;color:var(--slate-500);font-size:.74rem;line-height:1.5}.cockpit-cashflow{display:grid;gap:10px;margin-top:16px}.cockpit-cashflow-row{display:grid;grid-template-columns:42px minmax(0,1fr) 122px;gap:12px;align-items:center}.cockpit-cashflow-row span{color:var(--slate-500);font-size:.68rem;font-weight:800}.cockpit-cashflow-bars{display:grid;gap:5px}.cockpit-bar-track{height:9px;overflow:hidden;border-radius:999px;background:var(--slate-100)}.cockpit-bar{height:100%;min-width:4px;border-radius:inherit;background:linear-gradient(90deg,var(--teal-500),#9df4ec)}.cockpit-bar.net{background:linear-gradient(90deg,#4a90c5,#9ed4fb)}.cockpit-bar.cumulative{background:linear-gradient(90deg,#2f9f69,#b8efcd)}.cockpit-cashflow-row strong{color:var(--slate-800);font-size:.68rem;text-align:right}.cockpit-gauge-list{display:grid;gap:14px;margin-top:16px}.cockpit-gauge-head{display:flex;justify-content:space-between;gap:12px;align-items:center}.cockpit-gauge-head strong{color:var(--navy-900);font-size:.78rem}.cockpit-gauge-head span{color:var(--teal-600);font-size:.78rem;font-weight:850}.cockpit-gauge-track{height:10px;overflow:hidden;border-radius:999px;background:var(--slate-100)}.cockpit-gauge-fill{height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--teal-500),#9df4ec)}.cockpit-gauge.ready .cockpit-gauge-fill{background:linear-gradient(90deg,var(--teal-500),#9df4ec)}.cockpit-gauge.caution .cockpit-gauge-fill,.cockpit-gauge.warning .cockpit-gauge-fill{background:linear-gradient(90deg,#f5a800,#ffe29a)}.cockpit-gauge.critical .cockpit-gauge-fill{background:linear-gradient(90deg,#be3345,#ff9fac)}.cockpit-gauge.muted .cockpit-gauge-fill{background:var(--slate-300)}.cockpit-gauge p{margin:6px 0 0;color:var(--slate-500);font-size:.68rem;line-height:1.45}.cockpit-energy-strip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:16px}.cockpit-energy-pill{padding:13px;border-radius:16px;background:var(--slate-50);border:1px solid var(--slate-100)}.cockpit-energy-pill span{display:block;color:var(--slate-500);font-size:.64rem;font-weight:850;text-transform:uppercase;letter-spacing:.06em}.cockpit-energy-pill strong{display:block;margin-top:7px;color:var(--navy-900);font-size:.82rem}.cockpit-animated{animation:cockpitFloat 520ms ease both}@keyframes cockpitFloat{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-    @media(max-width:1280px){.cockpit-layout{grid-template-columns:1fr}.cockpit-workflow{grid-template-columns:repeat(3,minmax(0,1fr))}.cockpit-summary-grid,.cockpit-insight-grid{grid-template-columns:1fr}.cockpit-chart-grid{grid-template-columns:1fr}}
-    @media(max-width:760px){.cockpit-hero{grid-template-columns:1fr;padding:26px}.cockpit-hero-side{justify-items:start;text-align:left}.cockpit-actions{justify-content:flex-start}.cockpit-workflow{grid-template-columns:repeat(2,minmax(0,1fr))}.cockpit-warning-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.cockpit-profile-grid{grid-template-columns:1fr}.cockpit-profile-item.wide{grid-column:auto}.cockpit-card-head{display:grid}.cockpit-cashflow-row{grid-template-columns:34px minmax(0,1fr)}.cockpit-cashflow-row strong{grid-column:2;text-align:left}.cockpit-energy-strip{grid-template-columns:1fr}}
-    @media(max-width:520px){.cockpit-workflow,.cockpit-warning-grid{grid-template-columns:1fr}.cockpit-card-head,.cockpit-card-body{padding-left:18px;padding-right:18px}}
-</style>
+@push('scripts')
+    <script src="{{ asset('js/nexorin-cockpit.js') }}?v=55a" defer></script>
+    <script src="{{ asset('js/nexorin-project-flow.js') }}?v=55a" defer></script>
 @endpush
 
 @section('content')
@@ -57,531 +25,648 @@
         $warningRecords = $cockpit['warning_records'];
         $charts = $cockpit['charts'];
         $insights = $cockpit['insights'];
+        $warningTotal = count($warningRecords);
+        $criticalCount = (int) ($warningCounts['critical'] ?? 0);
+        $warningCount = (int) ($warningCounts['warning'] ?? 0);
+        $cautionCount = (int) ($warningCounts['caution'] ?? 0);
+        $infoCount = (int) ($warningCounts['info'] ?? 0);
+        $reviewItemCount = $criticalCount + $warningCount + $cautionCount;
+        $reviewBreakdown = collect([
+            $criticalCount > 0 ? $criticalCount.' critical' : null,
+            $warningCount > 0 ? $warningCount.' warning'.($warningCount === 1 ? '' : 's') : null,
+            $cautionCount > 0 ? $cautionCount.' caution'.($cautionCount === 1 ? '' : 's') : null,
+        ])->filter()->implode(' · ');
+
+        $engineeringWarningSources = ['system_recommendation', 'technical_calculation', 'roof_site_survey', 'technical_override'];
+        $engineeringWarnings = collect($warningRecords)
+            ->filter(fn (array $warning): bool => in_array($warning['source'] ?? '', $engineeringWarningSources, true));
+        $engineeringCriticalCount = $engineeringWarnings->where('severity', 'critical')->count();
+        $engineeringWarningCount = $engineeringWarnings->where('severity', 'warning')->count();
+        $engineeringCautionCount = $engineeringWarnings->where('severity', 'caution')->count();
+        $engineeringReviewCount = $engineeringCriticalCount + $engineeringWarningCount + $engineeringCautionCount;
+        $engineeringReviewBreakdown = collect([
+            $engineeringCriticalCount > 0 ? $engineeringCriticalCount.' critical' : null,
+            $engineeringWarningCount > 0 ? $engineeringWarningCount.' warning'.($engineeringWarningCount === 1 ? '' : 's') : null,
+            $engineeringCautionCount > 0 ? $engineeringCautionCount.' caution'.($engineeringCautionCount === 1 ? '' : 's') : null,
+        ])->filter()->implode(' · ');
+
+        $releaseReady = (bool) ($releaseGate['ready'] ?? false);
+        $releaseIssueCount = (int) ($releaseGate['issue_count'] ?? 0);
+        $hasEngineering = (bool) $project->technicalCalculation?->calculated_at;
+        $hasCommercial = (bool) $project->billOfMaterial;
+        $hasFinancial = (bool) $project->financialAnalysis;
+        $hasQuotation = (bool) $project->quotation;
+        $hasAnyOutput = $hasEngineering || $hasCommercial || $hasFinancial || $hasQuotation;
+        $sldRevision = $project->sldRevisions->first(fn ($revision) => $revision->status !== 'superseded');
+
         $workflowStateLabels = [
             'complete' => 'Complete',
             'current' => 'In progress',
-            'missing' => 'Missing',
-            'warning' => 'Review',
-            'locked' => 'Locked',
+            'missing' => 'Not started',
+            'warning' => 'Review needed',
+            'locked' => 'Finalized',
         ];
+
+        $moduleRoutes = [
+            'project' => $canUpdateProject && ! $project->isArchived()
+                ? route('companies.projects.edit', [$company, $project])
+                : route('companies.projects.show', [$company, $project]),
+            'load' => $canViewLoadAnalysis ? route('companies.load-analyses.show', [$company, $project]) : null,
+            'solar' => $canViewLocationSolar ? route('companies.location-solar.show', [$company, $project]) : null,
+            'roof' => $canViewRoofSite ? route('companies.roof-site.show', [$company, $project]) : null,
+            'recommendation' => $canViewRecommendation ? route('companies.recommendations.show', [$company, $project]) : null,
+            'technical' => $canViewTechnicalCalculation ? route('companies.technical-calculations.show', [$company, $project]) : null,
+            'sld' => $canViewTechnicalCalculation ? route('companies.projects.sld.show', [$company, $project]) : null,
+            'bom' => $canViewBom ? route('companies.boms.show', [$company, $project]) : null,
+            'financial' => $canViewFinancialAnalysis ? route('companies.financial-analyses.show', [$company, $project]) : null,
+            'quotation' => $canViewQuotation ? route('companies.quotations.show', [$company, $project]) : null,
+        ];
+
+        $warningActionMap = [
+            'system_recommendation' => ['url' => $moduleRoutes['recommendation'], 'label' => 'Open recommendation'],
+            'technical_calculation' => ['url' => $moduleRoutes['technical'], 'label' => 'Open technical calculation'],
+            'roof_site_survey' => ['url' => $moduleRoutes['roof'], 'label' => 'Open roof survey'],
+            'technical_override' => ['url' => $moduleRoutes['technical'], 'label' => 'Review overrides'],
+            'bom_boq' => ['url' => $moduleRoutes['bom'], 'label' => 'Open BOM/BOQ'],
+            'financial_analysis' => ['url' => $moduleRoutes['financial'], 'label' => 'Open financial analysis'],
+            'quotation' => ['url' => $moduleRoutes['quotation'], 'label' => 'Open quotation'],
+        ];
+
+        $nextStepUrl = $nextStep ? ($moduleRoutes[$nextStep['key']] ?? null) : null;
+        $nextActionTitle = $nextStep['label'] ?? ($reviewItemCount > 0 ? 'Review project warnings' : ($releaseReady ? 'Client release is ready' : 'Review client release gate'));
+        $nextActionCopy = $nextStep
+            ? $nextStep['caption'].' · '.$nextStep['status']
+            : ($reviewItemCount > 0
+                ? ($reviewBreakdown ?: $reviewItemCount.' review items').' remain before this project can move cleanly toward release.'
+                : ($releaseReady
+                    ? 'All release checks are clear and the final proposal is available.'
+                    : 'Module completion is separate from client release approval. Review the remaining gate checks.'));
+        $nextActionTab = $nextStep ? 'workflow' : ($reviewItemCount > 0 ? 'warnings' : 'release');
+
+        $engineeringState = ! $hasEngineering
+            ? 'pending'
+            : ($engineeringCriticalCount > 0
+                ? 'critical'
+                : ($engineeringReviewCount > 0 ? 'warning' : 'ready'));
+        $engineeringLabel = ! $hasEngineering
+            ? 'Not calculated'
+            : ($engineeringReviewCount > 0
+                ? $engineeringReviewCount.' review item'.($engineeringReviewCount === 1 ? '' : 's')
+                : 'Review clear');
+        $engineeringCaption = ! $hasEngineering
+            ? 'Technical results unavailable'
+            : ($engineeringReviewCount > 0
+                ? $engineeringReviewBreakdown
+                : 'No active engineering review signal');
+        $technicalStatusLabel = str_contains(strtolower((string) $engineering['status']), 'verified')
+            ? 'Technical calculation verified'
+            : $engineering['status'];
+        $technicalStatusTone = str_contains(strtolower((string) $engineering['status']), 'verified')
+            ? 'ready'
+            : (str_contains(strtolower((string) $engineering['status']), 'preliminary') ? 'info' : 'progress');
+        $releaseLabel = $releaseReady
+            ? 'Ready'
+            : ($releaseIssueCount > 0
+                ? $releaseIssueCount.' release blocker'.($releaseIssueCount === 1 ? '' : 's')
+                : 'Approval pending');
+        $projectLocation = collect([$project->city, $project->province])->filter()->implode(', ') ?: 'Location not specified';
     @endphp
 
-    <div class="cockpit-page">
-        <section class="cockpit-hero">
-            <div class="cockpit-hero-main">
-                <div class="cockpit-kicker">{{ $project->project_number }} · {{ $project->customer->name }}</div>
-                <h2 class="cockpit-title">{{ $project->name }}</h2>
-                <p class="cockpit-subtitle">
-                    Project cockpit for engineering, commercial, financial, warning, override, and report readiness in one professional workflow view.
-                </p>
-                <div class="cockpit-hero-badges">
-                    <span class="ui-status ui-status-project-{{ $project->status }}">{{ $project->status_label }}</span>
-                    <span class="cockpit-chip {{ $health['state'] }}">{{ $health['label'] }}</span>
+    <div class="nx-cockpit" data-cockpit-root data-project-number="{{ $project->project_number }}" data-project-name="{{ $project->name }}">
+        <section class="nx-cockpit-hero" data-cockpit-glow>
+            <div class="nx-cockpit-hero-ambient" aria-hidden="true"></div>
+
+            <div class="nx-cockpit-hero-copy">
+                <a class="nx-cockpit-back" href="{{ route('companies.projects.index', $company) }}">
+                    @include('projects.partials.cockpit-icon', ['name' => 'back', 'size' => 16])
+                    Project portfolio
+                </a>
+
+                <span class="nx-cockpit-eyebrow">{{ $project->project_number }} · {{ $project->customer->name }}</span>
+                <h2>{{ $project->name }}</h2>
+                <p>{{ $projectLocation }} · {{ $project->building_type_label }} · {{ $project->proposed_system_label }}</p>
+
+                <div class="nx-cockpit-hero-badges">
+                    <span class="nx-hero-badge">Updated {{ $project->updated_at?->diffForHumans() ?? 'recently' }}</span>
+                    @if ($hasQuotation)
+                        <span class="nx-hero-badge is-info">Quotation {{ $commercial['quotation_status'] }}</span>
+                    @endif
                     @if ($engineering['has_overrides'])
-                        <span class="cockpit-chip info">{{ $engineering['override_count'] }} active override{{ $engineering['override_count'] === 1 ? '' : 's' }}</span>
+                        <span class="nx-hero-badge is-info">{{ $engineering['override_count'] }} active override{{ $engineering['override_count'] === 1 ? '' : 's' }}</span>
                     @endif
                     @if ($project->isArchived())
-                        <span class="cockpit-chip critical">Archived</span>
+                        <span class="nx-hero-badge is-critical">Archived</span>
                     @endif
                 </div>
-            </div>
 
-            <div class="cockpit-hero-side">
-                <div class="cockpit-health">
-                    <span>Workflow readiness</span>
-                    <strong>{{ $cockpit['completion_percent'] }}%</strong>
-                    <div class="cockpit-progress-shell" aria-label="Workflow readiness">
-                        <div class="cockpit-progress-bar" style="width: {{ $cockpit['completion_percent'] }}%"></div>
-                    </div>
-                    <div class="cockpit-progress-note">
-                        {{ $cockpit['completed_steps'] }} of {{ $cockpit['total_steps'] }} modules complete
-                    </div>
-                </div>
-
-                <div class="cockpit-actions">
-                    <a href="{{ route('companies.projects.index', $company) }}" class="ui-button ui-button-secondary">Project Directory</a>
+                <div class="nx-cockpit-hero-actions">
                     @if ($canUpdateProject && ! $project->isArchived())
-                        <a href="{{ route('companies.projects.edit', [$company, $project]) }}" class="ui-button ui-button-primary">Edit Project</a>
+                        <a class="nx-cockpit-button is-primary" href="{{ route('companies.projects.edit', [$company, $project]) }}">
+                            @include('projects.partials.cockpit-icon', ['name' => 'edit', 'size' => 17])
+                            Edit project
+                        </a>
                     @endif
+                    <button class="nx-cockpit-button is-ghost" type="button" data-cockpit-open-tab="workflow">
+                        View workflow
+                        @include('projects.partials.cockpit-icon', ['name' => 'arrow', 'size' => 16])
+                    </button>
                 </div>
+            </div>
+
+            <div class="nx-cockpit-status-matrix" aria-label="Project status dimensions">
+                <article class="nx-status-dimension is-lifecycle">
+                    <span>Project lifecycle</span>
+                    <strong>{{ $project->status_label }}</strong>
+                    <small>Manual business status</small>
+                </article>
+                <article class="nx-status-dimension is-modules">
+                    <span>Module completion</span>
+                    <strong>{{ $cockpit['completed_steps'] }} / {{ $cockpit['total_steps'] }}</strong>
+                    <small>{{ $cockpit['completion_percent'] }}% complete</small>
+                    <i><b data-cockpit-progress="{{ $cockpit['completion_percent'] }}"></b></i>
+                </article>
+                <article class="nx-status-dimension is-engineering is-{{ $engineeringState }}">
+                    <span>Engineering review</span>
+                    <strong>{{ $engineeringLabel }}</strong>
+                    <small>{{ $engineeringCaption }}</small>
+                </article>
+                <article class="nx-status-dimension is-release {{ $releaseReady ? 'is-ready' : 'is-blocked' }}">
+                    <span>Client release</span>
+                    <strong>{{ $releaseLabel }}</strong>
+                    <small>{{ $releaseGate['status'] ?? 'Review required' }}</small>
+                </article>
             </div>
         </section>
 
-        <section class="cockpit-card">
-            <div class="cockpit-card-head">
-                <div>
-                    <h3>Workflow command track</h3>
-                    <p>Follow the project from customer data to quotation and report readiness.</p>
-                </div>
-                <span class="cockpit-chip {{ $health['state'] }}">{{ $health['description'] }}</span>
+        <section class="nx-next-command" data-cockpit-glow>
+            <div class="nx-next-command-icon">
+                @include('projects.partials.cockpit-icon', ['name' => $nextStep['key'] ?? ($engineeringReviewCount > 0 ? 'warning' : 'release'), 'size' => 24])
             </div>
-            <div class="cockpit-card-body">
-                <div class="cockpit-workflow" aria-label="Project workflow modules">
-                    @foreach ($cockpit['steps'] as $index => $step)
-                        <article class="cockpit-step {{ $step['state'] }}">
-                            <span class="cockpit-step-index">{{ $index + 1 }}</span>
-                            <strong>{{ $step['label'] }}</strong>
-                            <small>{{ $step['caption'] }}</small>
-                            <em>{{ $workflowStateLabels[$step['state']] ?? ucfirst($step['state']) }} · {{ $step['metric'] }}</em>
-                        </article>
-                    @endforeach
-                </div>
+            <div class="nx-next-command-copy">
+                <span>Recommended next action</span>
+                <strong>{{ $nextActionTitle }}</strong>
+                <p>{{ $nextActionCopy }}</p>
+            </div>
+            <div class="nx-next-command-meta">
+                @if ($nextStep)
+                    <span class="nx-state-pill is-{{ $nextStep['state'] === 'warning' ? 'warning' : 'progress' }}">{{ $workflowStateLabels[$nextStep['state']] ?? ucfirst($nextStep['state']) }}</span>
+                @elseif ($reviewItemCount > 0)
+                    <span class="nx-state-pill is-warning">{{ $reviewItemCount }} review item{{ $reviewItemCount === 1 ? '' : 's' }}</span>
+                @elseif ($releaseReady)
+                    <span class="nx-state-pill is-ready">Release ready</span>
+                @else
+                    <span class="nx-state-pill is-warning">Gate review</span>
+                @endif
+            </div>
+            <div class="nx-next-command-actions">
+                @if ($nextStepUrl)
+                    <a class="nx-cockpit-button is-primary" href="{{ $nextStepUrl }}"
+                        data-project-module="{{ $nextStep['key'] }}"
+                        data-project-module-state="{{ $workflowStateLabels[$nextStep['state']] ?? ucfirst($nextStep['state']) }}"
+                        data-project-module-metric="{{ $nextStep['metric'] }}">
+                        Continue to {{ $nextStep['label'] }}
+                        @include('projects.partials.cockpit-icon', ['name' => 'arrow', 'size' => 16])
+                    </a>
+                @else
+                    <button class="nx-cockpit-button is-primary" type="button" data-cockpit-open-tab="{{ $nextActionTab }}">
+                        Open {{ ucfirst($nextActionTab) }}
+                        @include('projects.partials.cockpit-icon', ['name' => 'arrow', 'size' => 16])
+                    </button>
+                @endif
             </div>
         </section>
 
-        <div class="cockpit-layout">
-            <main class="cockpit-main">
-                <section class="cockpit-summary-grid" aria-label="Project cockpit summaries">
-                    <article class="cockpit-summary-card">
-                        <h4>Engineering summary</h4>
-                        <div class="cockpit-kv">
-                            <div class="cockpit-kv-row highlight"><span>Installed PV</span><strong>{{ $engineering['installed_pv_kw'] }}</strong></div>
-                            <div class="cockpit-kv-row"><span>Required PV</span><strong>{{ $engineering['required_pv_kw'] }}</strong></div>
-                            <div class="cockpit-kv-row"><span>System Type</span><strong>{{ $engineering['system_type'] }}</strong></div>
-                            <div class="cockpit-kv-row"><span>Modules</span><strong>{{ $engineering['module_count'] }}</strong></div>
-                            <div class="cockpit-kv-row"><span>Inverter</span><strong>{{ $engineering['inverter_count'] }}</strong></div>
-                            <div class="cockpit-kv-row"><span>DC/AC Ratio</span><strong>{{ $engineering['dc_ac_ratio'] }}</strong></div>
-                            <div class="cockpit-kv-row"><span>Annual Energy</span><strong>{{ $engineering['annual_energy_kwh'] }}</strong></div>
-                            <div class="cockpit-kv-row"><span>Status</span><strong>{{ $engineering['status'] }}</strong></div>
-                        </div>
-                    </article>
+        <nav class="nx-cockpit-tabs" role="tablist" aria-label="Project cockpit sections">
+            <button type="button" role="tab" aria-selected="true" data-cockpit-tab="overview">
+                <span>Overview</span>
+            </button>
+            <button type="button" role="tab" aria-selected="false" data-cockpit-tab="workflow">
+                <span>Workflow</span><b>{{ $cockpit['completed_steps'] }}/{{ $cockpit['total_steps'] }}</b>
+            </button>
+            <button type="button" role="tab" aria-selected="false" data-cockpit-tab="engineering">
+                <span>Engineering</span>
+            </button>
+            <button type="button" role="tab" aria-selected="false" data-cockpit-tab="commercial">
+                <span>Commercial</span>
+            </button>
+            <button type="button" role="tab" aria-selected="false" data-cockpit-tab="warnings">
+                <span>Warnings</span><b>{{ $reviewItemCount }}</b>
+            </button>
+            <button type="button" role="tab" aria-selected="false" data-cockpit-tab="release">
+                <span>Release</span><b class="{{ $releaseReady ? 'is-ready' : 'is-warning' }}">{{ $releaseReady ? 'Ready' : ($releaseIssueCount > 0 ? $releaseIssueCount : 'Approval') }}</b>
+            </button>
+            <button type="button" role="tab" aria-selected="false" data-cockpit-tab="reports">
+                <span>Reports & Audit</span>
+            </button>
+        </nav>
 
-                    <article class="cockpit-summary-card">
-                        <h4>Commercial summary</h4>
-                        <div class="cockpit-kv">
-                            <div class="cockpit-kv-row highlight"><span>Grand Price</span><strong>{{ $commercial['grand_price'] }}</strong></div>
-                            <div class="cockpit-kv-row"><span>BOM Status</span><strong>{{ $commercial['bom_status'] }}</strong></div>
-                            <div class="cockpit-kv-row"><span>Pricing Status</span><strong>{{ $commercial['pricing_status'] }}</strong></div>
-                            <div class="cockpit-kv-row"><span>Material</span><strong>{{ $commercial['material_price'] }}</strong></div>
-                            <div class="cockpit-kv-row"><span>Labor</span><strong>{{ $commercial['labor_cost'] }}</strong></div>
-                            <div class="cockpit-kv-row"><span>Tax</span><strong>{{ $commercial['tax'] }}</strong></div>
-                            <div class="cockpit-kv-row"><span>Discount</span><strong>{{ $commercial['discount'] }}</strong></div>
-                            <div class="cockpit-kv-row"><span>Quotation</span><strong>{{ $commercial['quotation_status'] }}</strong></div>
-                        </div>
-                    </article>
+        <div class="nx-cockpit-panels">
+            <section class="nx-cockpit-panel is-active" role="tabpanel" data-cockpit-panel="overview">
+                <div class="nx-overview-grid">
+                    <section class="nx-cockpit-section-card nx-decision-snapshot" data-cockpit-glow>
+                        <header class="nx-section-heading">
+                            <div>
+                                <span class="nx-section-kicker">Decision snapshot</span>
+                                <h3>Project outputs at a glance</h3>
+                                <p>Core engineering, commercial, and financial values appear as their source modules become available.</p>
+                            </div>
+                        </header>
 
-                    <article class="cockpit-summary-card">
-                        <h4>Financial summary</h4>
-                        <div class="cockpit-kv">
-                            <div class="cockpit-kv-row highlight"><span>Payback</span><strong>{{ $financial['payback'] }}</strong></div>
-                            <div class="cockpit-kv-row"><span>Status</span><strong>{{ $financial['status'] }}</strong></div>
-                            <div class="cockpit-kv-row"><span>CAPEX</span><strong>{{ $financial['capex'] }}</strong></div>
-                            <div class="cockpit-kv-row {{ $financial['capex_attention'] ? 'highlight' : '' }}"><span>CAPEX Source</span><strong>{{ $financial['capex_source'] }}</strong></div>
-                            <div class="cockpit-kv-row"><span>First Year Saving</span><strong>{{ $financial['first_year_saving'] }}</strong></div>
-                            <div class="cockpit-kv-row"><span>Lifetime ROI</span><strong>{{ $financial['roi'] }}</strong></div>
-                            <div class="cockpit-kv-row"><span>NPV</span><strong>{{ $financial['npv'] }}</strong></div>
-                            <div class="cockpit-kv-row"><span>IRR</span><strong>{{ $financial['irr'] }}</strong></div>
-                            <div class="cockpit-kv-row"><span>LCOE</span><strong>{{ $financial['lcoe'] }}</strong></div>
-                        </div>
-                    </article>
-                </section>
+                        @if ($hasAnyOutput)
+                            <div class="nx-kpi-grid">
+                                <article class="nx-kpi-card is-engineering">
+                                    <span>Installed PV</span>
+                                    <strong>{{ $engineering['installed_pv_kw'] }}</strong>
+                                    <small>{{ $engineering['system_type'] }} system</small>
+                                </article>
+                                <article class="nx-kpi-card is-energy">
+                                    <span>Annual energy</span>
+                                    <strong>{{ $engineering['annual_energy_kwh'] }}</strong>
+                                    <small>{{ $charts['energy']['specific_yield'] }} specific yield</small>
+                                </article>
+                                <article class="nx-kpi-card is-commercial">
+                                    <span>Project value</span>
+                                    <strong>{{ $commercial['grand_price'] }}</strong>
+                                    <small>{{ $commercial['pricing_status'] }}</small>
+                                </article>
+                                <article class="nx-kpi-card is-financial">
+                                    <span>Simple payback</span>
+                                    <strong>{{ $financial['payback'] }}</strong>
+                                    <small>{{ $financial['status'] }}</small>
+                                </article>
+                                <article class="nx-kpi-card is-financial">
+                                    <span>IRR</span>
+                                    <strong>{{ $financial['irr'] }}</strong>
+                                    <small>NPV {{ $financial['npv'] }}</small>
+                                </article>
+                                <article class="nx-kpi-card is-quotation">
+                                    <span>Quotation</span>
+                                    <strong>{{ $commercial['quotation_status'] }}</strong>
+                                    <small>{{ $commercial['quote_number'] }}</small>
+                                </article>
+                            </div>
+                        @else
+                            <div class="nx-cockpit-empty">
+                                <span class="nx-cockpit-empty-icon">@include('projects.partials.cockpit-icon', ['name' => 'technical', 'size' => 25])</span>
+                                <div>
+                                    <strong>Decision outputs will appear as the workflow progresses</strong>
+                                    <p>Complete load, solar, roof, recommendation, technical, pricing, and financial modules to activate this command snapshot.</p>
+                                    @if ($nextStepUrl)
+                                        <a href="{{ $nextStepUrl }}"
+                                            data-project-module="{{ $nextStep['key'] }}"
+                                            data-project-module-state="{{ $workflowStateLabels[$nextStep['state']] ?? ucfirst($nextStep['state']) }}"
+                                            data-project-module-metric="{{ $nextStep['metric'] }}">Continue to {{ $nextStep['label'] }} @include('projects.partials.cockpit-icon', ['name' => 'arrow', 'size' => 15])</a>
+                                    @endif
+                                </div>
+                            </div>
+                        @endif
+                    </section>
 
-                <section class="cockpit-card cockpit-animated">
-                    <div class="cockpit-card-head">
-                        <div>
-                            <h3>Performance insight board</h3>
-                            <p>Financial cashflow, technical gauges, energy yield, and decision signals are summarized here.</p>
-                        </div>
-                        <span class="cockpit-chip {{ $health['state'] }}">{{ count($insights) }} insight{{ count($insights) === 1 ? '' : 's' }}</span>
-                    </div>
-                    <div class="cockpit-card-body">
-                        <div class="cockpit-insight-grid">
-                            @foreach ($insights as $insight)
-                                <article class="cockpit-insight {{ $insight['state'] }}">
-                                    <b>{{ $insight['metric'] }}</b>
-                                    <h4>{{ $insight['title'] }}</h4>
+                    <section class="nx-cockpit-section-card nx-attention-board" data-cockpit-glow>
+                        <header class="nx-section-heading is-compact">
+                            <div>
+                                <span class="nx-section-kicker">Attention board</span>
+                                <h3>Signals that need a decision</h3>
+                            </div>
+                            <button type="button" class="nx-text-button" data-cockpit-open-tab="warnings">Open warnings</button>
+                        </header>
+
+                        <div class="nx-insight-list">
+                            @foreach (array_slice($insights, 0, 3) as $insight)
+                                <article class="nx-insight-card is-{{ $insight['state'] }}">
+                                    <span>{{ $insight['metric'] }}</span>
+                                    <strong>{{ $insight['title'] }}</strong>
                                     <p>{{ $insight['message'] }}</p>
                                 </article>
                             @endforeach
                         </div>
+                    </section>
+                </div>
 
-                        <div class="cockpit-chart-grid">
-                            <article class="cockpit-chart-panel">
-                                <h4>Financial cashflow preview</h4>
-                                <p>First available years from the financial analysis. Values remain preliminary until engineering and pricing are verified.</p>
-
-                                @if ($charts['cashflow_available'])
-                                    <div class="cockpit-cashflow">
-                                        @foreach ($charts['cashflow'] as $row)
-                                            <div class="cockpit-cashflow-row">
-                                                <span>Y{{ $row['year'] }}</span>
-                                                <div class="cockpit-cashflow-bars">
-                                                    <div class="cockpit-bar-track" title="Saving {{ $row['saving_label'] }}">
-                                                        <div class="cockpit-bar" style="width: {{ $row['saving_percent'] }}%"></div>
-                                                    </div>
-                                                    <div class="cockpit-bar-track" title="Net cashflow {{ $row['net_label'] }}">
-                                                        <div class="cockpit-bar net" style="width: {{ $row['net_percent'] }}%"></div>
-                                                    </div>
-                                                    <div class="cockpit-bar-track" title="Cumulative {{ $row['cumulative_label'] }}">
-                                                        <div class="cockpit-bar cumulative" style="width: {{ $row['cumulative_percent'] }}%"></div>
-                                                    </div>
-                                                </div>
-                                                <strong>{{ $row['net_label'] }}</strong>
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                @else
-                                    <div class="ui-empty" style="margin-top:16px">
-                                        <div>
-                                            <h3>No cashflow yet</h3>
-                                            <p>Run financial analysis to activate the cashflow preview.</p>
-                                        </div>
-                                    </div>
-                                @endif
-                            </article>
-
-                            <article class="cockpit-chart-panel">
-                                <h4>Technical and energy gauges</h4>
-                                <p>Key engineering indicators are shown as quick review gauges.</p>
-
-                                <div class="cockpit-gauge-list">
-                                    @foreach ($charts['technical'] as $metric)
-                                        <div class="cockpit-gauge {{ $metric['state'] }}">
-                                            <div class="cockpit-gauge-head">
-                                                <strong>{{ $metric['label'] }}</strong>
-                                                <span>{{ $metric['value'] }}</span>
-                                            </div>
-                                            <div class="cockpit-gauge-track">
-                                                <div class="cockpit-gauge-fill" style="width: {{ $metric['percent'] }}%"></div>
-                                            </div>
-                                            <p>{{ $metric['note'] }}</p>
-                                        </div>
-                                    @endforeach
-                                </div>
-
-                                <div class="cockpit-energy-strip">
-                                    <div class="cockpit-energy-pill">
-                                        <span>Annual energy</span>
-                                        <strong>{{ $charts['energy']['annual_energy'] }}</strong>
-                                    </div>
-                                    <div class="cockpit-energy-pill">
-                                        <span>Specific yield</span>
-                                        <strong>{{ $charts['energy']['specific_yield'] }}</strong>
-                                    </div>
-                                    <div class="cockpit-energy-pill">
-                                        <span>PV design fit</span>
-                                        <strong>{{ $charts['energy']['pv_utilization_label'] }}</strong>
-                                    </div>
-                                </div>
-                            </article>
+                <div class="nx-overview-lower-grid">
+                    <section class="nx-cockpit-section-card" data-cockpit-glow>
+                        <header class="nx-section-heading is-compact">
+                            <div>
+                                <span class="nx-section-kicker">Workflow pulse</span>
+                                <h3>Module position</h3>
+                            </div>
+                            <button type="button" class="nx-text-button" data-cockpit-open-tab="workflow">View all modules</button>
+                        </header>
+                        <div class="nx-module-pulse">
+                            @foreach ($cockpit['steps'] as $index => $step)
+                                <span class="is-{{ $step['state'] }}" title="{{ $step['label'] }} · {{ $workflowStateLabels[$step['state']] ?? ucfirst($step['state']) }}">
+                                    <b>{{ $index + 1 }}</b><small>{{ $step['label'] }}</small>
+                                </span>
+                            @endforeach
                         </div>
+                    </section>
+
+                    <section class="nx-cockpit-section-card" data-cockpit-glow>
+                        <header class="nx-section-heading is-compact">
+                            <div>
+                                <span class="nx-section-kicker">Recent activity</span>
+                                <h3>Latest project events</h3>
+                            </div>
+                        </header>
+                        <div class="nx-activity-list">
+                            @forelse ($project->statusHistories->take(3) as $history)
+                                <article>
+                                    <span></span>
+                                    <div>
+                                        <strong>{{ $history->from_status ? ucfirst($history->from_status).' → ' : '' }}{{ ucfirst($history->to_status) }}</strong>
+                                        <p>{{ $history->note ?: 'No status note was provided.' }}</p>
+                                        <small>{{ $history->changedBy?->name ?? 'System' }} · {{ $history->changed_at?->diffForHumans() }}</small>
+                                    </div>
+                                </article>
+                            @empty
+                                <div class="nx-cockpit-empty is-compact"><div><strong>No activity yet</strong><p>Project activity will appear here.</p></div></div>
+                            @endforelse
+                        </div>
+                    </section>
+                </div>
+            </section>
+
+            <section class="nx-cockpit-panel" role="tabpanel" hidden data-cockpit-panel="workflow">
+                <section class="nx-cockpit-section-card" data-cockpit-glow>
+                    <header class="nx-section-heading">
+                        <div>
+                            <span class="nx-section-kicker">Nine-module workflow</span>
+                            <h3>Engineering and commercial command track</h3>
+                            <p>Each module keeps its original route, permission, and business logic. The cockpit only clarifies where the project stands.</p>
+                        </div>
+                        <span class="nx-state-pill is-{{ $health['state'] === 'ready' ? 'ready' : ($health['state'] === 'warning' ? 'warning' : 'progress') }}">{{ $health['description'] }}</span>
+                    </header>
+
+                    <div class="nx-workflow-grid">
+                        @foreach ($cockpit['steps'] as $index => $step)
+                            @php $stepUrl = $moduleRoutes[$step['key']] ?? null; @endphp
+                            @if ($stepUrl)
+                                <a class="nx-workflow-card is-{{ $step['state'] }}" href="{{ $stepUrl }}" data-cockpit-glow
+                                    data-project-module="{{ $step['key'] }}"
+                                    data-project-module-index="{{ str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT) }}"
+                                    data-project-module-state="{{ $workflowStateLabels[$step['state']] ?? ucfirst($step['state']) }}"
+                                    data-project-module-metric="{{ $step['metric'] }}">
+                            @else
+                                <article class="nx-workflow-card is-{{ $step['state'] }} is-disabled" aria-disabled="true">
+                            @endif
+                                    <span class="nx-workflow-index">{{ str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT) }}</span>
+                                    <span class="nx-workflow-icon">@include('projects.partials.cockpit-icon', ['name' => $step['key'], 'size' => 21])</span>
+                                    <div class="nx-workflow-copy">
+                                        <strong>{{ $step['label'] }}</strong>
+                                        <p>{{ $step['caption'] }}</p>
+                                    </div>
+                                    <span class="nx-workflow-state">{{ $workflowStateLabels[$step['state']] ?? ucfirst($step['state']) }}</span>
+                                    <small>{{ $step['metric'] }}</small>
+                                    @if ($stepUrl)
+                                        <span class="nx-workflow-arrow">@include('projects.partials.cockpit-icon', ['name' => 'arrow', 'size' => 16])</span>
+                                    @endif
+                            @if ($stepUrl)
+                                </a>
+                            @else
+                                </article>
+                            @endif
+                        @endforeach
                     </div>
                 </section>
+            </section>
 
-                <section class="cockpit-card">
-                    <div class="cockpit-card-head">
-                        <div>
-                            <h3>Warning center</h3>
-                            <p>All technical, roof, commercial, financial, quotation, and override warnings are grouped here.</p>
-                        </div>
-                        <span class="cockpit-chip {{ ($warningCounts['critical'] ?? 0) > 0 ? 'critical' : (($warningCounts['warning'] ?? 0) > 0 ? 'warning' : 'ready') }}">
-                            {{ count($warningRecords) }} total warning{{ count($warningRecords) === 1 ? '' : 's' }}
-                        </span>
-                    </div>
-                    <div class="cockpit-card-body">
-                        <div class="cockpit-warning-grid">
-                            <div class="cockpit-warning-count critical"><span>Critical</span><strong>{{ $warningCounts['critical'] ?? 0 }}</strong></div>
-                            <div class="cockpit-warning-count warning"><span>Warning</span><strong>{{ $warningCounts['warning'] ?? 0 }}</strong></div>
-                            <div class="cockpit-warning-count caution"><span>Caution</span><strong>{{ $warningCounts['caution'] ?? 0 }}</strong></div>
-                            <div class="cockpit-warning-count info"><span>Info</span><strong>{{ $warningCounts['info'] ?? 0 }}</strong></div>
-                        </div>
+            <section class="nx-cockpit-panel" role="tabpanel" hidden data-cockpit-panel="engineering">
+                @if ($hasEngineering)
+                    <section class="nx-cockpit-section-card" data-cockpit-glow>
+                        <header class="nx-section-heading">
+                            <div class="nx-section-heading-icon nx-tone-engineering">@include('projects.partials.cockpit-icon', ['name' => 'technical'])</div>
+                            <div>
+                                <span class="nx-section-kicker">Engineering intelligence</span>
+                                <h3>Technical result command board</h3>
+                                <p>Design capacity, energy yield, ratio position, cable performance, and active review signals.</p>
+                            </div>
+                            <span class="nx-state-pill is-{{ $technicalStatusTone }}">{{ $technicalStatusLabel }}</span>
+                            @if ($moduleRoutes['sld'])
+                                <a class="nx-section-action" href="{{ $moduleRoutes['sld'] }}">Open SLD @include('projects.partials.cockpit-icon', ['name' => 'arrow', 'size' => 14])</a>
+                            @endif
+                        </header>
 
-                        @if (count($warningRecords) > 0)
-                            <div class="cockpit-warning-list">
-                                @foreach ($warningRecords as $warning)
-                                    <article class="cockpit-warning-item {{ $warning['severity'] ?? 'info' }}">
-                                        <header>
-                                            <strong>{{ $warning['title'] ?? 'Warning' }}</strong>
-                                            <span class="cockpit-chip {{ $warning['severity'] ?? 'info' }}">{{ $warning['severity'] ?? 'info' }}</span>
-                                        </header>
-                                        <p>{{ $warning['message'] ?? '-' }}</p>
-                                        @if (! empty($warning['recommendation']))
-                                            <p><strong>Recommendation:</strong> {{ $warning['recommendation'] }}</p>
-                                        @endif
-                                        <small>{{ str_replace('_', ' ', $warning['source'] ?? 'system') }} · {{ $warning['code'] ?? 'WARNING' }}</small>
+                        @if ($engineeringReviewCount > 0)
+                            <div class="nx-review-ribbon is-{{ $engineeringCriticalCount > 0 ? 'critical' : 'warning' }}">
+                                <span class="nx-review-ribbon-icon">@include('projects.partials.cockpit-icon', ['name' => 'warning', 'size' => 17])</span>
+                                <div>
+                                    <strong>{{ $engineeringReviewCount }} engineering review item{{ $engineeringReviewCount === 1 ? '' : 's' }}</strong>
+                                    <small>{{ $engineeringReviewBreakdown }}</small>
+                                </div>
+                                <button type="button" data-cockpit-open-tab="warnings">Review warnings @include('projects.partials.cockpit-icon', ['name' => 'arrow', 'size' => 14])</button>
+                            </div>
+                        @endif
+
+                        <div class="nx-kpi-grid nx-kpi-grid-engineering">
+                            <article class="nx-kpi-card is-engineering"><span>Installed PV</span><strong>{{ $engineering['installed_pv_kw'] }}</strong><small>Required {{ $engineering['required_pv_kw'] }}</small></article>
+                            <article class="nx-kpi-card is-energy"><span>Annual energy</span><strong>{{ $engineering['annual_energy_kwh'] }}</strong><small>{{ $charts['energy']['specific_yield'] }}</small></article>
+                            <article class="nx-kpi-card is-engineering"><span>DC/AC ratio</span><strong>{{ $engineering['dc_ac_ratio'] }}</strong><small>Recommended 0.95–1.35</small></article>
+                            <article class="nx-kpi-card is-engineering"><span>PV modules</span><strong>{{ $engineering['module_count'] }}</strong><small>{{ $engineering['inverter_count'] }} inverter</small></article>
+                        </div>
+                    </section>
+
+                    <div class="nx-engineering-grid">
+                        <section class="nx-cockpit-section-card" data-cockpit-glow>
+                            <header class="nx-section-heading is-compact"><div><span class="nx-section-kicker">Technical gauges</span><h3>Design benchmarks</h3></div></header>
+                            <div class="nx-gauge-list">
+                                @foreach ($charts['technical'] as $metric)
+                                    <article class="nx-gauge is-{{ $metric['state'] }}">
+                                        <div><strong>{{ $metric['label'] }}</strong><span>{{ $metric['value'] }}</span></div>
+                                        <i><b style="--gauge-width: {{ $metric['percent'] }}%"></b></i>
+                                        <p>{{ $metric['note'] }}</p>
                                     </article>
                                 @endforeach
                             </div>
-                        @else
-                            <div class="ui-empty">
-                                <div>
-                                    <h3>No warning recorded</h3>
-                                    <p>This project has no recorded warnings yet. Review assumptions before procurement or construction approval.</p>
-                                </div>
+                        </section>
+
+                        <section class="nx-cockpit-section-card" data-cockpit-glow>
+                            <header class="nx-section-heading is-compact"><div><span class="nx-section-kicker">Engineering details</span><h3>Source values</h3></div></header>
+                            <dl class="nx-detail-list">
+                                <div><dt>System type</dt><dd>{{ $engineering['system_type'] }}</dd></div>
+                                <div><dt>Daily load</dt><dd>{{ $engineering['daily_load_kwh'] }}</dd></div>
+                                <div><dt>Usable roof area</dt><dd>{{ $engineering['usable_roof_area_m2'] }}</dd></div>
+                                <div><dt>Calculation status</dt><dd>{{ $engineering['status'] }}</dd></div>
+                                <div><dt>SLD status</dt><dd>{{ $sldRevision?->status_label ?? 'Not generated' }}</dd></div>
+                                <div><dt>Active overrides</dt><dd>{{ $engineering['has_overrides'] ? $engineering['override_count'] : 'None' }}</dd></div>
+                                <div><dt>PV design fit</dt><dd>{{ $charts['energy']['pv_utilization_label'] }}</dd></div>
+                            </dl>
+                        </section>
+                    </div>
+                @else
+                    <section class="nx-cockpit-section-card" data-cockpit-glow>
+                        <div class="nx-cockpit-empty is-large">
+                            <span class="nx-cockpit-empty-icon">@include('projects.partials.cockpit-icon', ['name' => 'technical', 'size' => 28])</span>
+                            <div>
+                                <span class="nx-section-kicker">Engineering workspace</span>
+                                <strong>Technical results are not available yet</strong>
+                                <p>Complete the upstream project modules, then run Technical Calculation to generate PV sizing, inverter, string, cable, battery, energy, and warning outputs.</p>
+                                @if ($moduleRoutes['technical'])
+                                    <a href="{{ $moduleRoutes['technical'] }}">Open technical calculation @include('projects.partials.cockpit-icon', ['name' => 'arrow', 'size' => 15])</a>
+                                @endif
                             </div>
-                        @endif
-                    </div>
-                </section>
-
-                <section class="cockpit-card">
-                    <div class="cockpit-card-head">
-                        <div>
-                            <h3>Project profile</h3>
-                            <p>Core site, customer, system, team, and audit metadata.</p>
                         </div>
-                        @if ($project->isArchived())
-                            <span class="cockpit-chip critical">Archived</span>
-                        @endif
-                    </div>
-                    <div class="cockpit-card-body">
-                        <dl class="cockpit-profile-grid">
-                            <div class="cockpit-profile-item"><dt>Project Number</dt><dd>{{ $project->project_number }}</dd></div>
-                            <div class="cockpit-profile-item"><dt>Customer</dt><dd>{{ $project->customer->name }}</dd></div>
-                            <div class="cockpit-profile-item"><dt>Building Type</dt><dd>{{ $project->building_type_label }}</dd></div>
-                            <div class="cockpit-profile-item"><dt>Proposed System</dt><dd>{{ $project->proposed_system_label }}</dd></div>
-                            <div class="cockpit-profile-item"><dt>City</dt><dd>{{ $project->city ?: 'Not provided' }}</dd></div>
-                            <div class="cockpit-profile-item"><dt>Province</dt><dd>{{ $project->province ?: 'Not provided' }}</dd></div>
-                            <div class="cockpit-profile-item"><dt>Latitude</dt><dd>{{ $project->latitude ?: 'Not provided' }}</dd></div>
-                            <div class="cockpit-profile-item"><dt>Longitude</dt><dd>{{ $project->longitude ?: 'Not provided' }}</dd></div>
-                            <div class="cockpit-profile-item"><dt>Engineer</dt><dd>{{ $project->assignedEngineer?->name ?? 'Unassigned' }}</dd></div>
-                            <div class="cockpit-profile-item"><dt>Sales</dt><dd>{{ $project->assignedSales?->name ?? 'Unassigned' }}</dd></div>
-                            <div class="cockpit-profile-item wide"><dt>Site Address</dt><dd>{{ $project->site_address }}</dd></div>
-                            <div class="cockpit-profile-item wide"><dt>Project Notes</dt><dd>{{ $project->description ?: 'No project notes.' }}</dd></div>
-                        </dl>
-                    </div>
-                </section>
+                    </section>
+                @endif
+            </section>
 
-                <section class="ui-card">
-                    <div class="ui-card-header">
-                        <div>
-                            <h3 class="ui-card-title">Status History</h3>
-                            <p class="ui-card-description">Every workflow status change is retained for auditability.</p>
+            <section class="nx-cockpit-panel" role="tabpanel" hidden data-cockpit-panel="commercial">
+                @if ($hasCommercial || $hasFinancial || $hasQuotation)
+                    <section class="nx-cockpit-section-card" data-cockpit-glow>
+                        <header class="nx-section-heading">
+                            <div class="nx-section-heading-icon nx-tone-commercial">@include('projects.partials.cockpit-icon', ['name' => 'financial'])</div>
+                            <div>
+                                <span class="nx-section-kicker">Commercial intelligence</span>
+                                <h3>Pricing, quotation, and financial position</h3>
+                                <p>Commercial totals and feasibility indicators remain traceable to their source modules.</p>
+                            </div>
+                        </header>
+
+                        <div class="nx-kpi-grid">
+                            <article class="nx-kpi-card is-commercial"><span>Grand price</span><strong>{{ $commercial['grand_price'] }}</strong><small>{{ $commercial['pricing_status'] }}</small></article>
+                            <article class="nx-kpi-card is-commercial"><span>Quotation</span><strong>{{ $commercial['quotation_status'] }}</strong><small>{{ $commercial['quote_number'] }}</small></article>
+                            <article class="nx-kpi-card is-financial"><span>Payback</span><strong>{{ $financial['payback'] }}</strong><small>{{ $financial['status'] }}</small></article>
+                            <article class="nx-kpi-card is-financial"><span>IRR</span><strong>{{ $financial['irr'] }}</strong><small>ROI {{ $financial['roi'] }}</small></article>
+                            <article class="nx-kpi-card is-financial {{ $hasFinancial && str_contains($financial['npv'], '-') ? 'is-negative' : '' }}"><span>NPV</span><strong>{{ $financial['npv'] }}</strong><small>{{ $financial['capex_source'] }}</small></article>
+                            <article class="nx-kpi-card is-financial"><span>LCOE</span><strong>{{ $financial['lcoe'] }}</strong><small>First-year saving {{ $financial['first_year_saving'] }}</small></article>
                         </div>
+                    </section>
+
+                    <div class="nx-commercial-grid">
+                        <section class="nx-cockpit-section-card" data-cockpit-glow>
+                            <header class="nx-section-heading is-compact">
+                                <div><span class="nx-section-kicker">Financial performance</span><h3>Cashflow preview</h3><p>Select any year to inspect saving, net cashflow, and cumulative position.</p></div>
+                            </header>
+                            @if ($charts['cashflow_available'])
+                                <div class="nx-cashflow-legend">
+                                    <span class="is-saving">Annual saving</span>
+                                    <span class="is-net">Net cashflow</span>
+                                    <span class="is-cumulative">Cumulative cashflow</span>
+                                </div>
+                                <div class="nx-cashflow-chart">
+                                    @foreach ($charts['cashflow'] as $row)
+                                        <article class="nx-cashflow-row">
+                                            <span>Y{{ $row['year'] }}</span>
+                                            <div class="nx-cashflow-bars">
+                                                <i title="Annual saving {{ $row['saving_label'] }}"><b class="is-saving" style="--bar-width: {{ $row['saving_percent'] }}%"></b></i>
+                                                <i title="Net cashflow {{ $row['net_label'] }}"><b class="is-net {{ $row['net_state'] === 'critical' ? 'is-negative' : '' }}" style="--bar-width: {{ $row['net_percent'] }}%"></b></i>
+                                                <i title="Cumulative cashflow {{ $row['cumulative_label'] }}"><b class="is-cumulative" style="--bar-width: {{ $row['cumulative_percent'] }}%"></b></i>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                class="nx-cashflow-inspector"
+                                                data-cashflow-inspector
+                                                aria-expanded="false"
+                                                aria-label="Inspect year {{ $row['year'] }} cashflow values"
+                                            >
+                                                <span class="nx-cashflow-net">{{ $row['net_label'] }}</span>
+                                                <span class="nx-cashflow-tooltip" role="tooltip">
+                                                    <span><small>Annual saving</small><b>{{ $row['saving_label'] }}</b></span>
+                                                    <span><small>Net cashflow</small><b>{{ $row['net_label'] }}</b></span>
+                                                    <span><small>Cumulative</small><b>{{ $row['cumulative_label'] }}</b></span>
+                                                </span>
+                                            </button>
+                                        </article>
+                                    @endforeach
+                                </div>
+                            @else
+                                <div class="nx-cockpit-empty is-compact"><div><strong>No cashflow yet</strong><p>Run financial analysis to activate the cashflow preview.</p></div></div>
+                            @endif
+                        </section>
+
+                        <section class="nx-cockpit-section-card" data-cockpit-glow>
+                            <header class="nx-section-heading is-compact"><div><span class="nx-section-kicker">Commercial details</span><h3>Pricing build-up</h3></div></header>
+                            <dl class="nx-detail-list">
+                                <div><dt>BOM status</dt><dd>{{ $commercial['bom_status'] }}</dd></div>
+                                <div><dt>Material</dt><dd>{{ $commercial['material_price'] }}</dd></div>
+                                <div><dt>Labor</dt><dd>{{ $commercial['labor_cost'] }}</dd></div>
+                                <div><dt>Tax</dt><dd>{{ $commercial['tax'] }}</dd></div>
+                                <div><dt>Discount</dt><dd>{{ $commercial['discount'] }}</dd></div>
+                                <div><dt>CAPEX</dt><dd>{{ $financial['capex'] }}</dd></div>
+                            </dl>
+                        </section>
                     </div>
-                    <div class="ui-card-body">
-                        <div class="ui-timeline">
-                            @foreach ($project->statusHistories as $history)
-                                <article class="ui-timeline-item">
-                                    <span class="ui-timeline-dot"></span>
-                                    <div class="ui-timeline-copy">
-                                        <strong>{{ $history->from_status ? ucfirst($history->from_status).' → ' : '' }}{{ ucfirst($history->to_status) }}</strong>
-                                        <p>{{ $history->note ?: 'No status note was provided.' }}</p>
-                                        <small>{{ $history->changedBy?->name ?? 'System' }} · {{ $history->changed_at?->format('d M Y, H:i') }}</small>
+                @else
+                    <section class="nx-cockpit-section-card" data-cockpit-glow>
+                        <div class="nx-cockpit-empty is-large">
+                            <span class="nx-cockpit-empty-icon">@include('projects.partials.cockpit-icon', ['name' => 'financial', 'size' => 28])</span>
+                            <div>
+                                <span class="nx-section-kicker">Commercial workspace</span>
+                                <strong>Commercial outputs are not available yet</strong>
+                                <p>Generate the BOM/BOQ, apply pricing, run financial analysis, and prepare a quotation to activate this commercial command board.</p>
+                                @if ($moduleRoutes['bom'])
+                                    <a href="{{ $moduleRoutes['bom'] }}">Open BOM/BOQ @include('projects.partials.cockpit-icon', ['name' => 'arrow', 'size' => 15])</a>
+                                @endif
+                            </div>
+                        </div>
+                    </section>
+                @endif
+            </section>
+
+            <section class="nx-cockpit-panel" role="tabpanel" hidden data-cockpit-panel="warnings">
+                <section class="nx-cockpit-section-card" data-cockpit-glow>
+                    <header class="nx-section-heading">
+                        <div class="nx-section-heading-icon nx-tone-warning">@include('projects.partials.cockpit-icon', ['name' => 'warning'])</div>
+                        <div>
+                            <span class="nx-section-kicker">Engineering and commercial review</span>
+                            <h3>Warning center</h3>
+                            <p>Technical, roof, commercial, financial, quotation, and override warnings stay grouped and traceable.</p>
+                        </div>
+                        <span class="nx-state-pill {{ ($warningCounts['critical'] ?? 0) > 0 ? 'is-critical' : (($warningCounts['warning'] ?? 0) > 0 ? 'is-warning' : 'is-ready') }}">{{ $warningTotal }} total</span>
+                    </header>
+
+                    <div class="nx-warning-filter" role="group" aria-label="Filter warnings by severity">
+                        <button type="button" class="is-active" data-warning-filter="all">All <b>{{ $warningTotal }}</b></button>
+                        <button type="button" data-warning-filter="critical">Critical <b>{{ $warningCounts['critical'] ?? 0 }}</b></button>
+                        <button type="button" data-warning-filter="warning">Warning <b>{{ $warningCounts['warning'] ?? 0 }}</b></button>
+                        <button type="button" data-warning-filter="caution">Caution <b>{{ $warningCounts['caution'] ?? 0 }}</b></button>
+                        <button type="button" data-warning-filter="info">Info <b>{{ $warningCounts['info'] ?? 0 }}</b></button>
+                    </div>
+
+                    @if ($warningTotal > 0)
+                        <div class="nx-warning-list">
+                            @foreach ($warningRecords as $warning)
+                                @php
+                                    $warningSource = $warning['source'] ?? 'system';
+                                    $warningAction = $warningActionMap[$warningSource] ?? null;
+                                    $warningAnchor = 'warning-'.\Illuminate\Support\Str::slug(($warning['code'] ?? 'warning').'-'.$loop->iteration);
+                                @endphp
+                                <article id="{{ $warningAnchor }}" class="nx-warning-card is-{{ $warning['severity'] ?? 'info' }}" data-warning-severity="{{ $warning['severity'] ?? 'info' }}">
+                                    <div class="nx-warning-card-head">
+                                        <span class="nx-warning-icon">@include('projects.partials.cockpit-icon', ['name' => 'warning', 'size' => 17])</span>
+                                        <div><strong>{{ $warning['title'] ?? 'Warning' }}</strong><small>{{ str_replace('_', ' ', $warning['source'] ?? 'system') }} · {{ $warning['code'] ?? 'WARNING' }}</small></div>
+                                        <span class="nx-state-pill is-{{ ($warning['severity'] ?? 'info') === 'critical' ? 'critical' : (($warning['severity'] ?? 'info') === 'warning' ? 'warning' : 'info') }}">{{ $warning['severity'] ?? 'info' }}</span>
+                                    </div>
+                                    <p>{{ $warning['message'] ?? '-' }}</p>
+                                    <div class="nx-warning-card-footer">
+                                        @if (! empty($warning['recommendation']))
+                                            <div class="nx-warning-recommendation"><span>Recommended action</span><strong>{{ $warning['recommendation'] }}</strong></div>
+                                        @endif
+                                        @if (! empty($warningAction['url']))
+                                            <a class="nx-warning-action" href="{{ $warningAction['url'] }}">
+                                                {{ $warningAction['label'] }}
+                                                @include('projects.partials.cockpit-icon', ['name' => 'arrow', 'size' => 14])
+                                            </a>
+                                        @endif
                                     </div>
                                 </article>
                             @endforeach
                         </div>
-                    </div>
+                    @else
+                        <div class="nx-cockpit-empty is-large">
+                            <span class="nx-cockpit-empty-icon">@include('projects.partials.cockpit-icon', ['name' => 'release', 'size' => 28])</span>
+                            <div><strong>No recorded warning</strong><p>No critical, warning, caution, or informational record is currently attached to this project.</p></div>
+                        </div>
+                    @endif
                 </section>
-            </main>
+            </section>
 
-            <aside class="cockpit-side">
-                <section class="cockpit-card">
-                    <div class="cockpit-card-head">
-                        <div>
-                            <h3>Next action</h3>
-                            <p>The recommended next module based on workflow completeness.</p>
-                        </div>
-                    </div>
-                    <div class="cockpit-card-body">
-                        <div class="cockpit-next">
-                            @if ($nextStep)
-                                <span>{{ $workflowStateLabels[$nextStep['state']] ?? ucfirst($nextStep['state']) }}</span>
-                                <strong>{{ $nextStep['label'] }}</strong>
-                                <p>{{ $nextStep['caption'] }} · {{ $nextStep['status'] }}</p>
-                            @else
-                                <span>Complete</span>
-                                <strong>Ready for review</strong>
-                                <p>All core workflow modules are available. Review warnings, overrides, and reports before final use.</p>
-                            @endif
-                        </div>
-                    </div>
-                </section>
+            <section class="nx-cockpit-panel" role="tabpanel" hidden data-cockpit-panel="release">
+                @include('projects.partials.cockpit-release')
+            </section>
 
-                @if ($canViewReports)
-                    <section class="cockpit-card">
-                        <div class="cockpit-card-head">
-                            <div>
-                                <h3>Client Release Gate</h3>
-                                <p>Approves whether the Client Proposal PDF may be released without draft watermark.</p>
-                            </div>
-                            <span class="cockpit-chip {{ $releaseGate['tone'] ?? 'warning' }}">{{ $releaseGate['status'] ?? 'Review Required' }}</span>
-                        </div>
-                        <div class="cockpit-card-body">
-                            <div class="release-gate-panel">
-                                <div class="release-gate-status">
-                                    <div>
-                                        <h4>{{ $releaseGate['ready'] ? 'Ready for client release' : 'Not ready for final client release' }}</h4>
-                                        <p>{{ $releaseGate['next_action'] ?? 'Review the release gate before sending the client proposal.' }}</p>
-                                    </div>
-                                    <span class="cockpit-chip {{ $releaseGate['ready'] ? 'ready' : (($releaseGate['tone'] ?? '') === 'critical' ? 'critical' : 'warning') }}">{{ $releaseGate['issue_count'] ?? 0 }} issue{{ ($releaseGate['issue_count'] ?? 0) === 1 ? '' : 's' }}</span>
-                                </div>
-
-                                <div class="release-gate-meta">
-                                    <div><span>Release Status</span><strong>{{ $releaseGate['status'] ?? 'Review Required' }}</strong></div>
-                                    <div><span>Approval Status</span><strong>{{ $releaseGate['approval_status_label'] ?? 'Approval Required' }}</strong></div>
-                                    <div><span>Engineering Issues</span><strong>{{ $releaseGate['engineering_issue_count'] ?? 0 }}</strong></div>
-                                    <div><span>Commercial Issues</span><strong>{{ $releaseGate['commercial_issue_count'] ?? 0 }}</strong></div>
-                                </div>
-
-                                @if (! empty($releaseGate['approval']))
-                                    <div class="release-gate-approved">
-                                        <strong>{{ $releaseGate['approval']['status_label'] ?? 'Approval recorded' }}</strong><br>
-                                        Approved by {{ $releaseGate['approval']['approved_by'] ?? 'System' }} at {{ $releaseGate['approval']['approved_at'] ?? 'unknown time' }}.
-                                        @if (! empty($releaseGate['approval_stale']))
-                                            <br><strong>Approval is stale.</strong> Re-approve after current data is reviewed.
-                                        @endif
-                                    </div>
-                                @endif
-
-                                @if (! empty($releaseGate['issues']))
-                                    <div class="release-gate-issues">
-                                        @foreach (array_slice($releaseGate['issues'], 0, 5) as $issue)
-                                            <div class="release-gate-issue {{ $issue['severity'] ?? 'warning' }}">
-                                                <strong>{{ $issue['title'] }}</strong>
-                                                <span>{{ $issue['detail'] }}</span>
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                @else
-                                    <div class="release-gate-issue">
-                                        <strong>All gate checks passed.</strong>
-                                        <span>{{ $releaseGate['ready'] ? 'Final Client Proposal PDF is available.' : 'The remaining step is explicit client release approval.' }}</span>
-                                    </div>
-                                @endif
-
-                                @if ($canApproveClientRelease)
-                                    <div class="release-gate-approval">
-                                        @if (! $releaseGate['ready'] && ($releaseGate['approval_allowed'] ?? false))
-                                            <form method="POST" action="{{ route('companies.projects.report.client-release.approve', [$company, $project]) }}">
-                                                @csrf
-                                                <label class="ui-label">Approval Notes</label>
-                                                <textarea class="ui-textarea" name="notes" placeholder="Optional release note for audit trail"></textarea>
-                                                <button class="ui-button ui-button-primary" type="submit" data-confirm="Approve this project for client release?">Approve Client Release</button>
-                                            </form>
-                                        @elseif (! $releaseGate['ready'])
-                                            <div class="release-gate-locked">Approval is locked until all engineering and commercial gate issues are resolved.</div>
-                                        @endif
-
-                                        @if (! empty($releaseGate['approval']))
-                                            <form method="POST" action="{{ route('companies.projects.report.client-release.revoke', [$company, $project]) }}">
-                                                @csrf
-                                                @method('DELETE')
-                                                <label class="ui-label">Revoke Reason</label>
-                                                <textarea class="ui-textarea" name="revoke_reason" required placeholder="Required reason, e.g. Pricing changed after client discussion."></textarea>
-                                                <button class="ui-button ui-button-secondary" type="submit" data-confirm="Revoke client release approval?">Revoke Approval</button>
-                                            </form>
-                                        @endif
-                                    </div>
-                                @endif
-
-                                @if ($project->releaseApprovals->isNotEmpty())
-                                    <div class="release-gate-history">
-                                        <h5>Release approval history</h5>
-                                        @foreach ($project->releaseApprovals->take(3) as $approvalRecord)
-                                            <div class="release-gate-history-item {{ $approvalRecord->status }}">
-                                                <strong>{{ $approvalRecord->status_label }} · {{ $approvalRecord->approved_at?->format('d M Y, H:i') ?? 'No approval time' }}</strong>
-                                                <span>
-                                                    Approved by {{ $approvalRecord->approver?->name ?? 'System' }}
-                                                    @if ($approvalRecord->revoked_at)
-                                                        · revoked {{ $approvalRecord->revoked_at->format('d M Y, H:i') }}
-                                                    @endif
-                                                </span>
-                                                @if ($approvalRecord->notes || $approvalRecord->revoke_reason)
-                                                    <span>{{ $approvalRecord->notes ?: $approvalRecord->revoke_reason }}</span>
-                                                @endif
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                @endif
-                            </div>
-                        </div>
-                    </section>
-                @endif
-
-                <section class="cockpit-card">
-                    <div class="cockpit-card-head">
-                        <div>
-                            <h3>Action panel</h3>
-                            <p>Open the relevant project module and continue the workflow from one place.</p>
-                        </div>
-                    </div>
-                    <div class="cockpit-card-body">
-                        <div class="cockpit-action-list">
-                            @if ($canViewLoadAnalysis)
-                                <a class="cockpit-action" href="{{ route('companies.load-analyses.show', [$company, $project]) }}"><span><strong>Load Analysis</strong><span>Review bills, equipment, critical loads, and daily profile.</span></span><b>Open</b></a>
-                            @endif
-                            @if ($canViewLocationSolar)
-                                <a class="cockpit-action" href="{{ route('companies.location-solar.show', [$company, $project]) }}"><span><strong>Location & Solar</strong><span>Check coordinate, irradiation, weather, and source quality.</span></span><b>Open</b></a>
-                            @endif
-                            @if ($canViewRoofSite)
-                                <a class="cockpit-action" href="{{ route('companies.roof-site.show', [$company, $project]) }}"><span><strong>Roof & Site Survey</strong><span>Review surface area, access, shading, and structure warnings.</span></span><b>Open</b></a>
-                            @endif
-                            @if ($canViewRecommendation)
-                                <a class="cockpit-action" href="{{ route('companies.recommendations.show', [$company, $project]) }}"><span><strong>System Recommendation</strong><span>Compare on-grid and hybrid scoring with reasons.</span></span><b>Open</b></a>
-                            @endif
-                            @if ($canViewTechnicalCalculation)
-                                <a class="cockpit-action" href="{{ route('companies.technical-calculations.show', [$company, $project]) }}"><span><strong>Technical Calculation</strong><span>Review PV sizing, string, cable, warning, formula, and overrides.</span></span><b>Open</b></a>
-                            @endif
-                            @if ($canViewBom)
-                                <a class="cockpit-action" href="{{ route('companies.boms.show', [$company, $project]) }}"><span><strong>BOM/BOQ</strong><span>Generate material quantities and commercial price build-up.</span></span><b>Open</b></a>
-                            @endif
-                            @if ($canViewFinancialAnalysis)
-                                <a class="cockpit-action" href="{{ route('companies.financial-analyses.show', [$company, $project]) }}"><span><strong>Financial Analysis</strong><span>Review saving, payback, ROI, NPV, IRR, and LCOE.</span></span><b>Open</b></a>
-                            @endif
-                            @if ($canViewQuotation)
-                                <a class="cockpit-action" href="{{ route('companies.quotations.show', [$company, $project]) }}"><span><strong>Quotation</strong><span>Prepare, issue, and review customer-facing quotation.</span></span><b>Open</b></a>
-                            @endif
-                            @if ($canViewReports)
-                                @if ($project->quotation)
-                                    <a class="cockpit-action" href="{{ route('companies.quotations.pdf', [$company, $project]) }}"><span><strong>Quotation PDF</strong><span>Download customer quotation document.</span></span><b>PDF</b></a>
-                                @endif
-                                <a class="cockpit-action" href="{{ route('companies.projects.report.premium.pdf', [$company, $project]) }}"><span><strong>Internal Engineering Report</strong><span>Download the full internal report with technical warnings, controlled scope, and catalog review.</span></span><b>PDF+</b></a>
-                                <a class="cockpit-action" href="{{ route('companies.projects.report.premium.preview', [$company, $project]) }}" target="_blank" rel="noopener"><span><strong>Internal Report Preview</strong><span>Open the browser-rendered internal engineering report before export.</span></span><b>View</b></a>
-                                <a class="cockpit-action" href="{{ route('companies.projects.report.client-proposal.preview', [$company, $project]) }}" target="_blank" rel="noopener"><span><strong>Client Proposal Preview</strong><span>Preview the customer-facing proposal before sending.</span></span><b>View</b></a>
-                                <a class="cockpit-action" href="{{ route('companies.projects.report.client-proposal.pdf', [$company, $project]) }}"><span><strong>Draft Proposal PDF</strong><span>Download the customer-facing draft. It keeps the release watermark until approved.</span></span><b>Draft</b></a>
-                                @if ($releaseGate['ready'] ?? false)
-                                    <a class="cockpit-action" href="{{ route('companies.projects.report.client-proposal.final-pdf', [$company, $project]) }}"><span><strong>Final Client Proposal PDF</strong><span>Download the approved client proposal without draft watermark.</span></span><b>Final</b></a>
-                                @else
-                                    <span class="cockpit-action disabled"><span><strong>Final Client Proposal PDF</strong><span>Locked until Client Release Gate is Ready for Client Release.</span></span><b>Locked</b></span>
-                                @endif
-                            @endif
-                        </div>
-                    </div>
-                </section>
-
-                <section class="cockpit-card">
-                    <div class="cockpit-card-head">
-                        <div>
-                            <h3>Record audit</h3>
-                            <p>Ownership and last known project change.</p>
-                        </div>
-                    </div>
-                    <div class="cockpit-card-body">
-                        <div class="cockpit-kv">
-                            <div class="cockpit-kv-row"><span>Created By</span><strong>{{ $project->creator?->name ?? 'System' }}</strong></div>
-                            <div class="cockpit-kv-row"><span>Created At</span><strong>{{ $project->created_at?->format('d M Y, H:i') }}</strong></div>
-                            <div class="cockpit-kv-row"><span>Status Updated By</span><strong>{{ $project->statusUpdater?->name ?? 'System' }}</strong></div>
-                            <div class="cockpit-kv-row"><span>Status Changed</span><strong>{{ $project->status_changed_at?->format('d M Y, H:i') ?: 'Not recorded' }}</strong></div>
-                        </div>
-                    </div>
-                </section>
-
-                @if ($canArchiveProject && ! $project->isArchived())
-                    <section class="ui-card ui-danger-zone">
-                        <div class="ui-card-header">
-                            <div>
-                                <h3 class="ui-card-title">Danger zone</h3>
-                                <p class="ui-card-description">Only completed or cancelled projects can be archived.</p>
-                            </div>
-                        </div>
-                        <div class="ui-card-body">
-                            <form method="POST" action="{{ route('companies.projects.archive', [$company, $project]) }}">
-                                @csrf
-                                @method('PATCH')
-                                <button
-                                    type="submit"
-                                    class="ui-button ui-button-danger"
-                                    data-confirm="Archive this project? It will be removed from the current project list."
-                                    @disabled(! in_array($project->status, ['completed', 'cancelled'], true))
-                                >
-                                    Archive Project
-                                </button>
-                            </form>
-                        </div>
-                    </section>
-                @endif
-            </aside>
+            <section class="nx-cockpit-panel" role="tabpanel" hidden data-cockpit-panel="reports">
+                @include('projects.partials.cockpit-reports-audit')
+            </section>
         </div>
     </div>
 @endsection

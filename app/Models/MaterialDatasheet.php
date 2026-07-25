@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
     'material_id',
@@ -14,6 +15,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'external_url',
     'mime_type',
     'file_size_bytes',
+    'sha256',
+    'page_count',
+    'extraction_method',
+    'detected_category_code',
+    'category_match_score',
     'revision',
     'issued_at',
     'is_active',
@@ -23,6 +29,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'parsed_text',
     'parsed_fields',
     'parse_warnings',
+    'extraction_meta',
     'parsed_at',
     'reviewed_at',
     'reviewed_by',
@@ -58,14 +65,24 @@ class MaterialDatasheet extends Model
         return $this->belongsTo(User::class, 'applied_by');
     }
 
+    public function applications(): HasMany
+    {
+        return $this->hasMany(MaterialDatasheetApplication::class)
+            ->latest('applied_at')
+            ->latest('id');
+    }
+
     protected function casts(): array
     {
         return [
             'issued_at' => 'date',
             'file_size_bytes' => 'integer',
+            'page_count' => 'integer',
+            'category_match_score' => 'decimal:2',
             'parse_confidence' => 'decimal:2',
             'parsed_fields' => 'array',
             'parse_warnings' => 'array',
+            'extraction_meta' => 'array',
             'parsed_at' => 'datetime',
             'reviewed_at' => 'datetime',
             'applied_at' => 'datetime',

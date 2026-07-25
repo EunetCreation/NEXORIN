@@ -183,6 +183,54 @@ class MaterialCatalogManagementTest extends TestCase
         ]);
     }
 
+    public function test_archive_and_reactivation_cannot_preserve_stale_material_approval(): void
+    {
+        $admin = $this->createCompanyUser('company_admin');
+        $material = Material::query()->create([
+            'company_id' => $this->company->id,
+            'sku' => 'APPROVED-ARCHIVE-001',
+            'name' => 'Approved Archive Test Material',
+            'uom' => 'pcs',
+            'catalog_status' => 'approved',
+            'compliance_status' => 'compliant',
+            'approved_at' => now(),
+            'approved_by' => $admin->id,
+            'is_active' => true,
+            'created_by' => $admin->id,
+            'updated_by' => $admin->id,
+        ]);
+
+        $this->actingAs($admin)
+            ->delete(route('companies.materials.archive', [$this->company, $material]))
+            ->assertRedirect()
+            ->assertSessionHas('success');
+
+        $material->refresh();
+        $this->assertFalse($material->is_active);
+        $this->assertSame('needs_review', $material->catalog_status);
+        $this->assertNull($material->approved_at);
+        $this->assertNull($material->approved_by);
+
+        $material->forceFill([
+            'catalog_status' => 'approved',
+            'compliance_status' => 'compliant',
+            'approved_at' => now(),
+            'approved_by' => $admin->id,
+        ])->save();
+
+        $this->actingAs($admin)
+            ->patch(route('companies.materials.activate', [$this->company, $material]))
+            ->assertRedirect()
+            ->assertSessionHas('success');
+
+        $material->refresh();
+        $this->assertTrue($material->is_active);
+        $this->assertSame('needs_review', $material->catalog_status);
+        $this->assertSame('needs_review', $material->compliance_status);
+        $this->assertNull($material->approved_at);
+        $this->assertNull($material->approved_by);
+    }
+
     private function createCompanyUser(string $roleCode): User
     {
         $user = User::factory()->create([

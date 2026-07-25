@@ -207,24 +207,80 @@ class QuotationEngine
 
     public function sourceFingerprint(Project $project, BillOfMaterial $bom, FinancialAnalysis $analysis): string
     {
-        $bom->loadMissing('items');
+        if ($project->exists) {
+            // Reload full proposal-facing relations because callers may have
+            // preloaded a column-limited customer/company relation.
+            $project->load(['company', 'customer', 'technicalCalculation']);
+        }
 
+        if ($bom->exists) {
+            $bom->load('items');
+        } else {
+            $bom->loadMissing('items');
+        }
+
+        $technical = $project->technicalCalculation;
+        $company = $project->company;
+        $customer = $project->customer;
+
+        // Fingerprints must represent proposal content, not lifecycle metadata.
+        // Timestamps such as project.updated_at, quotation issued_at, or accepted_at
+        // must not make an otherwise identical approved proposal stale.
         return $this->stableHash([
+            'company' => [
+                'id' => $company?->getKey(),
+                'name' => $company?->name,
+                'code' => $company?->code,
+                'registration_number' => $company?->registration_number,
+                'email' => $company?->email,
+                'phone' => $company?->phone,
+                'address' => $company?->address,
+                'logo_path' => $company?->logo_path,
+            ],
+            'customer' => [
+                'id' => $customer?->getKey(),
+                'customer_number' => $customer?->customer_number,
+                'name' => $customer?->name,
+                'type' => $customer?->type,
+                'email' => $customer?->email,
+                'phone' => $customer?->phone,
+                'address' => $customer?->address,
+                'city' => $customer?->city,
+                'province' => $customer?->province,
+                'postal_code' => $customer?->postal_code,
+            ],
             'project' => [
                 'id' => $project->getKey(),
                 'project_number' => $project->project_number,
                 'name' => $project->name,
-                'updated_at' => optional($project->updated_at)->toISOString(),
+                'customer_id' => $project->customer_id,
+                'building_type' => $project->building_type,
+                'proposed_system' => $project->proposed_system,
+                'site_address' => $project->site_address,
+                'city' => $project->city,
+                'province' => $project->province,
+                'postal_code' => $project->postal_code,
+                'latitude' => $project->latitude,
+                'longitude' => $project->longitude,
+                'description' => $project->description,
             ],
             'technical_calculation' => [
-                'id' => $project->technicalCalculation?->getKey(),
-                'status' => $project->technicalCalculation?->result_status,
-                'updated_at' => optional($project->technicalCalculation?->updated_at)->toISOString(),
+                'id' => $technical?->getKey(),
+                'system_type' => $technical?->system_type,
+                'result_status' => $technical?->result_status,
+                'results' => $technical?->results,
+                'override_summary' => $technical?->override_summary,
+                'warnings' => $technical?->warnings,
+                'engineering_notes' => $technical?->engineering_notes,
             ],
             'bill_of_material' => [
                 'id' => $bom->getKey(),
+                'status' => $bom->status,
                 'pricing_status' => $bom->pricing_status,
                 'summary' => $bom->summary,
+                'warnings' => $bom->warnings,
+                'notes' => $bom->notes,
+                'pricing_parameters' => $bom->pricing_parameters,
                 'material_price_subtotal_idr' => $this->money($bom->material_price_subtotal_idr),
                 'labor_cost_idr' => $this->money($bom->labor_cost_idr),
                 'logistics_cost_idr' => $this->money($bom->logistics_cost_idr),
@@ -233,25 +289,46 @@ class QuotationEngine
                 'tax_idr' => $this->money($bom->tax_idr),
                 'discount_idr' => $this->money($bom->discount_idr),
                 'grand_price_idr' => $this->money($bom->grand_price_idr),
-                'priced_at' => optional($bom->priced_at)->toISOString(),
-                'updated_at' => optional($bom->updated_at)->toISOString(),
-                'items' => $bom->items->map(fn ($item): array => [
+                'items' => collect($bom->items)->map(fn ($item): array => [
                     'id' => $item->getKey(),
+                    'category' => $item->category,
                     'item_code' => $item->item_code,
                     'item_name' => $item->item_name,
+                    'description' => $item->description,
                     'quantity' => $this->number($item->quantity, 3),
                     'unit' => $item->unit,
                     'unit_price_idr' => $this->money($item->unit_price_idr),
                     'line_price_idr' => $this->money($item->line_price_idr),
-                    'updated_at' => optional($item->updated_at)->toISOString(),
+                    'metadata' => $item->metadata,
                 ])->values()->all(),
             ],
             'financial_analysis' => [
                 'id' => $analysis->getKey(),
                 'status' => $analysis->status,
+                'currency' => $analysis->currency,
+                'electricity_tariff_idr_per_kwh' => $this->money($analysis->electricity_tariff_idr_per_kwh),
+                'export_credit_percent' => $this->number($analysis->export_credit_percent, 2),
+                'self_consumption_percent' => $this->number($analysis->self_consumption_percent, 2),
+                'tariff_escalation_percent' => $this->number($analysis->tariff_escalation_percent, 2),
+                'annual_om_percent' => $this->number($analysis->annual_om_percent, 2),
+                'discount_rate_percent' => $this->number($analysis->discount_rate_percent, 2),
+                'energy_degradation_percent' => $this->number($analysis->energy_degradation_percent, 2),
+                'project_lifetime_years' => (int) $analysis->project_lifetime_years,
+                'replacement_year' => $analysis->replacement_year === null ? null : (int) $analysis->replacement_year,
+                'replacement_cost_idr' => $this->money($analysis->replacement_cost_idr),
                 'project_capex_idr' => $this->money($analysis->project_capex_idr),
-                'updated_at' => optional($analysis->updated_at)->toISOString(),
-                'calculated_at' => optional($analysis->calculated_at)->toISOString(),
+                'annual_energy_kwh' => $this->number($analysis->annual_energy_kwh, 2),
+                'first_year_saving_idr' => $this->money($analysis->first_year_saving_idr),
+                'annual_om_cost_idr' => $this->money($analysis->annual_om_cost_idr),
+                'simple_payback_years' => $analysis->simple_payback_years === null ? null : $this->number($analysis->simple_payback_years, 2),
+                'lifetime_roi_percent' => $this->number($analysis->lifetime_roi_percent, 2),
+                'npv_idr' => $this->money($analysis->npv_idr),
+                'irr_percent' => $analysis->irr_percent === null ? null : $this->number($analysis->irr_percent, 2),
+                'lcoe_idr_per_kwh' => $analysis->lcoe_idr_per_kwh === null ? null : $this->number($analysis->lcoe_idr_per_kwh, 2),
+                'summary' => $analysis->summary,
+                'cashflows' => $analysis->cashflows,
+                'warnings' => $analysis->warnings,
+                'notes' => $analysis->notes,
             ],
         ]);
     }
@@ -442,7 +519,7 @@ class QuotationEngine
                 'gross_margin_idr' => $this->money($bom->gross_margin_idr),
                 'gross_margin_percent' => $this->number($bom->gross_margin_percent, 2),
             ],
-            'boq_items' => $bom->items->map(fn ($item): array => [
+            'boq_items' => collect($bom->items)->map(fn ($item): array => [
                 'id' => $item->getKey(),
                 'category' => $item->category,
                 'item_code' => $item->item_code,

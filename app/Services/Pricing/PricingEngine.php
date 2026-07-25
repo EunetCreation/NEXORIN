@@ -4,6 +4,7 @@ namespace App\Services\Pricing;
 
 use App\Models\BillOfMaterial;
 use App\Models\BillOfMaterialItem;
+use App\Models\Project;
 
 class PricingEngine
 {
@@ -33,13 +34,14 @@ class PricingEngine
         $scopeCounters = $this->scopeCounters($bom);
         $pricingHealth = $this->emptyPricingHealth();
         $resolver = $this->priceResolver ?? new PriceResolver();
+        $project = $this->projectContext($bom);
 
         foreach ($bom->items as $item) {
             $metadata = $item->metadata ?? [];
             $isSummaryCost = $this->isSummaryCost($metadata);
             $isChargeable = $this->isChargeable($metadata) && ! $isSummaryCost;
             $priceDecision = $isChargeable
-                ? $this->resolveUnitPricing($bom, $item, $normalized, $unitCosts, $categoryFallbacks, $resolver)
+                ? $this->resolveUnitPricing($bom, $item, $normalized, $unitCosts, $categoryFallbacks, $resolver, $project)
                 : $this->excludedPricingDecision($metadata, $isSummaryCost);
 
             $commercialDecision = $this->applyLineCommercialRules($item, $priceDecision, $normalized, $isChargeable);
@@ -196,6 +198,7 @@ class PricingEngine
             'missing_price_item_count' => $pricingHealth['missing_price_item_count'],
             'expired_price_item_count' => $pricingHealth['expired_price_item_count'],
             'unavailable_price_item_count' => $pricingHealth['unavailable_price_item_count'],
+            'catalog_review_item_count' => $pricingHealth['catalog_review_item_count'],
             'low_margin_item_count' => $pricingHealth['low_margin_item_count'],
             'discount_limit_exceeded_count' => $pricingHealth['discount_limit_exceeded_count'],
             'tax_review_issue_count' => $pricingHealth['tax_review_issue_count'],
@@ -475,6 +478,21 @@ class PricingEngine
         return $counters;
     }
 
+    private function projectContext(BillOfMaterial $bom): ?Project
+    {
+        if ($bom->relationLoaded('project')) {
+            $project = $bom->getRelation('project');
+
+            return $project instanceof Project ? $project : null;
+        }
+
+        if (! $bom->project_id) {
+            return null;
+        }
+
+        return $bom->project()->first();
+    }
+
     /** @return array<string, mixed> */
     private function resolveUnitPricing(
         BillOfMaterial $bom,
@@ -482,9 +500,12 @@ class PricingEngine
         array $parameters,
         array $unitCosts,
         array $categoryFallbacks,
-        PriceResolver $resolver
+        PriceResolver $resolver,
+        ?Project $project
     ): array {
-        $resolved = $resolver->resolve($item, $bom->company_id, $parameters);
+        $resolved = $resolver->resolve($item, $bom->company_id, array_merge($parameters, [
+            'project' => $project,
+        ]));
 
         if ($resolved['resolved'] ?? false) {
             return [
@@ -494,7 +515,12 @@ class PricingEngine
                 'pricing_state' => (string) ($resolved['state'] ?? 'priced'),
                 'pricing_trace' => $resolved['trace'] ?? [],
                 'source_margin_percent' => $resolved['margin_percent'] ?? null,
-                'warnings' => $resolved['warnings'] ?? [],
+                'catalog_review_required' => (bool) ($resolved['catalog_review_required'] ?? false),
+                'catalog_review_message' => $resolved['catalog_review_message'] ?? null,
+                'warnings' => array_values(array_filter(array_merge(
+                    $resolved['warnings'] ?? [],
+                    [($resolved['catalog_review_required'] ?? false) ? ($resolved['catalog_review_message'] ?? null) : null]
+                ))),
             ];
         }
 
@@ -514,6 +540,8 @@ class PricingEngine
                     'resolved_at' => now()->toISOString(),
                 ]),
                 'source_margin_percent' => $parameters['material_markup_percent'],
+                'catalog_review_required' => false,
+                'catalog_review_message' => null,
                 'warnings' => [],
             ];
         }
@@ -530,6 +558,8 @@ class PricingEngine
                 'resolved_at' => now()->toISOString(),
             ]),
             'source_margin_percent' => null,
+            'catalog_review_required' => false,
+            'catalog_review_message' => null,
             'warnings' => [],
         ];
     }
@@ -554,6 +584,8 @@ class PricingEngine
                 'resolved_at' => now()->toISOString(),
             ],
             'source_margin_percent' => null,
+            'catalog_review_required' => false,
+            'catalog_review_message' => null,
             'warnings' => [],
         ];
     }
@@ -579,6 +611,7 @@ class PricingEngine
             'missing_price_item_count' => 0,
             'expired_price_item_count' => 0,
             'unavailable_price_item_count' => 0,
+            'catalog_review_item_count' => 0,
             'low_margin_item_count' => 0,
             'discount_limit_exceeded_count' => 0,
             'tax_review_issue_count' => 0,
@@ -606,6 +639,10 @@ class PricingEngine
             'supplier_unavailable_warning' => $pricingHealth['unavailable_price_item_count']++,
             default => null,
         };
+
+        if (($priceDecision['catalog_review_required'] ?? false) === true) {
+            $pricingHealth['catalog_review_item_count']++;
+        }
     }
 
     private function finalPricingStatus(array $pricingHealth, float $grandPrice): string

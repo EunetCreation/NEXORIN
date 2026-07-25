@@ -169,7 +169,7 @@ class PriceBookItemController extends Controller
             ->when($linkedMaterialIds !== [], fn ($query) => $query->whereNotIn('id', $linkedMaterialIds))
             ->orderBy('name')
             ->orderBy('brand')
-            ->get(['id', 'company_id', 'material_category_id', 'sku', 'name', 'brand', 'model', 'uom']);
+            ->get(['id', 'company_id', 'material_category_id', 'sku', 'name', 'brand', 'model', 'uom', 'catalog_status', 'compliance_status', 'system_types', 'project_scales', 'suitable_roof_types', 'electrical_phase']);
     }
 
     private function suppliersForForm(Company $company)

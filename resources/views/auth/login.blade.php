@@ -26,9 +26,11 @@
     >
 
     <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
         rel="stylesheet"
     >
+
+    <link href="{{ asset('css/nexorin-engineering-system.css') }}?v=55a" rel="stylesheet">
 
     <style>
         :root {
@@ -676,28 +678,84 @@
         }
 
         .alert {
+            position: relative;
+            display: grid;
+            grid-template-columns: 42px minmax(0, 1fr);
+            gap: 12px;
+            align-items: start;
+            overflow: hidden;
             margin-bottom: 19px;
-            padding: 14px 16px;
-            border-radius: 14px;
-            font-size: 12px;
+            padding: 13px 14px;
+            border: 1px solid;
+            border-left-width: 4px;
+            border-radius: 17px;
+            background: #fff;
+            box-shadow: 0 13px 32px rgba(18, 44, 58, .07);
+        }
+
+        .alert::after {
+            content: "";
+            position: absolute;
+            width: 110px;
+            height: 110px;
+            right: -62px;
+            top: -74px;
+            border-radius: 50%;
+            border: 1px solid currentColor;
+            opacity: .09;
+            pointer-events: none;
+        }
+
+        .alert-icon {
+            display: grid;
+            place-items: center;
+            width: 40px;
+            height: 40px;
+            border: 1px solid currentColor;
+            border-radius: 13px;
+            background: rgba(255,255,255,.56);
+            opacity: .92;
+        }
+
+        .alert-icon svg { width: 20px; height: 20px; }
+        .alert-copy { min-width: 0; padding-top: 1px; }
+        .alert-kicker {
+            display: block;
+            margin-bottom: 3px;
+            font-family: "JetBrains Mono", monospace;
+            font-size: 8px;
+            font-weight: 700;
+            letter-spacing: .13em;
+            text-transform: uppercase;
+        }
+        .alert strong {
+            display: block;
+            color: var(--navy-950);
+            font-family: "Fraunces", Georgia, serif;
+            font-size: 17px;
+            font-weight: 650;
+            letter-spacing: -.025em;
+            line-height: 1.08;
+        }
+        .alert-message {
+            margin-top: 5px;
+            font-family: var(--font-body);
+            font-size: 10px;
             font-weight: 500;
             line-height: 1.55;
         }
+        .alert-message + .alert-message { margin-top: 4px; }
 
         .alert-danger {
-            color: var(--danger);
-            border: 1px solid var(--danger-border);
-            background: var(--danger-bg);
+            color: #943d35;
+            border-color: rgba(184, 73, 63, .28);
+            background: linear-gradient(135deg, #fff0ee, #fff9f8);
         }
 
         .alert-success {
-            color: var(--success);
-            border: 1px solid var(--success-border);
-            background: var(--success-bg);
-        }
-
-        .alert div + div {
-            margin-top: 5px;
+            color: #116c67;
+            border-color: rgba(19, 170, 162, .28);
+            background: linear-gradient(135deg, #eaf8f5, #f8fdfc);
         }
 
         .form-group {
@@ -1375,6 +1433,256 @@
                 transition-duration: 0.01ms !important;
             }
         }
+
+
+
+        /* Premium authentication handoff. Visible only after a valid submit. */
+        .login-transition {
+            position: fixed;
+            z-index: 999;
+            inset: 0;
+            display: grid;
+            place-items: center;
+            visibility: hidden;
+            opacity: 0;
+            overflow: hidden;
+            pointer-events: none;
+            color: #ffffff;
+            background:
+                radial-gradient(circle at 50% 38%, rgba(72, 225, 209, 0.18), transparent 24%),
+                radial-gradient(circle at 72% 62%, rgba(37, 99, 235, 0.11), transparent 26%),
+                linear-gradient(145deg, #020913 0%, #061a2b 52%, #073746 100%);
+            transition: opacity 260ms ease, visibility 260ms ease;
+        }
+
+        .login-transition.is-active {
+            visibility: visible;
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .login-transition::before,
+        .login-transition::after {
+            position: absolute;
+            content: "";
+            pointer-events: none;
+        }
+
+        .login-transition::before {
+            inset: 0;
+            opacity: 0.12;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px);
+            background-size: 72px 72px;
+            mask-image: radial-gradient(circle at center, #000 0 42%, transparent 76%);
+        }
+
+        .login-transition::after {
+            width: 720px;
+            height: 720px;
+            border-radius: 50%;
+            border: 1px solid rgba(79, 231, 215, 0.07);
+            box-shadow:
+                0 0 0 96px rgba(79, 231, 215, 0.025),
+                0 0 0 192px rgba(79, 231, 215, 0.012);
+            animation: authHalo 6s ease-in-out infinite alternate;
+        }
+
+        .login-transition-content {
+            position: relative;
+            width: min(520px, calc(100vw - 48px));
+            display: grid;
+            justify-items: center;
+            text-align: center;
+            animation: authContentIn 620ms cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        .login-transition-brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 24px;
+            color: rgba(255,255,255,0.92);
+            font-family: var(--font-display);
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 0.28em;
+            text-transform: uppercase;
+        }
+
+        .login-transition-brand::before,
+        .login-transition-brand::after {
+            width: 34px;
+            height: 1px;
+            content: "";
+            background: linear-gradient(90deg, transparent, rgba(89, 231, 216, 0.65));
+        }
+
+        .login-transition-brand::after {
+            transform: scaleX(-1);
+        }
+
+        .login-transition-mark {
+            position: relative;
+            width: 112px;
+            height: 112px;
+            display: grid;
+            place-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 34px;
+            background: linear-gradient(145deg, rgba(255,255,255,0.09), rgba(255,255,255,0.035));
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,0.16),
+                0 34px 90px rgba(0,0,0,0.34),
+                0 0 70px rgba(67,212,200,0.08);
+            backdrop-filter: blur(20px) saturate(130%);
+        }
+
+        .login-transition-mark::before {
+            position: absolute;
+            inset: 9px;
+            content: "";
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 26px;
+        }
+
+        .login-transition-mark img {
+            width: 76px;
+            height: 76px;
+            object-fit: contain;
+            filter: drop-shadow(0 18px 34px rgba(0,0,0,0.32));
+            animation: authMarkFloat 2.4s ease-in-out infinite;
+        }
+
+        .login-transition-orbit,
+        .login-transition-orbit::before {
+            position: absolute;
+            border-radius: 50%;
+        }
+
+        .login-transition-orbit {
+            inset: -15px;
+            background: conic-gradient(
+                from 20deg,
+                transparent 0 64%,
+                rgba(67,212,200,0.16) 72%,
+                #43d4c8 84%,
+                #f2c14e 91%,
+                transparent 100%
+            );
+            mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 0);
+            animation: authOrbit 1.25s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+        }
+
+        .login-transition-orbit::before {
+            inset: 7px;
+            content: "";
+            border: 1px solid rgba(67,212,200,0.09);
+        }
+
+        .login-transition-eyebrow {
+            margin-top: 30px;
+            color: #7dece2;
+            font-size: 9px;
+            font-weight: 800;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+        }
+
+        .login-transition-content strong {
+            margin-top: 8px;
+            font-family: var(--font-display);
+            font-size: clamp(28px, 4vw, 38px);
+            line-height: 1.08;
+            letter-spacing: -0.045em;
+        }
+
+        .login-transition-content > span.login-transition-copy {
+            max-width: 430px;
+            margin-top: 10px;
+            color: rgba(255,255,255,0.60);
+            font-size: 12px;
+            line-height: 1.7;
+        }
+
+        .login-transition-progress {
+            position: relative;
+            width: min(320px, 72vw);
+            height: 4px;
+            overflow: hidden;
+            margin-top: 28px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.10);
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.30);
+        }
+
+        .login-transition-progress::before {
+            position: absolute;
+            inset: 0;
+            content: "";
+            opacity: 0.35;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.28), transparent);
+        }
+
+        .login-transition-progress::after {
+            display: block;
+            width: 46%;
+            height: 100%;
+            content: "";
+            border-radius: inherit;
+            background: linear-gradient(90deg, #43d4c8 0%, #7dece2 48%, #f2c14e 100%);
+            box-shadow: 0 0 18px rgba(67,212,200,0.42);
+            animation: authProgress 0.95s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+        }
+
+        .login-transition-meta {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 16px;
+            color: rgba(255,255,255,0.42);
+            font-size: 9px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .login-transition-meta::before {
+            width: 6px;
+            height: 6px;
+            content: "";
+            border-radius: 50%;
+            background: #43d4c8;
+            box-shadow: 0 0 0 5px rgba(67,212,200,0.08);
+            animation: authStatus 1.7s ease-in-out infinite;
+        }
+
+        @keyframes authContentIn {
+            from { opacity: 0; transform: translateY(12px) scale(0.985); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        @keyframes authHalo {
+            from { transform: scale(0.95); opacity: 0.45; }
+            to { transform: scale(1.05); opacity: 0.76; }
+        }
+
+        @keyframes authMarkFloat {
+            50% { transform: translateY(-3px) scale(1.01); }
+        }
+
+        @keyframes authOrbit { to { transform: rotate(360deg); } }
+
+        @keyframes authProgress {
+            from { transform: translateX(-112%); }
+            to { transform: translateX(250%); }
+        }
+
+        @keyframes authStatus {
+            50% { opacity: 0.58; transform: scale(0.82); }
+        }
+
     </style>
 </head>
 
@@ -1470,22 +1778,30 @@
                     </header>
 
                     @if (session('status'))
-                        <div
-                            class="alert alert-success"
-                            role="status"
-                        >
-                            {{ session('status') }}
+                        <div class="alert alert-success" role="status">
+                            <span class="alert-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 7 9 18l-5-5"/><path d="M12 3 5 6v5c0 4.5 2.7 7.8 7 10 4.3-2.2 7-5.5 7-10V6z"/></svg>
+                            </span>
+                            <div class="alert-copy">
+                                <span class="alert-kicker">Secure access update</span>
+                                <strong>Authentication status updated</strong>
+                                <div class="alert-message">{{ session('status') }}</div>
+                            </div>
                         </div>
                     @endif
 
                     @if ($errors->any())
-                        <div
-                            class="alert alert-danger"
-                            role="alert"
-                        >
-                            @foreach ($errors->all() as $error)
-                                <div>{{ $error }}</div>
-                            @endforeach
+                        <div class="alert alert-danger" role="alert">
+                            <span class="alert-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 8v5M12 17h.01"/><path d="M10.3 3.6 2.8 17a2 2 0 0 0 1.8 3h14.8a2 2 0 0 0 1.8-3L13.7 3.6a2 2 0 0 0-3.4 0Z"/></svg>
+                            </span>
+                            <div class="alert-copy">
+                                <span class="alert-kicker">Secure access exception</span>
+                                <strong>Review your sign-in credentials</strong>
+                                @foreach ($errors->all() as $error)
+                                    <div class="alert-message">{{ $error }}</div>
+                                @endforeach
+                            </div>
                         </div>
                     @endif
 
@@ -1732,8 +2048,33 @@
         </section>
     </main>
 
+
+    <div id="loginTransition" class="login-transition" aria-hidden="true">
+        <div class="login-transition-content" role="status" aria-live="polite">
+            <span class="login-transition-brand">NEXORIN</span>
+            <span class="login-transition-mark">
+                <img src="{{ asset('images/nexorin-mark.png') }}" alt="">
+                <span class="login-transition-orbit" aria-hidden="true"></span>
+            </span>
+            <span class="login-transition-eyebrow">Secure workspace handoff</span>
+            <strong>Preparing your command center</strong>
+            <span class="login-transition-copy">Establishing your session and opening the engineering workspace.</span>
+            <span class="login-transition-progress" aria-hidden="true"></span>
+            <span class="login-transition-meta">Encrypted session</span>
+        </div>
+    </div>
+
+    <script src="{{ asset('js/nexorin-engineering-action.js') }}?v=55a" defer></script>
+
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            @if ($errors->any())
+                try {
+                    sessionStorage.removeItem('nexorin-auth-transition');
+                } catch (error) {
+                    // Storage access is optional.
+                }
+            @endif
             const passwordInput =
                 document.getElementById('password');
 
@@ -1751,6 +2092,12 @@
 
             const buttonText =
                 document.getElementById('buttonText');
+
+            const loginTransition =
+                document.getElementById('loginTransition');
+
+            const actionEngine = window.NexorinEngineeringAction;
+            let loginIsSubmitting = false;
 
             const heroPanel =
                 document.getElementById('heroPanel');
@@ -1834,15 +2181,57 @@
             ) {
                 loginForm.addEventListener(
                     'submit',
-                    function () {
+                    function (event) {
+                        if (loginIsSubmitting) {
+                            return;
+                        }
+
+                        event.preventDefault();
+                        loginIsSubmitting = true;
                         loginButton.disabled = true;
+                        loginButton.classList.add('is-loading');
+                        buttonText.textContent = 'Authenticating…';
 
-                        loginButton.classList.add(
-                            'is-loading'
-                        );
+                        try {
+                            sessionStorage.setItem(
+                                'nexorin-auth-transition',
+                                String(Date.now())
+                            );
+                        } catch (error) {
+                            // Storage access is optional.
+                        }
 
-                        buttonText.textContent =
-                            'Signing In...';
+                        let handoffDuration = 220;
+
+                        if (actionEngine) {
+                            const handoff = actionEngine.show({
+                                kind: 'auth',
+                                icon: 'auth',
+                                title: 'Authenticating Secure Workspace',
+                                copy: 'Credentials, session integrity, and protected workspace context are being validated before access is granted.',
+                                signal: 'NEXORIN secure access',
+                                eyebrow: 'Authentication command sequence',
+                                metaLeft: 'Encrypted session',
+                                metaRight: 'Role context protected',
+                                accent: '#13aaa2',
+                                secondary: '#f3a04f',
+                                duration: 980,
+                                steps: [
+                                    'Validating account credentials',
+                                    'Establishing the encrypted session',
+                                    'Resolving role and company access',
+                                    'Opening the engineering command center',
+                                ],
+                            });
+                            handoffDuration = handoff.duration;
+                        } else {
+                            loginTransition?.classList.add('is-active');
+                            loginTransition?.setAttribute('aria-hidden', 'false');
+                        }
+
+                        window.setTimeout(function () {
+                            loginForm.submit();
+                        }, handoffDuration);
                     }
                 );
             }

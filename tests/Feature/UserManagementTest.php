@@ -65,7 +65,7 @@ class UserManagementTest extends TestCase
             ->actingAs($this->superAdmin)
             ->get(route('users.index'))
             ->assertOk()
-            ->assertSee('User Directory')
+            ->assertSee('Users')
             ->assertSee($this->superAdmin->email);
     }
 

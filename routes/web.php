@@ -10,12 +10,17 @@ use App\Http\Controllers\LoadAnalysisController;
 use App\Http\Controllers\LoadApplianceController;
 use App\Http\Controllers\LocationSolarController;
 use App\Http\Controllers\MaterialCatalogController;
+use App\Http\Controllers\MaterialCertificateController;
 use App\Http\Controllers\MaterialDatasheetController;
+use App\Http\Controllers\MaterialDocumentController;
+use App\Http\Controllers\MaterialEvidenceController;
+use App\Http\Controllers\MaterialSpecController;
 use App\Http\Controllers\PriceBookBulkItemController;
 use App\Http\Controllers\PriceBookController;
 use App\Http\Controllers\PriceBookItemController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectReportController;
+use App\Http\Controllers\ProjectSldController;
 use App\Http\Controllers\QuotationController;
 use App\Http\Controllers\RoofSiteSurveyController;
 use App\Http\Controllers\RoofSiteSurveyPhotoController;
@@ -250,6 +255,77 @@ Route::middleware(['auth', 'user.active'])->group(function () {
                 ->middleware('company.permission:calculation.revise')
                 ->name('technical-calculations.overrides.reset');
 
+            Route::get('/projects/{project}/sld', [ProjectSldController::class, 'show'])
+                ->middleware('company.permission:calculation.view,calculation.run,calculation.revise,calculation.verify,calculation.view_own')
+                ->name('projects.sld.show');
+
+            Route::get('/projects/{project}/sld/edit', [ProjectSldController::class, 'edit'])
+                ->middleware('company.permission:calculation.view,calculation.run,calculation.revise,calculation.verify,calculation.view_own')
+                ->name('projects.sld.edit');
+
+            Route::patch('/projects/{project}/sld/editor', [ProjectSldController::class, 'saveEditor'])
+                ->middleware('company.permission:calculation.revise')
+                ->name('projects.sld.editor.save');
+
+            Route::patch('/projects/{project}/sld/controller', [ProjectSldController::class, 'syncController'])
+                ->middleware('company.permission:calculation.revise')
+                ->name('projects.sld.controller.sync');
+
+            Route::post('/projects/{project}/sld/generate', [ProjectSldController::class, 'generate'])
+                ->middleware('company.permission:calculation.run,calculation.revise')
+                ->name('projects.sld.generate');
+
+            Route::patch('/projects/{project}/sld/document-control', [ProjectSldController::class, 'updateDocumentControl'])
+                ->middleware('company.permission:calculation.revise')
+                ->name('projects.sld.document-control.update');
+
+            Route::patch('/projects/{project}/sld/submit', [ProjectSldController::class, 'submit'])
+                ->middleware('company.permission:calculation.revise')
+                ->name('projects.sld.submit');
+
+            Route::patch('/projects/{project}/sld/check', [ProjectSldController::class, 'check'])
+                ->middleware('company.permission:calculation.verify')
+                ->name('projects.sld.check');
+
+            Route::patch('/projects/{project}/sld/approve', [ProjectSldController::class, 'approve'])
+                ->middleware('company.permission:calculation.verify')
+                ->name('projects.sld.approve');
+
+            Route::patch('/projects/{project}/sld/reject', [ProjectSldController::class, 'reject'])
+                ->middleware('company.permission:calculation.verify')
+                ->name('projects.sld.reject');
+
+            Route::patch('/projects/{project}/sld/issue', [ProjectSldController::class, 'issue'])
+                ->middleware('company.permission:calculation.verify')
+                ->name('projects.sld.issue');
+
+            Route::get('/projects/{project}/sld/manifest.json', [ProjectSldController::class, 'manifest'])
+                ->middleware('company.permission:calculation.view,calculation.verify,calculation.view_own')
+                ->name('projects.sld.manifest');
+
+            Route::get('/projects/{project}/sld.svg', [ProjectSldController::class, 'svg'])
+                ->middleware('company.permission:calculation.view,calculation.verify,calculation.view_own')
+                ->name('projects.sld.svg');
+
+            Route::get('/projects/{project}/sld.pdf', [ProjectSldController::class, 'pdf'])
+                ->middleware('company.permission:calculation.view,calculation.verify,calculation.view_own')
+                ->name('projects.sld.pdf');
+
+            Route::get('/projects/{project}/sld-package.zip', [ProjectSldController::class, 'package'])
+                ->middleware('company.permission:calculation.view,calculation.verify,calculation.view_own')
+                ->name('projects.sld.package');
+
+
+            Route::get('/projects/{project}/sld/revisions/{revision}/packages/{event}', [ProjectSldController::class, 'downloadArchivedPackage'])
+                ->whereNumber('revision')
+                ->middleware('company.permission:calculation.view,calculation.verify,calculation.view_own')
+                ->name('projects.sld.packages.download');
+
+            Route::post('/projects/{project}/sld/revisions/{revision}/packages/{event}/verify', [ProjectSldController::class, 'verifyArchivedPackage'])
+                ->whereNumber('revision')
+                ->middleware('company.permission:calculation.verify')
+                ->name('projects.sld.packages.verify');
+
             Route::get('/boms', [BillOfMaterialController::class, 'index'])
                 ->middleware('company.permission:calculation.view,calculation.view_own')
                 ->name('boms.index');
@@ -310,17 +386,69 @@ Route::middleware(['auth', 'user.active'])->group(function () {
                 ->middleware('company.permission:equipment.update')
                 ->name('materials.approve');
 
+            Route::post('/material-catalog/{material}/specifications', [MaterialSpecController::class, 'store'])
+                ->middleware('company.permission:equipment.update')
+                ->name('materials.specs.store');
+
+            Route::delete('/material-catalog/{material}/specifications/{spec}', [MaterialSpecController::class, 'destroy'])
+                ->middleware('company.permission:equipment.update')
+                ->name('materials.specs.destroy');
+
+            Route::get('/material-catalog/{material}/datasheets/{datasheet}/source', [MaterialEvidenceController::class, 'datasheet'])
+                ->middleware('company.permission:equipment.view')
+                ->name('materials.datasheets.source');
+
             Route::post('/material-catalog/{material}/datasheets', [MaterialDatasheetController::class, 'store'])
                 ->middleware('company.permission:equipment.update')
                 ->name('materials.datasheets.store');
+
+            Route::post('/material-catalog/{material}/datasheets/{datasheet}/reparse', [MaterialDatasheetController::class, 'reparse'])
+                ->middleware('company.permission:equipment.update')
+                ->name('materials.datasheets.reparse');
 
             Route::post('/material-catalog/{material}/datasheets/{datasheet}/apply', [MaterialDatasheetController::class, 'applyParsedSpecs'])
                 ->middleware('company.permission:equipment.update')
                 ->name('materials.datasheets.apply');
 
+            Route::patch('/material-catalog/{material}/datasheets/{datasheet}/applications/{application}/rollback', [MaterialDatasheetController::class, 'rollback'])
+                ->middleware('company.permission:equipment.update')
+                ->name('materials.datasheets.applications.rollback');
+
             Route::delete('/material-catalog/{material}/datasheets/{datasheet}', [MaterialDatasheetController::class, 'archive'])
                 ->middleware('company.permission:equipment.update')
                 ->name('materials.datasheets.archive');
+
+            Route::get('/material-catalog/{material}/certificates/{certificate}/source', [MaterialEvidenceController::class, 'certificate'])
+                ->middleware('company.permission:equipment.view')
+                ->name('materials.certificates.source');
+
+            Route::post('/material-catalog/{material}/certificates', [MaterialCertificateController::class, 'store'])
+                ->middleware('company.permission:equipment.update')
+                ->name('materials.certificates.store');
+
+            Route::patch('/material-catalog/{material}/certificates/{certificate}/verify', [MaterialCertificateController::class, 'verify'])
+                ->middleware('company.permission:equipment.update')
+                ->name('materials.certificates.verify');
+
+            Route::delete('/material-catalog/{material}/certificates/{certificate}', [MaterialCertificateController::class, 'archive'])
+                ->middleware('company.permission:equipment.update')
+                ->name('materials.certificates.archive');
+
+            Route::get('/material-catalog/{material}/documents/{document}/source', [MaterialEvidenceController::class, 'document'])
+                ->middleware('company.permission:equipment.view')
+                ->name('materials.documents.source');
+
+            Route::post('/material-catalog/{material}/documents', [MaterialDocumentController::class, 'store'])
+                ->middleware('company.permission:equipment.update')
+                ->name('materials.documents.store');
+
+            Route::patch('/material-catalog/{material}/documents/{document}/verify', [MaterialDocumentController::class, 'verify'])
+                ->middleware('company.permission:equipment.update')
+                ->name('materials.documents.verify');
+
+            Route::delete('/material-catalog/{material}/documents/{document}', [MaterialDocumentController::class, 'archive'])
+                ->middleware('company.permission:equipment.update')
+                ->name('materials.documents.archive');
 
             Route::delete('/material-catalog/{material}', [MaterialCatalogController::class, 'archive'])
                 ->middleware('company.permission:equipment.delete')
@@ -659,3 +787,4 @@ Route::middleware(['auth', 'user.active'])->group(function () {
         ])
         ->name('companies.approval-test');
 });
+

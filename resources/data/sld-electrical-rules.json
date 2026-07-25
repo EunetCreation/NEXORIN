@@ -1,0 +1,792 @@
+{
+  "schema": "nexorin.sld.electrical-rules.v1",
+  "checkpoint": "APP67I",
+  "version": "67I.1",
+  "claim": "Deterministic design-rule checks for NEXORIN SLD drafting. Results support engineering review and do not replace project-specific protection coordination, conductor calculations, manufacturer instructions, or local authority approval.",
+  "severity": {
+    "error": {
+      "label": "Error",
+      "rank": 40,
+      "blocking": true
+    },
+    "warning": {
+      "label": "Warning",
+      "rank": 30,
+      "blocking": false
+    },
+    "notice": {
+      "label": "Notice",
+      "rank": 20,
+      "blocking": false
+    },
+    "info": {
+      "label": "Information",
+      "rank": 10,
+      "blocking": false
+    }
+  },
+  "network_families": {
+    "dc_positive": "dc",
+    "dc_negative": "dc",
+    "dc_power": "dc",
+    "battery_positive": "battery",
+    "battery_negative": "battery",
+    "battery_dc": "battery",
+    "ac_power": "ac",
+    "neutral": "neutral",
+    "protective_earth": "protective_earth",
+    "functional_earth": "functional_earth",
+    "communication": "communication",
+    "control": "control",
+    "measurement": "measurement",
+    "power": "power",
+    "unclassified": "unclassified"
+  },
+  "compatible_networks": {
+    "dc_positive": [
+      "dc_positive",
+      "dc_power"
+    ],
+    "dc_negative": [
+      "dc_negative",
+      "dc_power"
+    ],
+    "dc_power": [
+      "dc_positive",
+      "dc_negative",
+      "dc_power"
+    ],
+    "battery_positive": [
+      "battery_positive",
+      "battery_dc"
+    ],
+    "battery_negative": [
+      "battery_negative",
+      "battery_dc"
+    ],
+    "battery_dc": [
+      "battery_positive",
+      "battery_negative",
+      "battery_dc"
+    ],
+    "ac_power": [
+      "ac_power"
+    ],
+    "neutral": [
+      "neutral"
+    ],
+    "protective_earth": [
+      "protective_earth"
+    ],
+    "functional_earth": [
+      "functional_earth"
+    ],
+    "communication": [
+      "communication"
+    ],
+    "control": [
+      "control"
+    ],
+    "measurement": [
+      "measurement"
+    ],
+    "power": [
+      "power"
+    ],
+    "unclassified": []
+  },
+  "power_networks": [
+    "dc_positive",
+    "dc_negative",
+    "dc_power",
+    "battery_positive",
+    "battery_negative",
+    "battery_dc",
+    "ac_power",
+    "neutral",
+    "protective_earth",
+    "functional_earth",
+    "power"
+  ],
+  "symbol_profiles": {
+    "pv_array": {
+      "critical_path": true,
+      "grounding_expected": true,
+      "requirements": [
+        {
+          "id": "positive_source",
+          "ports": [
+            "DC_OUT",
+            "DC_POS"
+          ],
+          "severity": "error",
+          "label": "PV positive/source output"
+        },
+        {
+          "id": "negative_source",
+          "ports": [
+            "DC_OUT",
+            "DC_NEG"
+          ],
+          "severity": "error",
+          "label": "PV negative/source output"
+        }
+      ]
+    },
+    "dc_protection": {
+      "critical_path": true,
+      "grounding_expected": true,
+      "requirements": [
+        {
+          "id": "dc_input",
+          "ports": [
+            "DC_IN"
+          ],
+          "severity": "error",
+          "label": "DC protection input"
+        },
+        {
+          "id": "dc_output",
+          "ports": [
+            "DC_OUT"
+          ],
+          "severity": "error",
+          "label": "DC protection output"
+        }
+      ],
+      "manual_properties": [
+        {
+          "field": "rated_voltage",
+          "label": "rated voltage",
+          "severity": "warning"
+        },
+        {
+          "field": "rated_current",
+          "label": "rated current",
+          "severity": "warning"
+        }
+      ]
+    },
+    "inverter": {
+      "critical_path": true,
+      "grounding_expected": true,
+      "requirements": [
+        {
+          "id": "dc_positive_input",
+          "ports": [
+            "DC_IN",
+            "DC_MPPT1_POS"
+          ],
+          "severity": "error",
+          "label": "Inverter DC positive/input"
+        },
+        {
+          "id": "dc_negative_input",
+          "ports": [
+            "DC_IN",
+            "DC_MPPT1_NEG"
+          ],
+          "severity": "error",
+          "label": "Inverter DC negative/input"
+        },
+        {
+          "id": "ac_output",
+          "ports": [
+            "AC_OUT"
+          ],
+          "severity": "error",
+          "label": "Inverter AC output"
+        }
+      ]
+    },
+    "hybrid_inverter": {
+      "critical_path": true,
+      "grounding_expected": true,
+      "requirements": [
+        {
+          "id": "pv_input",
+          "ports": [
+            "PV_POS",
+            "PV_NEG"
+          ],
+          "mode": "all",
+          "severity": "error",
+          "label": "Hybrid inverter PV positive and negative inputs"
+        },
+        {
+          "id": "ac_output",
+          "ports": [
+            "GRID_AC"
+          ],
+          "severity": "error",
+          "label": "Hybrid inverter grid AC terminal"
+        }
+      ]
+    },
+    "offgrid_inverter": {
+      "critical_path": true,
+      "grounding_expected": true,
+      "requirements": [
+        {
+          "id": "dc_input",
+          "ports": [
+            "BAT_POS",
+            "BAT_NEG"
+          ],
+          "mode": "all",
+          "severity": "error",
+          "label": "Off-grid inverter battery positive and negative inputs"
+        },
+        {
+          "id": "ac_output",
+          "ports": [
+            "AC_OUT"
+          ],
+          "severity": "error",
+          "label": "Off-grid inverter AC output"
+        }
+      ]
+    },
+    "central_inverter": {
+      "critical_path": true,
+      "grounding_expected": true,
+      "requirements": [
+        {
+          "id": "dc_input",
+          "ports": [
+            "DC_IN_POS",
+            "DC_IN_NEG"
+          ],
+          "mode": "all",
+          "severity": "error",
+          "label": "Central inverter DC positive and negative inputs"
+        },
+        {
+          "id": "ac_output",
+          "ports": [
+            "AC_OUT"
+          ],
+          "severity": "error",
+          "label": "Central inverter AC output"
+        }
+      ]
+    },
+    "pcs": {
+      "critical_path": true,
+      "grounding_expected": true,
+      "requirements": [
+        {
+          "id": "dc_bus",
+          "ports": [
+            "BAT_POS",
+            "BAT_NEG"
+          ],
+          "mode": "all",
+          "severity": "error",
+          "label": "PCS battery positive and negative DC terminals"
+        },
+        {
+          "id": "ac_bus",
+          "ports": [
+            "AC_GRID"
+          ],
+          "severity": "error",
+          "label": "PCS AC grid terminal"
+        }
+      ]
+    },
+    "ac_protection": {
+      "critical_path": true,
+      "grounding_expected": true,
+      "requirements": [
+        {
+          "id": "ac_input",
+          "ports": [
+            "AC_IN"
+          ],
+          "severity": "error",
+          "label": "AC protection input"
+        },
+        {
+          "id": "ac_output",
+          "ports": [
+            "AC_OUT"
+          ],
+          "severity": "error",
+          "label": "AC protection output"
+        }
+      ],
+      "manual_properties": [
+        {
+          "field": "rated_voltage",
+          "label": "rated voltage",
+          "severity": "warning"
+        },
+        {
+          "field": "rated_current",
+          "label": "rated current",
+          "severity": "warning"
+        }
+      ]
+    },
+    "meter": {
+      "critical_path": true,
+      "requirements": [
+        {
+          "id": "meter_input",
+          "ports": [
+            "AC_IN"
+          ],
+          "severity": "error",
+          "label": "Meter customer-side input"
+        },
+        {
+          "id": "meter_output",
+          "ports": [
+            "AC_OUT"
+          ],
+          "severity": "error",
+          "label": "Meter utility-side output"
+        }
+      ]
+    },
+    "grid": {
+      "critical_path": true,
+      "requirements": [
+        {
+          "id": "pcc",
+          "ports": [
+            "AC_PCC"
+          ],
+          "severity": "error",
+          "label": "Point of common coupling"
+        }
+      ]
+    },
+    "battery": {
+      "grounding_expected": true,
+      "requirements": [
+        {
+          "id": "battery_positive",
+          "ports": [
+            "BAT_DC",
+            "BAT_POS"
+          ],
+          "severity": "error",
+          "label": "Battery positive/DC terminal"
+        },
+        {
+          "id": "battery_negative",
+          "ports": [
+            "BAT_DC",
+            "BAT_NEG"
+          ],
+          "severity": "error",
+          "label": "Battery negative/DC terminal"
+        }
+      ]
+    },
+    "battery_rack": {
+      "grounding_expected": true
+    },
+    "battery_disconnect": {},
+    "panel": {
+      "grounding_expected": true
+    },
+    "main_panel": {
+      "grounding_expected": true
+    },
+    "critical_panel": {
+      "grounding_expected": true
+    },
+    "backup_panel": {
+      "grounding_expected": true,
+      "requirements": [
+        {
+          "id": "backup_input",
+          "ports": [
+            "AC_IN"
+          ],
+          "severity": "error",
+          "label": "Backup panel input"
+        }
+      ]
+    },
+    "transformer": {
+      "grounding_expected": true
+    },
+    "generator": {
+      "grounding_expected": true
+    },
+    "dc_breaker": {
+      "grounding_expected": true,
+      "manual_properties": [
+        {
+          "field": "rated_voltage",
+          "label": "rated voltage",
+          "severity": "warning"
+        },
+        {
+          "field": "rated_current",
+          "label": "rated current",
+          "severity": "warning"
+        }
+      ]
+    },
+    "lightning_arrester": {
+      "grounding_expected": true,
+      "requirements": [
+        {
+          "id": "surge_line",
+          "ports": [
+            "LINE"
+          ],
+          "severity": "error",
+          "label": "Surge arrester line terminal"
+        },
+        {
+          "id": "surge_earth",
+          "ports": [
+            "PE"
+          ],
+          "severity": "error",
+          "label": "Surge arrester earth discharge"
+        }
+      ],
+      "manual_properties": [
+        {
+          "field": "rated_voltage",
+          "label": "rated voltage or MCOV basis",
+          "severity": "warning"
+        }
+      ]
+    },
+    "ct": {
+      "requirements": [
+        {
+          "id": "ct_primary",
+          "ports": [
+            "P1",
+            "P2"
+          ],
+          "mode": "all",
+          "severity": "warning",
+          "label": "CT primary circuit"
+        },
+        {
+          "id": "ct_secondary",
+          "ports": [
+            "S1",
+            "S2"
+          ],
+          "mode": "all",
+          "severity": "warning",
+          "label": "CT measurement secondary"
+        }
+      ]
+    },
+    "pt": {
+      "requirements": [
+        {
+          "id": "pt_primary",
+          "ports": [
+            "PRIMARY"
+          ],
+          "severity": "warning",
+          "label": "VT/PT primary"
+        },
+        {
+          "id": "pt_secondary",
+          "ports": [
+            "SECONDARY"
+          ],
+          "severity": "warning",
+          "label": "VT/PT measurement secondary"
+        }
+      ]
+    },
+    "dc_fuse": {
+      "manual_properties": [
+        {
+          "field": "rated_voltage",
+          "label": "rated voltage",
+          "severity": "warning"
+        },
+        {
+          "field": "rated_current",
+          "label": "rated current",
+          "severity": "warning"
+        }
+      ],
+      "critical_path": true,
+      "requirements": [
+        {
+          "id": "dc_input",
+          "ports": [
+            "DC_IN"
+          ],
+          "mode": "all",
+          "severity": "error",
+          "label": "DC fuse input"
+        },
+        {
+          "id": "dc_output",
+          "ports": [
+            "DC_OUT"
+          ],
+          "mode": "all",
+          "severity": "error",
+          "label": "DC fuse output"
+        }
+      ]
+    },
+    "dc_isolator": {
+      "critical_path": true,
+      "requirements": [
+        {
+          "id": "dc_input",
+          "ports": [
+            "DC_IN"
+          ],
+          "mode": "all",
+          "severity": "error",
+          "label": "DC isolator input"
+        },
+        {
+          "id": "dc_output",
+          "ports": [
+            "DC_OUT"
+          ],
+          "mode": "all",
+          "severity": "error",
+          "label": "DC isolator output"
+        }
+      ]
+    },
+    "dc_busbar": {
+      "critical_path": true,
+      "requirements": [
+        {
+          "id": "dc_input",
+          "ports": [
+            "DC_IN"
+          ],
+          "mode": "all",
+          "severity": "error",
+          "label": "DC bus input"
+        },
+        {
+          "id": "dc_output",
+          "ports": [
+            "DC_OUT"
+          ],
+          "mode": "all",
+          "severity": "error",
+          "label": "DC bus output and SPD tap"
+        }
+      ]
+    },
+    "dc_spd": {
+      "grounding_expected": true,
+      "requirements": [
+        {
+          "id": "dc_tap",
+          "ports": [
+            "DC_TAP"
+          ],
+          "mode": "all",
+          "severity": "error",
+          "label": "DC SPD bus tap"
+        },
+        {
+          "id": "pe",
+          "ports": [
+            "PE"
+          ],
+          "mode": "all",
+          "severity": "error",
+          "label": "DC SPD protective earth"
+        }
+      ]
+    },
+    "ac_breaker": {
+      "critical_path": true,
+      "requirements": [
+        {
+          "id": "ac_input",
+          "ports": [
+            "AC_IN"
+          ],
+          "mode": "all",
+          "severity": "error",
+          "label": "AC breaker input"
+        },
+        {
+          "id": "ac_output",
+          "ports": [
+            "AC_OUT"
+          ],
+          "mode": "all",
+          "severity": "error",
+          "label": "AC breaker output"
+        }
+      ]
+    },
+    "ac_isolator": {
+      "critical_path": true,
+      "requirements": [
+        {
+          "id": "ac_input",
+          "ports": [
+            "AC_IN"
+          ],
+          "mode": "all",
+          "severity": "error",
+          "label": "AC isolator input"
+        },
+        {
+          "id": "ac_output",
+          "ports": [
+            "AC_OUT"
+          ],
+          "mode": "all",
+          "severity": "error",
+          "label": "AC isolator output"
+        }
+      ]
+    },
+    "ac_combiner": {
+      "critical_path": true,
+      "grounding_expected": true,
+      "requirements": [
+        {
+          "id": "ac_input",
+          "ports": [
+            "AC_IN"
+          ],
+          "mode": "all",
+          "severity": "error",
+          "label": "AC combiner incoming feeder"
+        },
+        {
+          "id": "ac_output",
+          "ports": [
+            "AC_OUT"
+          ],
+          "mode": "all",
+          "severity": "error",
+          "label": "AC combiner outgoing feeder and SPD tap"
+        }
+      ]
+    },
+    "ac_spd": {
+      "grounding_expected": true,
+      "requirements": [
+        {
+          "id": "ac_tap",
+          "ports": [
+            "AC_TAP"
+          ],
+          "mode": "all",
+          "severity": "error",
+          "label": "AC SPD bus tap"
+        },
+        {
+          "id": "pe",
+          "ports": [
+            "PE"
+          ],
+          "mode": "all",
+          "severity": "error",
+          "label": "AC SPD protective earth"
+        }
+      ]
+    },
+    "data_logger": {
+      "grounding_expected": true,
+      "requirements": [
+        {
+          "id": "field_comm",
+          "ports": [
+            "COM_1",
+            "COM_2"
+          ],
+          "mode": "any",
+          "severity": "warning",
+          "label": "Data logger field communication"
+        }
+      ]
+    },
+    "plant_controller": {
+      "grounding_expected": true,
+      "requirements": [
+        {
+          "id": "plant_comm",
+          "ports": [
+            "COM",
+            "ETH"
+          ],
+          "mode": "any",
+          "severity": "warning",
+          "label": "Plant-controller communication"
+        }
+      ]
+    },
+    "pe_bus": {
+      "requirements": [
+        {
+          "id": "pe_collection",
+          "ports": [
+            "PE_IN"
+          ],
+          "mode": "all",
+          "severity": "error",
+          "label": "PE collection input"
+        },
+        {
+          "id": "earth_out",
+          "ports": [
+            "PE_OUT"
+          ],
+          "mode": "all",
+          "severity": "error",
+          "label": "PE bus earth output"
+        }
+      ]
+    },
+    "ground_rod": {
+      "requirements": [
+        {
+          "id": "earthing_conductor",
+          "ports": [
+            "PE"
+          ],
+          "mode": "all",
+          "severity": "error",
+          "label": "Grounding-electrode conductor"
+        }
+      ]
+    }
+  },
+  "rule_codes": {
+    "E001": "Missing connection endpoint",
+    "E002": "Unknown terminal reference",
+    "E003": "Incompatible electrical networks",
+    "E004": "Invalid terminal direction",
+    "E005": "Terminal connection limit exceeded",
+    "E006": "Required electrical connection missing",
+    "E007": "Duplicate equipment tag",
+    "E008": "Unclassified electrical network",
+    "E009": "Invalid self-loop",
+    "E010": "PV source bypasses DC protection",
+    "W001": "Protective-earth connection missing",
+    "W002": "Cable specification incomplete",
+    "W003": "Duplicate terminal-to-terminal connection",
+    "W004": "Equipment tag missing",
+    "W005": "Isolated engineering object",
+    "N001": "Cable voltage class not recorded",
+    "E011": "Unknown engineering symbol",
+    "E012": "Inverter AC output bypasses AC protection",
+    "W006": "Manual protection rating incomplete"
+  }
+}

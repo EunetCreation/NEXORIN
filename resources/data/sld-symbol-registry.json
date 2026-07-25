@@ -1,0 +1,6565 @@
+{
+  "schema": "nexorin.sld.symbol-registry.v1",
+  "checkpoint": "APP67L.1",
+  "version": "67L.1",
+  "standard_basis": {
+    "primary": "Controlled electrotechnical symbol design reference",
+    "claim": "NEXORIN project-specific engineering symbols. No certification or standards-conformity claim.",
+    "reference_document": "User-supplied project SLD and electrotechnical symbol reference documents"
+  },
+  "nominal_frame": {
+    "width": 144,
+    "height": 120,
+    "unit": "editor_px",
+    "aspect_ratio": 1.2
+  },
+  "groups": {
+    "pv_generation": {
+      "label": "PV generation",
+      "short_label": "PV/DC",
+      "category": "pv",
+      "order": 10,
+      "symbols": [
+        "pv_module",
+        "pv_string",
+        "pv_array",
+        "sub_array",
+        "junction_box",
+        "combiner",
+        "power_optimizer",
+        "rsd",
+        "microinverter"
+      ]
+    },
+    "conversion_storage": {
+      "label": "Conversion and storage",
+      "short_label": "Conversion",
+      "category": "conversion",
+      "order": 20,
+      "symbols": [
+        "mppt",
+        "dc_dc_converter",
+        "inverter",
+        "hybrid_inverter",
+        "offgrid_inverter",
+        "central_inverter",
+        "pcs",
+        "battery_cell",
+        "battery_module",
+        "battery_rack",
+        "battery",
+        "bms"
+      ]
+    },
+    "protection_switching": {
+      "label": "Protection and switching",
+      "short_label": "Protection",
+      "category": "protection",
+      "order": 30,
+      "symbols": [
+        "battery_disconnect",
+        "dc_isolator",
+        "dc_fuse",
+        "dc_spd",
+        "dc_breaker",
+        "dc_protection",
+        "dc_busbar",
+        "gfpd",
+        "afci",
+        "ac_breaker",
+        "ac_isolator",
+        "ac_spd",
+        "ac_protection",
+        "transfer_switch",
+        "epo"
+      ]
+    },
+    "ac_distribution_grid": {
+      "label": "AC distribution and grid",
+      "short_label": "AC & grid",
+      "category": "ac-grid",
+      "order": 40,
+      "symbols": [
+        "ac_combiner",
+        "panel",
+        "main_panel",
+        "critical_panel",
+        "load",
+        "meter",
+        "app_pln",
+        "pcc",
+        "grid",
+        "transformer",
+        "generator"
+      ]
+    },
+    "monitoring_metering_safety": {
+      "label": "Monitoring, metering, and safety",
+      "short_label": "Monitoring",
+      "category": "monitoring",
+      "order": 50,
+      "symbols": [
+        "ct",
+        "pt",
+        "relay",
+        "monitoring",
+        "data_logger",
+        "plant_controller",
+        "scada",
+        "weather_station",
+        "irradiance_sensor",
+        "ground",
+        "pe_bus",
+        "ground_rod",
+        "lightning_arrester"
+      ]
+    },
+    "internal": {
+      "label": "Internal generated symbols",
+      "short_label": "Internal",
+      "category": "internal",
+      "order": 99,
+      "symbols": [
+        "backup_panel"
+      ]
+    }
+  },
+  "network_classes": {
+    "dc_positive": {
+      "label": "DC positive",
+      "family": "dc",
+      "polarity": "positive"
+    },
+    "dc_negative": {
+      "label": "DC negative",
+      "family": "dc",
+      "polarity": "negative"
+    },
+    "dc_power": {
+      "label": "DC power",
+      "family": "dc",
+      "polarity": "unspecified"
+    },
+    "battery_positive": {
+      "label": "Battery positive",
+      "family": "battery",
+      "polarity": "positive"
+    },
+    "battery_negative": {
+      "label": "Battery negative",
+      "family": "battery",
+      "polarity": "negative"
+    },
+    "battery_dc": {
+      "label": "Battery DC",
+      "family": "battery",
+      "polarity": "unspecified"
+    },
+    "ac_power": {
+      "label": "AC power",
+      "family": "ac"
+    },
+    "neutral": {
+      "label": "Neutral",
+      "family": "neutral"
+    },
+    "protective_earth": {
+      "label": "Protective earth",
+      "family": "earth"
+    },
+    "functional_earth": {
+      "label": "Functional earth",
+      "family": "earth"
+    },
+    "communication": {
+      "label": "Communication",
+      "family": "signal"
+    },
+    "control": {
+      "label": "Control",
+      "family": "signal"
+    },
+    "measurement": {
+      "label": "Measurement",
+      "family": "signal"
+    },
+    "power": {
+      "label": "Power unspecified",
+      "family": "power"
+    }
+  },
+  "symbols": {
+    "pv_module": {
+      "id": "pv_module",
+      "palette": true,
+      "order": 10,
+      "group": "pv_generation",
+      "category": "pv",
+      "title": "PV module",
+      "subtitle": "Individual photovoltaic module",
+      "default_rating": "Module rating not specified",
+      "kind": "generation",
+      "tag_prefix": "PVM",
+      "nominal_size": {
+        "width": 144,
+        "height": 120
+      },
+      "glyph_box": {
+        "x": 35,
+        "y": 12,
+        "width": 74,
+        "height": 68
+      },
+      "optical_center": {
+        "x": 0.5,
+        "y": 0.375
+      },
+      "electrical_center": {
+        "x": 0.5,
+        "y": 0.39
+      },
+      "standard": {
+        "status": "iec_simplified",
+        "status_label": "IEC simplified form",
+        "family": "IEC 60617 photovoltaic cell / generator",
+        "reference": "IEC 60617",
+        "source_pages": "30, 43",
+        "note": "Simplified PLTS module form derived from photovoltaic symbols.",
+        "certified": false
+      },
+      "transforms": {
+        "rotations": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "mirror_horizontal": true,
+        "mirror_vertical": true,
+        "preserve_terminal_semantics": true
+      },
+      "ports": [
+        {
+          "id": "DC_NEG",
+          "network": "dc_negative",
+          "direction": "output",
+          "side": "right",
+          "label": "DC negative",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.25
+          },
+          "terminal_class": "power_dc_negative",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "DC_POS",
+          "network": "dc_positive",
+          "direction": "output",
+          "side": "right",
+          "label": "DC positive",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.57
+          },
+          "terminal_class": "power_dc_positive",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "PE",
+          "network": "protective_earth",
+          "direction": "bidirectional",
+          "side": "bottom",
+          "label": "Frame earth",
+          "anchor": {
+            "x": 0.5,
+            "y": 0.665
+          },
+          "terminal_class": "protective_earth",
+          "required": false,
+          "max_connections": 2
+        }
+      ]
+    },
+    "pv_string": {
+      "id": "pv_string",
+      "palette": true,
+      "order": 20,
+      "group": "pv_generation",
+      "category": "pv",
+      "title": "PV string",
+      "subtitle": "Series-connected PV modules",
+      "default_rating": "String layout not specified",
+      "kind": "generation",
+      "tag_prefix": "PVS",
+      "nominal_size": {
+        "width": 144,
+        "height": 120
+      },
+      "glyph_box": {
+        "x": 35,
+        "y": 12,
+        "width": 74,
+        "height": 68
+      },
+      "optical_center": {
+        "x": 0.5,
+        "y": 0.375
+      },
+      "electrical_center": {
+        "x": 0.5,
+        "y": 0.39
+      },
+      "standard": {
+        "status": "nexorin_assembly",
+        "status_label": "NEXORIN engineering assembly",
+        "family": "IEC 60617 photovoltaic generator basis",
+        "reference": "IEC 60617",
+        "source_pages": "43",
+        "note": "NEXORIN assembly representing series-connected modules.",
+        "certified": false
+      },
+      "transforms": {
+        "rotations": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "mirror_horizontal": true,
+        "mirror_vertical": true,
+        "preserve_terminal_semantics": true
+      },
+      "ports": [
+        {
+          "id": "DC_NEG",
+          "network": "dc_negative",
+          "direction": "output",
+          "side": "right",
+          "label": "String negative",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.25
+          },
+          "terminal_class": "power_dc_negative",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "DC_POS",
+          "network": "dc_positive",
+          "direction": "output",
+          "side": "right",
+          "label": "String positive",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.57
+          },
+          "terminal_class": "power_dc_positive",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "PE",
+          "network": "protective_earth",
+          "direction": "bidirectional",
+          "side": "bottom",
+          "label": "Frame earth",
+          "anchor": {
+            "x": 0.5,
+            "y": 0.665
+          },
+          "terminal_class": "protective_earth",
+          "required": false,
+          "max_connections": 2
+        }
+      ]
+    },
+    "pv_array": {
+      "id": "pv_array",
+      "palette": true,
+      "order": 30,
+      "group": "pv_generation",
+      "category": "pv",
+      "title": "PV array",
+      "subtitle": "Generation source",
+      "default_rating": "Rating not specified",
+      "kind": "generation",
+      "tag_prefix": "PVA",
+      "nominal_size": {
+        "width": 144,
+        "height": 120
+      },
+      "glyph_box": {
+        "x": 35,
+        "y": 12,
+        "width": 74,
+        "height": 68
+      },
+      "optical_center": {
+        "x": 0.5,
+        "y": 0.375
+      },
+      "electrical_center": {
+        "x": 0.5,
+        "y": 0.39
+      },
+      "standard": {
+        "status": "nexorin_assembly",
+        "status_label": "NEXORIN engineering assembly",
+        "family": "IEC 60617 photovoltaic generator basis",
+        "reference": "IEC 60617",
+        "source_pages": "43",
+        "note": "NEXORIN array assembly for single-line PLTS topology.",
+        "certified": false
+      },
+      "transforms": {
+        "rotations": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "mirror_horizontal": true,
+        "mirror_vertical": true,
+        "preserve_terminal_semantics": true
+      },
+      "ports": [
+        {
+          "id": "DC_NEG",
+          "network": "dc_negative",
+          "direction": "output",
+          "side": "right",
+          "label": "Array negative",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.25
+          },
+          "terminal_class": "power_dc_negative",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "DC_POS",
+          "network": "dc_positive",
+          "direction": "output",
+          "side": "right",
+          "label": "Array positive",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.57
+          },
+          "terminal_class": "power_dc_positive",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "PE",
+          "network": "protective_earth",
+          "direction": "bidirectional",
+          "side": "bottom",
+          "label": "Protective earth",
+          "anchor": {
+            "x": 0.5,
+            "y": 0.665
+          },
+          "terminal_class": "protective_earth",
+          "required": false,
+          "max_connections": 2
+        }
+      ],
+      "source_ports": [
+        {
+          "id": "DC_OUT",
+          "network": "dc_power",
+          "direction": "output",
+          "side": "right",
+          "label": "DC output",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.41
+          },
+          "terminal_class": "power_dc",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "PE",
+          "network": "protective_earth",
+          "direction": "bidirectional",
+          "side": "bottom",
+          "label": "Protective earth",
+          "anchor": {
+            "x": 0.5,
+            "y": 0.665
+          },
+          "terminal_class": "protective_earth",
+          "required": false,
+          "max_connections": 2
+        }
+      ]
+    },
+    "sub_array": {
+      "id": "sub_array",
+      "palette": true,
+      "order": 40,
+      "group": "pv_generation",
+      "category": "pv",
+      "title": "PV sub-array",
+      "subtitle": "Grouped strings by orientation or MPPT",
+      "default_rating": "Sub-array rating not specified",
+      "kind": "generation",
+      "tag_prefix": "PVSA",
+      "nominal_size": {
+        "width": 144,
+        "height": 120
+      },
+      "glyph_box": {
+        "x": 35,
+        "y": 12,
+        "width": 74,
+        "height": 68
+      },
+      "optical_center": {
+        "x": 0.5,
+        "y": 0.375
+      },
+      "electrical_center": {
+        "x": 0.5,
+        "y": 0.39
+      },
+      "standard": {
+        "status": "nexorin_assembly",
+        "status_label": "NEXORIN engineering assembly",
+        "family": "IEC 60617 photovoltaic generator basis",
+        "reference": "IEC 60617",
+        "source_pages": "43",
+        "note": "NEXORIN sub-array assembly grouped by MPPT or orientation.",
+        "certified": false
+      },
+      "transforms": {
+        "rotations": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "mirror_horizontal": true,
+        "mirror_vertical": true,
+        "preserve_terminal_semantics": true
+      },
+      "ports": [
+        {
+          "id": "DC_NEG",
+          "network": "dc_negative",
+          "direction": "output",
+          "side": "right",
+          "label": "Sub-array negative",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.25
+          },
+          "terminal_class": "power_dc_negative",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "DC_POS",
+          "network": "dc_positive",
+          "direction": "output",
+          "side": "right",
+          "label": "Sub-array positive",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.57
+          },
+          "terminal_class": "power_dc_positive",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "PE",
+          "network": "protective_earth",
+          "direction": "bidirectional",
+          "side": "bottom",
+          "label": "Protective earth",
+          "anchor": {
+            "x": 0.5,
+            "y": 0.665
+          },
+          "terminal_class": "protective_earth",
+          "required": false,
+          "max_connections": 2
+        }
+      ]
+    },
+    "junction_box": {
+      "id": "junction_box",
+      "palette": true,
+      "order": 50,
+      "group": "pv_generation",
+      "category": "pv",
+      "title": "PV junction box",
+      "subtitle": "PV cable transition point",
+      "default_rating": "Terminal rating not specified",
+      "kind": "distribution",
+      "tag_prefix": "PVJB",
+      "nominal_size": {
+        "width": 144,
+        "height": 120
+      },
+      "glyph_box": {
+        "x": 35,
+        "y": 12,
+        "width": 74,
+        "height": 68
+      },
+      "optical_center": {
+        "x": 0.5,
+        "y": 0.375
+      },
+      "electrical_center": {
+        "x": 0.5,
+        "y": 0.39
+      },
+      "standard": {
+        "status": "iec_simplified",
+        "status_label": "IEC simplified form",
+        "family": "IEC 60617 junction box",
+        "reference": "IEC 60617",
+        "source_pages": "4",
+        "note": "Simplified single-line junction box.",
+        "certified": false
+      },
+      "transforms": {
+        "rotations": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "mirror_horizontal": true,
+        "mirror_vertical": true,
+        "preserve_terminal_semantics": true
+      },
+      "ports": [
+        {
+          "id": "DC_IN_NEG",
+          "network": "dc_negative",
+          "direction": "input",
+          "side": "left",
+          "label": "Negative input",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.25
+          },
+          "terminal_class": "power_dc_negative",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "DC_IN_POS",
+          "network": "dc_positive",
+          "direction": "input",
+          "side": "left",
+          "label": "Positive input",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.57
+          },
+          "terminal_class": "power_dc_positive",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "DC_OUT_NEG",
+          "network": "dc_negative",
+          "direction": "output",
+          "side": "right",
+          "label": "Negative output",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.25
+          },
+          "terminal_class": "power_dc_negative",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "DC_OUT_POS",
+          "network": "dc_positive",
+          "direction": "output",
+          "side": "right",
+          "label": "Positive output",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.57
+          },
+          "terminal_class": "power_dc_positive",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "PE",
+          "network": "protective_earth",
+          "direction": "bidirectional",
+          "side": "bottom",
+          "label": "Protective earth",
+          "anchor": {
+            "x": 0.5,
+            "y": 0.665
+          },
+          "terminal_class": "protective_earth",
+          "required": false,
+          "max_connections": 2
+        }
+      ]
+    },
+    "combiner": {
+      "id": "combiner",
+      "palette": true,
+      "order": 60,
+      "group": "pv_generation",
+      "category": "pv",
+      "title": "DC combiner box",
+      "subtitle": "String aggregation",
+      "default_rating": "Fuse and SPD not specified",
+      "kind": "protection",
+      "tag_prefix": "DCCB",
+      "nominal_size": {
+        "width": 144,
+        "height": 120
+      },
+      "glyph_box": {
+        "x": 35,
+        "y": 12,
+        "width": 74,
+        "height": 68
+      },
+      "optical_center": {
+        "x": 0.5,
+        "y": 0.375
+      },
+      "electrical_center": {
+        "x": 0.5,
+        "y": 0.39
+      },
+      "standard": {
+        "status": "nexorin_assembly",
+        "status_label": "NEXORIN engineering assembly",
+        "family": "IEC 60617 junction, fuse, and arrester basis",
+        "reference": "IEC 60617",
+        "source_pages": "2, 17, 18",
+        "note": "Composite PV combiner assembly.",
+        "certified": false
+      },
+      "transforms": {
+        "rotations": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "mirror_horizontal": true,
+        "mirror_vertical": true,
+        "preserve_terminal_semantics": true
+      },
+      "ports": [
+        {
+          "id": "DC_IN_NEG",
+          "network": "dc_negative",
+          "direction": "input",
+          "side": "left",
+          "label": "String negative input",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.25
+          },
+          "terminal_class": "power_dc_negative",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "DC_IN_POS",
+          "network": "dc_positive",
+          "direction": "input",
+          "side": "left",
+          "label": "String positive input",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.57
+          },
+          "terminal_class": "power_dc_positive",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "DC_OUT_NEG",
+          "network": "dc_negative",
+          "direction": "output",
+          "side": "right",
+          "label": "Negative output",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.25
+          },
+          "terminal_class": "power_dc_negative",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "DC_OUT_POS",
+          "network": "dc_positive",
+          "direction": "output",
+          "side": "right",
+          "label": "Positive output",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.57
+          },
+          "terminal_class": "power_dc_positive",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "PE",
+          "network": "protective_earth",
+          "direction": "bidirectional",
+          "side": "bottom",
+          "label": "Protective earth",
+          "anchor": {
+            "x": 0.5,
+            "y": 0.665
+          },
+          "terminal_class": "protective_earth",
+          "required": false,
+          "max_connections": 2
+        }
+      ]
+    },
+    "power_optimizer": {
+      "id": "power_optimizer",
+      "palette": true,
+      "order": 70,
+      "group": "pv_generation",
+      "category": "pv",
+      "title": "Power optimizer",
+      "subtitle": "Module-level DC-DC conversion",
+      "default_rating": "Optimizer rating not specified",
+      "kind": "conversion",
+      "tag_prefix": "OPT",
+      "nominal_size": {
+        "width": 144,
+        "height": 120
+      },
+      "glyph_box": {
+        "x": 35,
+        "y": 12,
+        "width": 74,
+        "height": 68
+      },
+      "optical_center": {
+        "x": 0.5,
+        "y": 0.375
+      },
+      "electrical_center": {
+        "x": 0.5,
+        "y": 0.39
+      },
+      "standard": {
+        "status": "iec_simplified",
+        "status_label": "IEC simplified form",
+        "family": "IEC 60617 DC/DC converter",
+        "reference": "IEC 60617",
+        "source_pages": "42",
+        "note": "Simplified module-level converter.",
+        "certified": false
+      },
+      "transforms": {
+        "rotations": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "mirror_horizontal": true,
+        "mirror_vertical": true,
+        "preserve_terminal_semantics": true
+      },
+      "ports": [
+        {
+          "id": "DC_IN_NEG",
+          "network": "dc_negative",
+          "direction": "input",
+          "side": "left",
+          "label": "DC negative input",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.25
+          },
+          "terminal_class": "power_dc_negative",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "DC_IN_POS",
+          "network": "dc_positive",
+          "direction": "input",
+          "side": "left",
+          "label": "DC positive input",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.57
+          },
+          "terminal_class": "power_dc_positive",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "DC_OUT_NEG",
+          "network": "dc_negative",
+          "direction": "output",
+          "side": "right",
+          "label": "DC negative output",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.25
+          },
+          "terminal_class": "power_dc_negative",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "DC_OUT_POS",
+          "network": "dc_positive",
+          "direction": "output",
+          "side": "right",
+          "label": "DC positive output",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.57
+          },
+          "terminal_class": "power_dc_positive",
+          "required": false,
+          "max_connections": 1
+        }
+      ]
+    },
+    "rsd": {
+      "id": "rsd",
+      "palette": true,
+      "order": 80,
+      "group": "pv_generation",
+      "category": "pv",
+      "title": "Rapid shutdown device",
+      "subtitle": "PV emergency shutdown",
+      "default_rating": "RSD rating not specified",
+      "kind": "safety",
+      "tag_prefix": "RSD",
+      "nominal_size": {
+        "width": 144,
+        "height": 120
+      },
+      "glyph_box": {
+        "x": 35,
+        "y": 12,
+        "width": 74,
+        "height": 68
+      },
+      "optical_center": {
+        "x": 0.5,
+        "y": 0.375
+      },
+      "electrical_center": {
+        "x": 0.5,
+        "y": 0.39
+      },
+      "standard": {
+        "status": "nexorin_assembly",
+        "status_label": "NEXORIN engineering assembly",
+        "family": "IEC switching and emergency actuator basis",
+        "reference": "IEC 60617",
+        "source_pages": "9, 13, 14",
+        "note": "PV rapid-shutdown functional assembly.",
+        "certified": false
+      },
+      "transforms": {
+        "rotations": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "mirror_horizontal": true,
+        "mirror_vertical": true,
+        "preserve_terminal_semantics": true
+      },
+      "ports": [
+        {
+          "id": "DC_IN_NEG",
+          "network": "dc_negative",
+          "direction": "input",
+          "side": "left",
+          "label": "DC negative input",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.25
+          },
+          "terminal_class": "power_dc_negative",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "DC_IN_POS",
+          "network": "dc_positive",
+          "direction": "input",
+          "side": "left",
+          "label": "DC positive input",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.57
+          },
+          "terminal_class": "power_dc_positive",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "DC_OUT_NEG",
+          "network": "dc_negative",
+          "direction": "output",
+          "side": "right",
+          "label": "DC negative output",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.25
+          },
+          "terminal_class": "power_dc_negative",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "DC_OUT_POS",
+          "network": "dc_positive",
+          "direction": "output",
+          "side": "right",
+          "label": "DC positive output",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.57
+          },
+          "terminal_class": "power_dc_positive",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "CTRL",
+          "network": "control",
+          "direction": "input",
+          "side": "bottom",
+          "label": "Shutdown control",
+          "anchor": {
+            "x": 0.5,
+            "y": 0.665
+          },
+          "terminal_class": "control",
+          "required": false,
+          "max_connections": 1
+        }
+      ]
+    },
+    "microinverter": {
+      "id": "microinverter",
+      "palette": true,
+      "order": 90,
+      "group": "pv_generation",
+      "category": "pv",
+      "title": "Microinverter",
+      "subtitle": "Module-level DC to AC conversion",
+      "default_rating": "Microinverter rating not specified",
+      "kind": "conversion",
+      "tag_prefix": "MINV",
+      "nominal_size": {
+        "width": 144,
+        "height": 120
+      },
+      "glyph_box": {
+        "x": 35,
+        "y": 12,
+        "width": 74,
+        "height": 68
+      },
+      "optical_center": {
+        "x": 0.5,
+        "y": 0.375
+      },
+      "electrical_center": {
+        "x": 0.5,
+        "y": 0.39
+      },
+      "standard": {
+        "status": "iec_simplified",
+        "status_label": "IEC simplified form",
+        "family": "IEC 60617 inverter",
+        "reference": "IEC 60617",
+        "source_pages": "42",
+        "note": "Simplified module-level inverter.",
+        "certified": false
+      },
+      "transforms": {
+        "rotations": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "mirror_horizontal": true,
+        "mirror_vertical": true,
+        "preserve_terminal_semantics": true
+      },
+      "ports": [
+        {
+          "id": "DC_IN_NEG",
+          "network": "dc_negative",
+          "direction": "input",
+          "side": "left",
+          "label": "DC negative input",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.25
+          },
+          "terminal_class": "power_dc_negative",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "DC_IN_POS",
+          "network": "dc_positive",
+          "direction": "input",
+          "side": "left",
+          "label": "DC positive input",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.57
+          },
+          "terminal_class": "power_dc_positive",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "AC_OUT",
+          "network": "ac_power",
+          "direction": "output",
+          "side": "right",
+          "label": "AC trunk output",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.41
+          },
+          "terminal_class": "power_ac",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "PE",
+          "network": "protective_earth",
+          "direction": "bidirectional",
+          "side": "bottom",
+          "label": "Protective earth",
+          "anchor": {
+            "x": 0.32,
+            "y": 0.665
+          },
+          "terminal_class": "protective_earth",
+          "required": false,
+          "max_connections": 2
+        },
+        {
+          "id": "COM",
+          "network": "communication",
+          "direction": "bidirectional",
+          "side": "bottom",
+          "label": "Communication",
+          "anchor": {
+            "x": 0.68,
+            "y": 0.665
+          },
+          "terminal_class": "communication",
+          "required": false,
+          "max_connections": 2
+        }
+      ]
+    },
+    "mppt": {
+      "id": "mppt",
+      "palette": true,
+      "order": 100,
+      "group": "conversion_storage",
+      "category": "conversion",
+      "title": "MPPT charge controller",
+      "subtitle": "PV battery charge control",
+      "default_rating": "Controller rating not specified",
+      "kind": "conversion",
+      "tag_prefix": "SCC",
+      "nominal_size": {
+        "width": 144,
+        "height": 120
+      },
+      "glyph_box": {
+        "x": 35,
+        "y": 12,
+        "width": 74,
+        "height": 68
+      },
+      "optical_center": {
+        "x": 0.5,
+        "y": 0.375
+      },
+      "electrical_center": {
+        "x": 0.5,
+        "y": 0.39
+      },
+      "standard": {
+        "status": "nexorin_assembly",
+        "status_label": "NEXORIN engineering assembly",
+        "family": "IEC controller and DC/DC converter basis",
+        "reference": "IEC 60617",
+        "source_pages": "42, 43",
+        "note": "Charge-controller functional assembly.",
+        "certified": false
+      },
+      "transforms": {
+        "rotations": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "mirror_horizontal": true,
+        "mirror_vertical": true,
+        "preserve_terminal_semantics": true
+      },
+      "ports": [
+        {
+          "id": "PV_NEG",
+          "network": "dc_negative",
+          "direction": "input",
+          "side": "left",
+          "label": "PV negative input",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.25
+          },
+          "terminal_class": "power_dc_negative",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "PV_POS",
+          "network": "dc_positive",
+          "direction": "input",
+          "side": "left",
+          "label": "PV positive input",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.57
+          },
+          "terminal_class": "power_dc_positive",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "BAT_NEG",
+          "network": "battery_negative",
+          "direction": "output",
+          "side": "right",
+          "label": "Battery negative",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.25
+          },
+          "terminal_class": "battery_negative",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "BAT_POS",
+          "network": "battery_positive",
+          "direction": "output",
+          "side": "right",
+          "label": "Battery positive",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.57
+          },
+          "terminal_class": "battery_positive",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "COM",
+          "network": "communication",
+          "direction": "bidirectional",
+          "side": "bottom",
+          "label": "Communication",
+          "anchor": {
+            "x": 0.5,
+            "y": 0.665
+          },
+          "terminal_class": "communication",
+          "required": false,
+          "max_connections": 2
+        }
+      ]
+    },
+    "dc_dc_converter": {
+      "id": "dc_dc_converter",
+      "palette": true,
+      "order": 110,
+      "group": "conversion_storage",
+      "category": "conversion",
+      "title": "DC-DC converter",
+      "subtitle": "DC voltage conversion",
+      "default_rating": "Converter rating not specified",
+      "kind": "conversion",
+      "tag_prefix": "DCDC",
+      "nominal_size": {
+        "width": 144,
+        "height": 120
+      },
+      "glyph_box": {
+        "x": 35,
+        "y": 12,
+        "width": 74,
+        "height": 68
+      },
+      "optical_center": {
+        "x": 0.5,
+        "y": 0.375
+      },
+      "electrical_center": {
+        "x": 0.5,
+        "y": 0.39
+      },
+      "standard": {
+        "status": "iec_reference",
+        "status_label": "IEC reference form",
+        "family": "IEC 60617 DC/DC converter",
+        "reference": "IEC 60617",
+        "source_pages": "42",
+        "note": "Direct reference form for DC/DC conversion.",
+        "certified": false
+      },
+      "transforms": {
+        "rotations": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "mirror_horizontal": true,
+        "mirror_vertical": true,
+        "preserve_terminal_semantics": true
+      },
+      "ports": [
+        {
+          "id": "DC_IN_NEG",
+          "network": "dc_negative",
+          "direction": "input",
+          "side": "left",
+          "label": "DC negative input",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.25
+          },
+          "terminal_class": "power_dc_negative",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "DC_IN_POS",
+          "network": "dc_positive",
+          "direction": "input",
+          "side": "left",
+          "label": "DC positive input",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.57
+          },
+          "terminal_class": "power_dc_positive",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "DC_OUT_NEG",
+          "network": "dc_negative",
+          "direction": "output",
+          "side": "right",
+          "label": "DC negative output",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.25
+          },
+          "terminal_class": "power_dc_negative",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "DC_OUT_POS",
+          "network": "dc_positive",
+          "direction": "output",
+          "side": "right",
+          "label": "DC positive output",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.57
+          },
+          "terminal_class": "power_dc_positive",
+          "required": false,
+          "max_connections": 1
+        }
+      ]
+    },
+    "inverter": {
+      "id": "inverter",
+      "palette": true,
+      "order": 120,
+      "group": "conversion_storage",
+      "category": "conversion",
+      "title": "String inverter",
+      "subtitle": "DC to AC conversion",
+      "default_rating": "Equipment rating not specified",
+      "kind": "conversion",
+      "tag_prefix": "INV",
+      "nominal_size": {
+        "width": 144,
+        "height": 120
+      },
+      "glyph_box": {
+        "x": 35,
+        "y": 12,
+        "width": 74,
+        "height": 68
+      },
+      "optical_center": {
+        "x": 0.5,
+        "y": 0.375
+      },
+      "electrical_center": {
+        "x": 0.5,
+        "y": 0.39
+      },
+      "standard": {
+        "status": "iec_reference",
+        "status_label": "IEC reference form",
+        "family": "IEC 60617 inverter",
+        "reference": "IEC 60617",
+        "source_pages": "42",
+        "note": "Direct reference form for DC to AC conversion.",
+        "certified": false
+      },
+      "transforms": {
+        "rotations": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "mirror_horizontal": true,
+        "mirror_vertical": true,
+        "preserve_terminal_semantics": true
+      },
+      "ports": [
+        {
+          "id": "DC_MPPT1_NEG",
+          "network": "dc_negative",
+          "direction": "input",
+          "side": "left",
+          "label": "MPPT 1 negative",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.25
+          },
+          "terminal_class": "power_dc_negative",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "DC_MPPT1_POS",
+          "network": "dc_positive",
+          "direction": "input",
+          "side": "left",
+          "label": "MPPT 1 positive",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.57
+          },
+          "terminal_class": "power_dc_positive",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "AC_OUT",
+          "network": "ac_power",
+          "direction": "output",
+          "side": "right",
+          "label": "Grid AC output",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.41
+          },
+          "terminal_class": "power_ac",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "PE",
+          "network": "protective_earth",
+          "direction": "bidirectional",
+          "side": "bottom",
+          "label": "Protective earth",
+          "anchor": {
+            "x": 0.32,
+            "y": 0.665
+          },
+          "terminal_class": "protective_earth",
+          "required": false,
+          "max_connections": 2
+        },
+        {
+          "id": "COM",
+          "network": "communication",
+          "direction": "bidirectional",
+          "side": "bottom",
+          "label": "Communication",
+          "anchor": {
+            "x": 0.68,
+            "y": 0.665
+          },
+          "terminal_class": "communication",
+          "required": false,
+          "max_connections": 2
+        }
+      ],
+      "source_ports": [
+        {
+          "id": "DC_IN",
+          "network": "dc_power",
+          "direction": "input",
+          "side": "left",
+          "label": "PV DC input",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.25
+          },
+          "terminal_class": "power_dc",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "BAT_DC",
+          "network": "battery_dc",
+          "direction": "bidirectional",
+          "side": "left",
+          "label": "Battery DC",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.57
+          },
+          "terminal_class": "battery_dc",
+          "required": false,
+          "max_connections": 2
+        },
+        {
+          "id": "AC_OUT",
+          "network": "ac_power",
+          "direction": "output",
+          "side": "right",
+          "label": "Grid AC output",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.25
+          },
+          "terminal_class": "power_ac",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "AC_BACKUP",
+          "network": "ac_power",
+          "direction": "output",
+          "side": "right",
+          "label": "Backup AC output",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.57
+          },
+          "terminal_class": "power_ac",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "PE",
+          "network": "protective_earth",
+          "direction": "bidirectional",
+          "side": "bottom",
+          "label": "Protective earth",
+          "anchor": {
+            "x": 0.32,
+            "y": 0.665
+          },
+          "terminal_class": "protective_earth",
+          "required": false,
+          "max_connections": 2
+        },
+        {
+          "id": "COM",
+          "network": "communication",
+          "direction": "bidirectional",
+          "side": "bottom",
+          "label": "Communication",
+          "anchor": {
+            "x": 0.68,
+            "y": 0.665
+          },
+          "terminal_class": "communication",
+          "required": false,
+          "max_connections": 2
+        }
+      ]
+    },
+    "hybrid_inverter": {
+      "id": "hybrid_inverter",
+      "palette": true,
+      "order": 130,
+      "group": "conversion_storage",
+      "category": "conversion",
+      "title": "Hybrid inverter",
+      "subtitle": "PV, battery, grid, and backup interface",
+      "default_rating": "Hybrid inverter rating not specified",
+      "kind": "conversion",
+      "tag_prefix": "HINV",
+      "nominal_size": {
+        "width": 144,
+        "height": 120
+      },
+      "glyph_box": {
+        "x": 35,
+        "y": 12,
+        "width": 74,
+        "height": 68
+      },
+      "optical_center": {
+        "x": 0.5,
+        "y": 0.375
+      },
+      "electrical_center": {
+        "x": 0.5,
+        "y": 0.39
+      },
+      "standard": {
+        "status": "nexorin_assembly",
+        "status_label": "NEXORIN engineering assembly",
+        "family": "IEC converter / inverter basis",
+        "reference": "IEC 60617",
+        "source_pages": "42",
+        "note": "Multi-port PLTS hybrid converter assembly.",
+        "certified": false
+      },
+      "transforms": {
+        "rotations": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "mirror_horizontal": true,
+        "mirror_vertical": true,
+        "preserve_terminal_semantics": true
+      },
+      "ports": [
+        {
+          "id": "PV_NEG",
+          "network": "dc_negative",
+          "direction": "input",
+          "side": "left",
+          "label": "PV negative",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.25
+          },
+          "terminal_class": "power_dc_negative",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "PV_POS",
+          "network": "dc_positive",
+          "direction": "input",
+          "side": "left",
+          "label": "PV positive",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.3567
+          },
+          "terminal_class": "power_dc_positive",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "BAT_NEG",
+          "network": "battery_negative",
+          "direction": "bidirectional",
+          "side": "left",
+          "label": "Battery negative",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.4633
+          },
+          "terminal_class": "battery_negative",
+          "required": false,
+          "max_connections": 2
+        },
+        {
+          "id": "BAT_POS",
+          "network": "battery_positive",
+          "direction": "bidirectional",
+          "side": "left",
+          "label": "Battery positive",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.57
+          },
+          "terminal_class": "battery_positive",
+          "required": false,
+          "max_connections": 2
+        },
+        {
+          "id": "GRID_AC",
+          "network": "ac_power",
+          "direction": "bidirectional",
+          "side": "right",
+          "label": "Grid AC",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.25
+          },
+          "terminal_class": "power_ac",
+          "required": false,
+          "max_connections": 2
+        },
+        {
+          "id": "BACKUP_AC",
+          "network": "ac_power",
+          "direction": "output",
+          "side": "right",
+          "label": "Backup AC",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.57
+          },
+          "terminal_class": "power_ac",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "PE",
+          "network": "protective_earth",
+          "direction": "bidirectional",
+          "side": "bottom",
+          "label": "Protective earth",
+          "anchor": {
+            "x": 0.32,
+            "y": 0.665
+          },
+          "terminal_class": "protective_earth",
+          "required": false,
+          "max_connections": 2
+        },
+        {
+          "id": "COM",
+          "network": "communication",
+          "direction": "bidirectional",
+          "side": "bottom",
+          "label": "Communication",
+          "anchor": {
+            "x": 0.68,
+            "y": 0.665
+          },
+          "terminal_class": "communication",
+          "required": false,
+          "max_connections": 2
+        }
+      ]
+    },
+    "offgrid_inverter": {
+      "id": "offgrid_inverter",
+      "palette": true,
+      "order": 140,
+      "group": "conversion_storage",
+      "category": "conversion",
+      "title": "Off-grid inverter",
+      "subtitle": "Standalone AC conversion",
+      "default_rating": "Off-grid inverter rating not specified",
+      "kind": "conversion",
+      "tag_prefix": "OINV",
+      "nominal_size": {
+        "width": 144,
+        "height": 120
+      },
+      "glyph_box": {
+        "x": 35,
+        "y": 12,
+        "width": 74,
+        "height": 68
+      },
+      "optical_center": {
+        "x": 0.5,
+        "y": 0.375
+      },
+      "electrical_center": {
+        "x": 0.5,
+        "y": 0.39
+      },
+      "standard": {
+        "status": "iec_simplified",
+        "status_label": "IEC simplified form",
+        "family": "IEC 60617 inverter",
+        "reference": "IEC 60617",
+        "source_pages": "42",
+        "note": "Simplified standalone inverter.",
+        "certified": false
+      },
+      "transforms": {
+        "rotations": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "mirror_horizontal": true,
+        "mirror_vertical": true,
+        "preserve_terminal_semantics": true
+      },
+      "ports": [
+        {
+          "id": "BAT_NEG",
+          "network": "battery_negative",
+          "direction": "input",
+          "side": "left",
+          "label": "Battery negative",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.25
+          },
+          "terminal_class": "battery_negative",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "BAT_POS",
+          "network": "battery_positive",
+          "direction": "input",
+          "side": "left",
+          "label": "Battery positive",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.57
+          },
+          "terminal_class": "battery_positive",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "AC_OUT",
+          "network": "ac_power",
+          "direction": "output",
+          "side": "right",
+          "label": "AC load output",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.41
+          },
+          "terminal_class": "power_ac",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "PE",
+          "network": "protective_earth",
+          "direction": "bidirectional",
+          "side": "bottom",
+          "label": "Protective earth",
+          "anchor": {
+            "x": 0.5,
+            "y": 0.665
+          },
+          "terminal_class": "protective_earth",
+          "required": false,
+          "max_connections": 2
+        }
+      ]
+    },
+    "central_inverter": {
+      "id": "central_inverter",
+      "palette": true,
+      "order": 150,
+      "group": "conversion_storage",
+      "category": "conversion",
+      "title": "Central inverter",
+      "subtitle": "High-capacity DC to AC conversion",
+      "default_rating": "Central inverter rating not specified",
+      "kind": "conversion",
+      "tag_prefix": "CINV",
+      "nominal_size": {
+        "width": 144,
+        "height": 120
+      },
+      "glyph_box": {
+        "x": 35,
+        "y": 12,
+        "width": 74,
+        "height": 68
+      },
+      "optical_center": {
+        "x": 0.5,
+        "y": 0.375
+      },
+      "electrical_center": {
+        "x": 0.5,
+        "y": 0.39
+      },
+      "standard": {
+        "status": "iec_simplified",
+        "status_label": "IEC simplified form",
+        "family": "IEC 60617 inverter",
+        "reference": "IEC 60617",
+        "source_pages": "42",
+        "note": "Simplified high-capacity inverter.",
+        "certified": false
+      },
+      "transforms": {
+        "rotations": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "mirror_horizontal": true,
+        "mirror_vertical": true,
+        "preserve_terminal_semantics": true
+      },
+      "ports": [
+        {
+          "id": "DC_IN_NEG",
+          "network": "dc_negative",
+          "direction": "input",
+          "side": "left",
+          "label": "DC negative input",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.25
+          },
+          "terminal_class": "power_dc_negative",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "DC_IN_POS",
+          "network": "dc_positive",
+          "direction": "input",
+          "side": "left",
+          "label": "DC positive input",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.57
+          },
+          "terminal_class": "power_dc_positive",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "AC_OUT",
+          "network": "ac_power",
+          "direction": "output",
+          "side": "right",
+          "label": "AC output",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.41
+          },
+          "terminal_class": "power_ac",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "PE",
+          "network": "protective_earth",
+          "direction": "bidirectional",
+          "side": "bottom",
+          "label": "Protective earth",
+          "anchor": {
+            "x": 0.32,
+            "y": 0.665
+          },
+          "terminal_class": "protective_earth",
+          "required": false,
+          "max_connections": 2
+        },
+        {
+          "id": "COM",
+          "network": "communication",
+          "direction": "bidirectional",
+          "side": "bottom",
+          "label": "SCADA communication",
+          "anchor": {
+            "x": 0.68,
+            "y": 0.665
+          },
+          "terminal_class": "communication",
+          "required": false,
+          "max_connections": 2
+        }
+      ]
+    },
+    "pcs": {
+      "id": "pcs",
+      "palette": true,
+      "order": 160,
+      "group": "conversion_storage",
+      "category": "conversion",
+      "title": "Power conversion system",
+      "subtitle": "Bidirectional BESS converter",
+      "default_rating": "PCS rating not specified",
+      "kind": "conversion",
+      "tag_prefix": "PCS",
+      "nominal_size": {
+        "width": 144,
+        "height": 120
+      },
+      "glyph_box": {
+        "x": 35,
+        "y": 12,
+        "width": 74,
+        "height": 68
+      },
+      "optical_center": {
+        "x": 0.5,
+        "y": 0.375
+      },
+      "electrical_center": {
+        "x": 0.5,
+        "y": 0.39
+      },
+      "standard": {
+        "status": "nexorin_assembly",
+        "status_label": "NEXORIN engineering assembly",
+        "family": "IEC rectifier/inverter basis",
+        "reference": "IEC 60617",
+        "source_pages": "42",
+        "note": "Bidirectional PCS functional assembly.",
+        "certified": false
+      },
+      "transforms": {
+        "rotations": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "mirror_horizontal": true,
+        "mirror_vertical": true,
+        "preserve_terminal_semantics": true
+      },
+      "ports": [
+        {
+          "id": "BAT_NEG",
+          "network": "battery_negative",
+          "direction": "bidirectional",
+          "side": "left",
+          "label": "Battery negative",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.25
+          },
+          "terminal_class": "battery_negative",
+          "required": false,
+          "max_connections": 2
+        },
+        {
+          "id": "BAT_POS",
+          "network": "battery_positive",
+          "direction": "bidirectional",
+          "side": "left",
+          "label": "Battery positive",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.57
+          },
+          "terminal_class": "battery_positive",
+          "required": false,
+          "max_connections": 2
+        },
+        {
+          "id": "AC_GRID",
+          "network": "ac_power",
+          "direction": "bidirectional",
+          "side": "right",
+          "label": "AC grid interface",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.41
+          },
+          "terminal_class": "power_ac",
+          "required": false,
+          "max_connections": 2
+        },
+        {
+          "id": "PE",
+          "network": "protective_earth",
+          "direction": "bidirectional",
+          "side": "bottom",
+          "label": "Protective earth",
+          "anchor": {
+            "x": 0.32,
+            "y": 0.665
+          },
+          "terminal_class": "protective_earth",
+          "required": false,
+          "max_connections": 2
+        },
+        {
+          "id": "COM",
+          "network": "communication",
+          "direction": "bidirectional",
+          "side": "bottom",
+          "label": "BMS / EMS communication",
+          "anchor": {
+            "x": 0.68,
+            "y": 0.665
+          },
+          "terminal_class": "communication",
+          "required": false,
+          "max_connections": 2
+        }
+      ]
+    },
+    "battery_cell": {
+      "id": "battery_cell",
+      "palette": true,
+      "order": 170,
+      "group": "conversion_storage",
+      "category": "conversion",
+      "title": "Battery cell",
+      "subtitle": "Electrochemical cell",
+      "default_rating": "Cell voltage not specified",
+      "kind": "storage",
+      "tag_prefix": "CELL",
+      "nominal_size": {
+        "width": 144,
+        "height": 120
+      },
+      "glyph_box": {
+        "x": 35,
+        "y": 12,
+        "width": 74,
+        "height": 68
+      },
+      "optical_center": {
+        "x": 0.5,
+        "y": 0.375
+      },
+      "electrical_center": {
+        "x": 0.5,
+        "y": 0.39
+      },
+      "standard": {
+        "status": "iec_reference",
+        "status_label": "IEC reference form",
+        "family": "IEC 60617 primary or secondary cell",
+        "reference": "IEC 60617",
+        "source_pages": "50",
+        "note": "Battery cell reference form.",
+        "certified": false
+      },
+      "transforms": {
+        "rotations": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "mirror_horizontal": true,
+        "mirror_vertical": true,
+        "preserve_terminal_semantics": true
+      },
+      "ports": [
+        {
+          "id": "BAT_NEG",
+          "network": "battery_negative",
+          "direction": "bidirectional",
+          "side": "left",
+          "label": "Battery negative",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.41
+          },
+          "terminal_class": "battery_negative",
+          "required": false,
+          "max_connections": 2
+        },
+        {
+          "id": "BAT_POS",
+          "network": "battery_positive",
+          "direction": "bidirectional",
+          "side": "right",
+          "label": "Battery positive",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.41
+          },
+          "terminal_class": "battery_positive",
+          "required": false,
+          "max_connections": 2
+        }
+      ]
+    },
+    "battery_module": {
+      "id": "battery_module",
+      "palette": true,
+      "order": 180,
+      "group": "conversion_storage",
+      "category": "conversion",
+      "title": "Battery module",
+      "subtitle": "Grouped battery cells",
+      "default_rating": "Module rating not specified",
+      "kind": "storage",
+      "tag_prefix": "BATM",
+      "nominal_size": {
+        "width": 144,
+        "height": 120
+      },
+      "glyph_box": {
+        "x": 35,
+        "y": 12,
+        "width": 74,
+        "height": 68
+      },
+      "optical_center": {
+        "x": 0.5,
+        "y": 0.375
+      },
+      "electrical_center": {
+        "x": 0.5,
+        "y": 0.39
+      },
+      "standard": {
+        "status": "nexorin_assembly",
+        "status_label": "NEXORIN engineering assembly",
+        "family": "IEC 60617 battery basis",
+        "reference": "IEC 60617",
+        "source_pages": "50",
+        "note": "Grouped battery cells.",
+        "certified": false
+      },
+      "transforms": {
+        "rotations": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "mirror_horizontal": true,
+        "mirror_vertical": true,
+        "preserve_terminal_semantics": true
+      },
+      "ports": [
+        {
+          "id": "BAT_NEG",
+          "network": "battery_negative",
+          "direction": "bidirectional",
+          "side": "left",
+          "label": "Battery negative",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.41
+          },
+          "terminal_class": "battery_negative",
+          "required": false,
+          "max_connections": 2
+        },
+        {
+          "id": "BAT_POS",
+          "network": "battery_positive",
+          "direction": "bidirectional",
+          "side": "right",
+          "label": "Battery positive",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.41
+          },
+          "terminal_class": "battery_positive",
+          "required": false,
+          "max_connections": 2
+        },
+        {
+          "id": "COM",
+          "network": "communication",
+          "direction": "bidirectional",
+          "side": "bottom",
+          "label": "BMS communication",
+          "anchor": {
+            "x": 0.5,
+            "y": 0.665
+          },
+          "terminal_class": "communication",
+          "required": false,
+          "max_connections": 2
+        }
+      ]
+    },
+    "battery_rack": {
+      "id": "battery_rack",
+      "palette": true,
+      "order": 190,
+      "group": "conversion_storage",
+      "category": "conversion",
+      "title": "Battery rack",
+      "subtitle": "Battery module assembly",
+      "default_rating": "Rack rating not specified",
+      "kind": "storage",
+      "tag_prefix": "BATR",
+      "nominal_size": {
+        "width": 144,
+        "height": 120
+      },
+      "glyph_box": {
+        "x": 35,
+        "y": 12,
+        "width": 74,
+        "height": 68
+      },
+      "optical_center": {
+        "x": 0.5,
+        "y": 0.375
+      },
+      "electrical_center": {
+        "x": 0.5,
+        "y": 0.39
+      },
+      "standard": {
+        "status": "nexorin_assembly",
+        "status_label": "NEXORIN engineering assembly",
+        "family": "IEC 60617 battery basis",
+        "reference": "IEC 60617",
+        "source_pages": "50",
+        "note": "Battery module rack assembly.",
+        "certified": false
+      },
+      "transforms": {
+        "rotations": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "mirror_horizontal": true,
+        "mirror_vertical": true,
+        "preserve_terminal_semantics": true
+      },
+      "ports": [
+        {
+          "id": "BAT_NEG",
+          "network": "battery_negative",
+          "direction": "bidirectional",
+          "side": "left",
+          "label": "Battery negative",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.41
+          },
+          "terminal_class": "battery_negative",
+          "required": false,
+          "max_connections": 2
+        },
+        {
+          "id": "BAT_POS",
+          "network": "battery_positive",
+          "direction": "bidirectional",
+          "side": "right",
+          "label": "Battery positive",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.41
+          },
+          "terminal_class": "battery_positive",
+          "required": false,
+          "max_connections": 2
+        },
+        {
+          "id": "PE",
+          "network": "protective_earth",
+          "direction": "bidirectional",
+          "side": "bottom",
+          "label": "Protective earth",
+          "anchor": {
+            "x": 0.32,
+            "y": 0.665
+          },
+          "terminal_class": "protective_earth",
+          "required": false,
+          "max_connections": 2
+        },
+        {
+          "id": "COM",
+          "network": "communication",
+          "direction": "bidirectional",
+          "side": "bottom",
+          "label": "BMS communication",
+          "anchor": {
+            "x": 0.68,
+            "y": 0.665
+          },
+          "terminal_class": "communication",
+          "required": false,
+          "max_connections": 2
+        }
+      ]
+    },
+    "battery": {
+      "id": "battery",
+      "palette": true,
+      "order": 200,
+      "group": "conversion_storage",
+      "category": "conversion",
+      "title": "Battery bank",
+      "subtitle": "Energy storage",
+      "default_rating": "Voltage and capacity not specified",
+      "kind": "storage",
+      "tag_prefix": "BAT",
+      "nominal_size": {
+        "width": 144,
+        "height": 120
+      },
+      "glyph_box": {
+        "x": 35,
+        "y": 12,
+        "width": 74,
+        "height": 68
+      },
+      "optical_center": {
+        "x": 0.5,
+        "y": 0.375
+      },
+      "electrical_center": {
+        "x": 0.5,
+        "y": 0.39
+      },
+      "standard": {
+        "status": "iec_reference",
+        "status_label": "IEC reference form",
+        "family": "IEC 60617 battery of cells",
+        "reference": "IEC 60617",
+        "source_pages": "50",
+        "note": "Battery bank reference form.",
+        "certified": false
+      },
+      "transforms": {
+        "rotations": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "mirror_horizontal": true,
+        "mirror_vertical": true,
+        "preserve_terminal_semantics": true
+      },
+      "ports": [
+        {
+          "id": "BAT_NEG",
+          "network": "battery_negative",
+          "direction": "bidirectional",
+          "side": "left",
+          "label": "Battery negative",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.41
+          },
+          "terminal_class": "battery_negative",
+          "required": false,
+          "max_connections": 2
+        },
+        {
+          "id": "BAT_POS",
+          "network": "battery_positive",
+          "direction": "bidirectional",
+          "side": "right",
+          "label": "Battery positive",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.41
+          },
+          "terminal_class": "battery_positive",
+          "required": false,
+          "max_connections": 2
+        },
+        {
+          "id": "PE",
+          "network": "protective_earth",
+          "direction": "bidirectional",
+          "side": "bottom",
+          "label": "Protective earth",
+          "anchor": {
+            "x": 0.32,
+            "y": 0.665
+          },
+          "terminal_class": "protective_earth",
+          "required": false,
+          "max_connections": 2
+        },
+        {
+          "id": "COM",
+          "network": "communication",
+          "direction": "bidirectional",
+          "side": "bottom",
+          "label": "BMS communication",
+          "anchor": {
+            "x": 0.68,
+            "y": 0.665
+          },
+          "terminal_class": "communication",
+          "required": false,
+          "max_connections": 2
+        }
+      ],
+      "source_ports": [
+        {
+          "id": "BAT_DC",
+          "network": "battery_dc",
+          "direction": "bidirectional",
+          "side": "right",
+          "label": "Battery DC",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.41
+          },
+          "terminal_class": "battery_dc",
+          "required": false,
+          "max_connections": 8
+        },
+        {
+          "id": "PE",
+          "network": "protective_earth",
+          "direction": "bidirectional",
+          "side": "bottom",
+          "label": "Protective earth",
+          "anchor": {
+            "x": 0.32,
+            "y": 0.665
+          },
+          "terminal_class": "protective_earth",
+          "required": false,
+          "max_connections": 2
+        },
+        {
+          "id": "COM",
+          "network": "communication",
+          "direction": "bidirectional",
+          "side": "bottom",
+          "label": "BMS communication",
+          "anchor": {
+            "x": 0.68,
+            "y": 0.665
+          },
+          "terminal_class": "communication",
+          "required": false,
+          "max_connections": 2
+        }
+      ]
+    },
+    "bms": {
+      "id": "bms",
+      "palette": true,
+      "order": 210,
+      "group": "conversion_storage",
+      "category": "conversion",
+      "title": "Battery management system",
+      "subtitle": "Battery monitoring and protection",
+      "default_rating": "BMS interface not specified",
+      "kind": "control",
+      "tag_prefix": "BMS",
+      "nominal_size": {
+        "width": 144,
+        "height": 120
+      },
+      "glyph_box": {
+        "x": 35,
+        "y": 12,
+        "width": 74,
+        "height": 68
+      },
+      "optical_center": {
+        "x": 0.5,
+        "y": 0.375
+      },
+      "electrical_center": {
+        "x": 0.5,
+        "y": 0.39
+      },
+      "standard": {
+        "status": "nexorin_assembly",
+        "status_label": "NEXORIN engineering assembly",
+        "family": "IEC controller / functional unit basis",
+        "reference": "IEC 60617",
+        "source_pages": "5, 43",
+        "note": "Battery management functional unit.",
+        "certified": false
+      },
+      "transforms": {
+        "rotations": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "mirror_horizontal": true,
+        "mirror_vertical": true,
+        "preserve_terminal_semantics": true
+      },
+      "ports": [
+        {
+          "id": "COM_BAT",
+          "network": "communication",
+          "direction": "bidirectional",
+          "side": "left",
+          "label": "Battery communication",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.41
+          },
+          "terminal_class": "communication",
+          "required": false,
+          "max_connections": 2
+        },
+        {
+          "id": "COM_PCS",
+          "network": "communication",
+          "direction": "bidirectional",
+          "side": "right",
+          "label": "PCS communication",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.41
+          },
+          "terminal_class": "communication",
+          "required": false,
+          "max_connections": 2
+        },
+        {
+          "id": "CTRL",
+          "network": "control",
+          "direction": "output",
+          "side": "bottom",
+          "label": "Contactor control",
+          "anchor": {
+            "x": 0.5,
+            "y": 0.665
+          },
+          "terminal_class": "control",
+          "required": false,
+          "max_connections": 1
+        }
+      ]
+    },
+    "battery_disconnect": {
+      "id": "battery_disconnect",
+      "palette": true,
+      "order": 220,
+      "group": "protection_switching",
+      "category": "protection",
+      "title": "Battery disconnect",
+      "subtitle": "Battery isolation and protection",
+      "default_rating": "Disconnect rating not specified",
+      "kind": "protection",
+      "tag_prefix": "QSBAT",
+      "nominal_size": {
+        "width": 144,
+        "height": 120
+      },
+      "glyph_box": {
+        "x": 35,
+        "y": 12,
+        "width": 74,
+        "height": 68
+      },
+      "optical_center": {
+        "x": 0.5,
+        "y": 0.375
+      },
+      "electrical_center": {
+        "x": 0.5,
+        "y": 0.39
+      },
+      "standard": {
+        "status": "iec_simplified",
+        "status_label": "IEC simplified form",
+        "family": "IEC 60617 disconnector / isolator",
+        "reference": "IEC 60617",
+        "source_pages": "14, 15",
+        "note": "Battery isolation function.",
+        "certified": false
+      },
+      "transforms": {
+        "rotations": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "mirror_horizontal": false,
+        "mirror_vertical": false,
+        "preserve_terminal_semantics": true
+      },
+      "ports": [
+        {
+          "id": "BAT_IN_NEG",
+          "network": "battery_negative",
+          "direction": "input",
+          "side": "left",
+          "label": "Battery negative input",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.25
+          },
+          "terminal_class": "battery_negative",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "BAT_IN_POS",
+          "network": "battery_positive",
+          "direction": "input",
+          "side": "left",
+          "label": "Battery positive input",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.57
+          },
+          "terminal_class": "battery_positive",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "BAT_OUT_NEG",
+          "network": "battery_negative",
+          "direction": "output",
+          "side": "right",
+          "label": "Battery negative output",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.25
+          },
+          "terminal_class": "battery_negative",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "BAT_OUT_POS",
+          "network": "battery_positive",
+          "direction": "output",
+          "side": "right",
+          "label": "Battery positive output",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.57
+          },
+          "terminal_class": "battery_positive",
+          "required": false,
+          "max_connections": 1
+        }
+      ]
+    },
+    "dc_isolator": {
+      "id": "dc_isolator",
+      "palette": true,
+      "order": 232,
+      "group": "protection_switching",
+      "category": "protection",
+      "title": "DC isolator",
+      "subtitle": "PV DC load-break disconnect",
+      "aliases": [
+        "isolator",
+        "disconnect",
+        "disconnector",
+        "load break switch",
+        "pv dc switch"
+      ],
+      "default_rating": "DC rating not specified",
+      "kind": "protection",
+      "tag_prefix": "QS-DC",
+      "nominal_size": {
+        "width": 144,
+        "height": 120
+      },
+      "glyph_box": {
+        "x": 35,
+        "y": 12,
+        "width": 74,
+        "height": 68
+      },
+      "optical_center": {
+        "x": 0.5,
+        "y": 0.375
+      },
+      "electrical_center": {
+        "x": 0.5,
+        "y": 0.39
+      },
+      "standard": {
+        "status": "iec_reference",
+        "status_label": "Reference drawing form",
+        "family": "Disconnector / switch-disconnector",
+        "reference": "User-provided IEC 60617 symbol reference",
+        "source_pages": "14–15",
+        "note": "Individual DC isolator for the series power path.",
+        "certified": false
+      },
+      "transforms": {
+        "rotations": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "mirror_horizontal": false,
+        "mirror_vertical": false,
+        "preserve_terminal_semantics": true
+      },
+      "ports": [
+        {
+          "id": "DC_IN",
+          "network": "dc_power",
+          "direction": "input",
+          "side": "left",
+          "label": "DC input",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.41
+          },
+          "terminal_class": "power_dc",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "DC_OUT",
+          "network": "dc_power",
+          "direction": "output",
+          "side": "right",
+          "label": "Isolated DC output",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.41
+          },
+          "terminal_class": "power_dc",
+          "required": false,
+          "max_connections": 1
+        }
+      ]
+    },
+    "dc_fuse": {
+      "id": "dc_fuse",
+      "palette": true,
+      "order": 230,
+      "group": "protection_switching",
+      "category": "protection",
+      "title": "DC fuse",
+      "subtitle": "DC overcurrent protection",
+      "default_rating": "Fuse rating not specified",
+      "kind": "protection",
+      "tag_prefix": "FU-DC",
+      "nominal_size": {
+        "width": 144,
+        "height": 120
+      },
+      "glyph_box": {
+        "x": 35,
+        "y": 12,
+        "width": 74,
+        "height": 68
+      },
+      "optical_center": {
+        "x": 0.5,
+        "y": 0.375
+      },
+      "electrical_center": {
+        "x": 0.5,
+        "y": 0.39
+      },
+      "standard": {
+        "status": "iec_reference",
+        "status_label": "IEC reference form",
+        "family": "IEC 60617 fuse",
+        "reference": "IEC 60617",
+        "source_pages": "17",
+        "note": "Fuse reference form.",
+        "certified": false
+      },
+      "transforms": {
+        "rotations": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "mirror_horizontal": false,
+        "mirror_vertical": false,
+        "preserve_terminal_semantics": true
+      },
+      "ports": [
+        {
+          "id": "DC_IN",
+          "network": "dc_power",
+          "direction": "input",
+          "side": "left",
+          "label": "DC input",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.41
+          },
+          "terminal_class": "power_dc",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "DC_OUT",
+          "network": "dc_power",
+          "direction": "output",
+          "side": "right",
+          "label": "DC output",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.41
+          },
+          "terminal_class": "power_dc",
+          "required": false,
+          "max_connections": 1
+        }
+      ],
+      "aliases": [
+        "pv fuse",
+        "string fuse",
+        "fuse holder",
+        "dc fuse"
+      ]
+    },
+    "dc_spd": {
+      "id": "dc_spd",
+      "palette": true,
+      "order": 236,
+      "group": "protection_switching",
+      "category": "protection",
+      "title": "DC SPD",
+      "subtitle": "PV surge protective device",
+      "aliases": [
+        "spd",
+        "surge protection",
+        "surge protective device",
+        "dc arrester",
+        "type 2 spd"
+      ],
+      "default_rating": "SPD rating not specified",
+      "kind": "protection",
+      "tag_prefix": "SPD-DC",
+      "nominal_size": {
+        "width": 144,
+        "height": 120
+      },
+      "glyph_box": {
+        "x": 35,
+        "y": 12,
+        "width": 74,
+        "height": 68
+      },
+      "optical_center": {
+        "x": 0.5,
+        "y": 0.375
+      },
+      "electrical_center": {
+        "x": 0.5,
+        "y": 0.39
+      },
+      "standard": {
+        "status": "iec_reference",
+        "status_label": "Reference drawing form",
+        "family": "Surge diverter / lightning arrester",
+        "reference": "User-provided IEC 60617 symbol reference",
+        "source_pages": "18",
+        "note": "Parallel DC surge-protection branch with a protective-earth terminal.",
+        "certified": false
+      },
+      "transforms": {
+        "rotations": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "mirror_horizontal": false,
+        "mirror_vertical": false,
+        "preserve_terminal_semantics": true
+      },
+      "ports": [
+        {
+          "id": "DC_TAP",
+          "network": "dc_power",
+          "direction": "input",
+          "side": "left",
+          "label": "DC bus tap",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.31
+          },
+          "terminal_class": "power_dc",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "PE",
+          "network": "protective_earth",
+          "direction": "output",
+          "side": "bottom",
+          "label": "Protective earth",
+          "anchor": {
+            "x": 0.5,
+            "y": 0.665
+          },
+          "terminal_class": "protective_earth",
+          "required": false,
+          "max_connections": 1
+        }
+      ]
+    },
+    "dc_breaker": {
+      "id": "dc_breaker",
+      "palette": true,
+      "order": 240,
+      "group": "protection_switching",
+      "category": "protection",
+      "title": "DC circuit breaker",
+      "subtitle": "DC switching and overcurrent protection",
+      "default_rating": "Breaker rating not specified",
+      "kind": "protection",
+      "tag_prefix": "QFDC",
+      "nominal_size": {
+        "width": 144,
+        "height": 120
+      },
+      "glyph_box": {
+        "x": 35,
+        "y": 12,
+        "width": 74,
+        "height": 68
+      },
+      "optical_center": {
+        "x": 0.5,
+        "y": 0.375
+      },
+      "electrical_center": {
+        "x": 0.5,
+        "y": 0.39
+      },
+      "standard": {
+        "status": "iec_reference",
+        "status_label": "IEC reference form",
+        "family": "IEC 60617 circuit breaker",
+        "reference": "IEC 60617",
+        "source_pages": "14",
+        "note": "Circuit-breaker reference form.",
+        "certified": false
+      },
+      "transforms": {
+        "rotations": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "mirror_horizontal": false,
+        "mirror_vertical": false,
+        "preserve_terminal_semantics": true
+      },
+      "ports": [
+        {
+          "id": "DC_IN",
+          "network": "dc_power",
+          "direction": "input",
+          "side": "left",
+          "label": "DC input",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.41
+          },
+          "terminal_class": "power_dc",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "DC_OUT",
+          "network": "dc_power",
+          "direction": "output",
+          "side": "right",
+          "label": "DC output",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.41
+          },
+          "terminal_class": "power_dc",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "PE",
+          "network": "protective_earth",
+          "direction": "bidirectional",
+          "side": "bottom",
+          "label": "Protective earth",
+          "anchor": {
+            "x": 0.5,
+            "y": 0.665
+          },
+          "terminal_class": "protective_earth",
+          "required": false,
+          "max_connections": 2
+        }
+      ],
+      "aliases": [
+        "dc breaker",
+        "dc mccb",
+        "dc mcb"
+      ]
+    },
+    "dc_protection": {
+      "id": "dc_protection",
+      "palette": true,
+      "order": 250,
+      "group": "protection_switching",
+      "category": "protection",
+      "title": "DC protection assembly",
+      "subtitle": "Isolator, fuse, and SPD",
+      "default_rating": "DC rating not specified",
+      "kind": "protection",
+      "tag_prefix": "QSDC",
+      "nominal_size": {
+        "width": 144,
+        "height": 120
+      },
+      "glyph_box": {
+        "x": 35,
+        "y": 12,
+        "width": 74,
+        "height": 68
+      },
+      "optical_center": {
+        "x": 0.5,
+        "y": 0.375
+      },
+      "electrical_center": {
+        "x": 0.5,
+        "y": 0.39
+      },
+      "standard": {
+        "status": "nexorin_assembly",
+        "status_label": "NEXORIN engineering assembly",
+        "family": "IEC disconnector, fuse, and arrester basis",
+        "reference": "IEC 60617",
+        "source_pages": "14, 17, 18",
+        "note": "Composite DC protection assembly.",
+        "certified": false
+      },
+      "transforms": {
+        "rotations": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "mirror_horizontal": true,
+        "mirror_vertical": true,
+        "preserve_terminal_semantics": true
+      },
+      "ports": [
+        {
+          "id": "DC_IN",
+          "network": "dc_power",
+          "direction": "input",
+          "side": "left",
+          "label": "DC input",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.41
+          },
+          "terminal_class": "power_dc",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "DC_OUT",
+          "network": "dc_power",
+          "direction": "output",
+          "side": "right",
+          "label": "Protected DC",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.41
+          },
+          "terminal_class": "power_dc",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "PE",
+          "network": "protective_earth",
+          "direction": "bidirectional",
+          "side": "bottom",
+          "label": "Protective earth",
+          "anchor": {
+            "x": 0.5,
+            "y": 0.665
+          },
+          "terminal_class": "protective_earth",
+          "required": false,
+          "max_connections": 2
+        }
+      ],
+      "source_ports": [
+        {
+          "id": "DC_IN",
+          "network": "dc_power",
+          "direction": "input",
+          "side": "left",
+          "label": "DC input",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.41
+          },
+          "terminal_class": "power_dc",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "DC_OUT",
+          "network": "dc_power",
+          "direction": "output",
+          "side": "right",
+          "label": "Protected DC",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.41
+          },
+          "terminal_class": "power_dc",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "PE",
+          "network": "protective_earth",
+          "direction": "bidirectional",
+          "side": "bottom",
+          "label": "Protective earth",
+          "anchor": {
+            "x": 0.5,
+            "y": 0.665
+          },
+          "terminal_class": "protective_earth",
+          "required": false,
+          "max_connections": 2
+        }
+      ],
+      "aliases": [
+        "dc protection assembly",
+        "dc protection box",
+        "isolator fuse spd"
+      ]
+    },
+    "dc_busbar": {
+      "id": "dc_busbar",
+      "palette": true,
+      "order": 260,
+      "group": "protection_switching",
+      "category": "protection",
+      "title": "DC busbar",
+      "subtitle": "DC distribution bus",
+      "default_rating": "Busbar rating not specified",
+      "kind": "distribution",
+      "tag_prefix": "BUS-DC",
+      "nominal_size": {
+        "width": 144,
+        "height": 120
+      },
+      "glyph_box": {
+        "x": 35,
+        "y": 12,
+        "width": 74,
+        "height": 68
+      },
+      "optical_center": {
+        "x": 0.5,
+        "y": 0.375
+      },
+      "electrical_center": {
+        "x": 0.5,
+        "y": 0.39
+      },
+      "standard": {
+        "status": "iec_simplified",
+        "status_label": "IEC simplified form",
+        "family": "IEC 60617 conductor / group of connections",
+        "reference": "IEC 60617",
+        "source_pages": "1",
+        "note": "Simplified DC distribution bus.",
+        "certified": false
+      },
+      "transforms": {
+        "rotations": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "mirror_horizontal": true,
+        "mirror_vertical": true,
+        "preserve_terminal_semantics": true
+      },
+      "ports": [
+        {
+          "id": "DC_IN",
+          "network": "dc_power",
+          "direction": "bidirectional",
+          "side": "left",
+          "label": "DC bus input",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.41
+          },
+          "terminal_class": "power_dc",
+          "required": false,
+          "max_connections": 2
+        },
+        {
+          "id": "DC_OUT",
+          "network": "dc_power",
+          "direction": "bidirectional",
+          "side": "right",
+          "label": "DC bus output",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.41
+          },
+          "terminal_class": "power_dc",
+          "required": false,
+          "max_connections": 2
+        }
+      ]
+    },
+    "gfpd": {
+      "id": "gfpd",
+      "palette": true,
+      "order": 270,
+      "group": "protection_switching",
+      "category": "protection",
+      "title": "Ground-fault protection",
+      "subtitle": "Ground-fault detection and isolation",
+      "default_rating": "GFPD rating not specified",
+      "kind": "protection",
+      "tag_prefix": "GFPD",
+      "nominal_size": {
+        "width": 144,
+        "height": 120
+      },
+      "glyph_box": {
+        "x": 35,
+        "y": 12,
+        "width": 74,
+        "height": 68
+      },
+      "optical_center": {
+        "x": 0.5,
+        "y": 0.375
+      },
+      "electrical_center": {
+        "x": 0.5,
+        "y": 0.39
+      },
+      "standard": {
+        "status": "nexorin_assembly",
+        "status_label": "NEXORIN engineering assembly",
+        "family": "IEC fault and switching-function basis",
+        "reference": "IEC 60617",
+        "source_pages": "11, 14",
+        "note": "Ground-fault protection functional assembly.",
+        "certified": false
+      },
+      "transforms": {
+        "rotations": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "mirror_horizontal": true,
+        "mirror_vertical": true,
+        "preserve_terminal_semantics": true
+      },
+      "ports": [
+        {
+          "id": "DC_IN",
+          "network": "dc_power",
+          "direction": "input",
+          "side": "left",
+          "label": "Power input",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.41
+          },
+          "terminal_class": "power_dc",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "DC_OUT",
+          "network": "dc_power",
+          "direction": "output",
+          "side": "right",
+          "label": "Protected output",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.41
+          },
+          "terminal_class": "power_dc",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "PE",
+          "network": "protective_earth",
+          "direction": "bidirectional",
+          "side": "bottom",
+          "label": "Protective earth",
+          "anchor": {
+            "x": 0.5,
+            "y": 0.665
+          },
+          "terminal_class": "protective_earth",
+          "required": false,
+          "max_connections": 2
+        }
+      ]
+    },
+    "afci": {
+      "id": "afci",
+      "palette": true,
+      "order": 280,
+      "group": "protection_switching",
+      "category": "protection",
+      "title": "Arc-fault protection",
+      "subtitle": "PV arc-fault detection",
+      "default_rating": "AFCI rating not specified",
+      "kind": "protection",
+      "tag_prefix": "AFCI",
+      "nominal_size": {
+        "width": 144,
+        "height": 120
+      },
+      "glyph_box": {
+        "x": 35,
+        "y": 12,
+        "width": 74,
+        "height": 68
+      },
+      "optical_center": {
+        "x": 0.5,
+        "y": 0.375
+      },
+      "electrical_center": {
+        "x": 0.5,
+        "y": 0.39
+      },
+      "standard": {
+        "status": "nexorin_assembly",
+        "status_label": "NEXORIN engineering assembly",
+        "family": "IEC fault and switching-function basis",
+        "reference": "IEC 60617",
+        "source_pages": "11, 14",
+        "note": "Arc-fault protection functional assembly.",
+        "certified": false
+      },
+      "transforms": {
+        "rotations": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "mirror_horizontal": true,
+        "mirror_vertical": true,
+        "preserve_terminal_semantics": true
+      },
+      "ports": [
+        {
+          "id": "DC_IN",
+          "network": "dc_power",
+          "direction": "input",
+          "side": "left",
+          "label": "Power input",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.41
+          },
+          "terminal_class": "power_dc",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "DC_OUT",
+          "network": "dc_power",
+          "direction": "output",
+          "side": "right",
+          "label": "Protected output",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.41
+          },
+          "terminal_class": "power_dc",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "COM",
+          "network": "communication",
+          "direction": "bidirectional",
+          "side": "bottom",
+          "label": "Alarm communication",
+          "anchor": {
+            "x": 0.5,
+            "y": 0.665
+          },
+          "terminal_class": "communication",
+          "required": false,
+          "max_connections": 2
+        }
+      ]
+    },
+    "ac_breaker": {
+      "id": "ac_breaker",
+      "palette": true,
+      "order": 281,
+      "group": "protection_switching",
+      "category": "protection",
+      "title": "AC circuit breaker",
+      "subtitle": "LV AC overcurrent protection",
+      "aliases": [
+        "breaker",
+        "mccb",
+        "mcb",
+        "ac circuit breaker",
+        "qf"
+      ],
+      "default_rating": "Breaker rating not specified",
+      "kind": "protection",
+      "tag_prefix": "QF-AC",
+      "nominal_size": {
+        "width": 144,
+        "height": 120
+      },
+      "glyph_box": {
+        "x": 35,
+        "y": 12,
+        "width": 74,
+        "height": 68
+      },
+      "optical_center": {
+        "x": 0.5,
+        "y": 0.375
+      },
+      "electrical_center": {
+        "x": 0.5,
+        "y": 0.39
+      },
+      "standard": {
+        "status": "iec_reference",
+        "status_label": "Reference drawing form",
+        "family": "Circuit breaker",
+        "reference": "User-provided IEC 60617 symbol reference",
+        "source_pages": "14",
+        "note": "Individual AC circuit breaker for inverter and panel feeders.",
+        "certified": false
+      },
+      "transforms": {
+        "rotations": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "mirror_horizontal": false,
+        "mirror_vertical": false,
+        "preserve_terminal_semantics": true
+      },
+      "ports": [
+        {
+          "id": "AC_IN",
+          "network": "ac_power",
+          "direction": "input",
+          "side": "left",
+          "label": "AC input",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.41
+          },
+          "terminal_class": "power_ac",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "AC_OUT",
+          "network": "ac_power",
+          "direction": "output",
+          "side": "right",
+          "label": "Protected AC output",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.41
+          },
+          "terminal_class": "power_ac",
+          "required": false,
+          "max_connections": 1
+        }
+      ]
+    },
+    "ac_isolator": {
+      "id": "ac_isolator",
+      "palette": true,
+      "order": 284,
+      "group": "protection_switching",
+      "category": "protection",
+      "title": "AC isolator",
+      "subtitle": "AC load-break disconnect",
+      "aliases": [
+        "isolator",
+        "disconnect",
+        "disconnector",
+        "ac switch",
+        "load break switch"
+      ],
+      "default_rating": "AC rating not specified",
+      "kind": "protection",
+      "tag_prefix": "QS-AC",
+      "nominal_size": {
+        "width": 144,
+        "height": 120
+      },
+      "glyph_box": {
+        "x": 35,
+        "y": 12,
+        "width": 74,
+        "height": 68
+      },
+      "optical_center": {
+        "x": 0.5,
+        "y": 0.375
+      },
+      "electrical_center": {
+        "x": 0.5,
+        "y": 0.39
+      },
+      "standard": {
+        "status": "iec_reference",
+        "status_label": "Reference drawing form",
+        "family": "Disconnector / switch-disconnector",
+        "reference": "User-provided IEC 60617 symbol reference",
+        "source_pages": "14–15",
+        "note": "Individual AC isolator for a controlled series path.",
+        "certified": false
+      },
+      "transforms": {
+        "rotations": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "mirror_horizontal": false,
+        "mirror_vertical": false,
+        "preserve_terminal_semantics": true
+      },
+      "ports": [
+        {
+          "id": "AC_IN",
+          "network": "ac_power",
+          "direction": "input",
+          "side": "left",
+          "label": "AC input",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.41
+          },
+          "terminal_class": "power_ac",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "AC_OUT",
+          "network": "ac_power",
+          "direction": "output",
+          "side": "right",
+          "label": "Isolated AC output",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.41
+          },
+          "terminal_class": "power_ac",
+          "required": false,
+          "max_connections": 1
+        }
+      ]
+    },
+    "ac_spd": {
+      "id": "ac_spd",
+      "palette": true,
+      "order": 288,
+      "group": "protection_switching",
+      "category": "protection",
+      "title": "AC SPD",
+      "subtitle": "LV AC surge protective device",
+      "aliases": [
+        "spd",
+        "surge protection",
+        "surge protective device",
+        "ac arrester",
+        "3p+n spd"
+      ],
+      "default_rating": "SPD rating not specified",
+      "kind": "protection",
+      "tag_prefix": "SPD-AC",
+      "nominal_size": {
+        "width": 144,
+        "height": 120
+      },
+      "glyph_box": {
+        "x": 35,
+        "y": 12,
+        "width": 74,
+        "height": 68
+      },
+      "optical_center": {
+        "x": 0.5,
+        "y": 0.375
+      },
+      "electrical_center": {
+        "x": 0.5,
+        "y": 0.39
+      },
+      "standard": {
+        "status": "iec_reference",
+        "status_label": "Reference drawing form",
+        "family": "Surge diverter / lightning arrester",
+        "reference": "User-provided IEC 60617 symbol reference",
+        "source_pages": "18",
+        "note": "Parallel AC surge-protection branch with protective-earth termination.",
+        "certified": false
+      },
+      "transforms": {
+        "rotations": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "mirror_horizontal": false,
+        "mirror_vertical": false,
+        "preserve_terminal_semantics": true
+      },
+      "ports": [
+        {
+          "id": "AC_TAP",
+          "network": "ac_power",
+          "direction": "input",
+          "side": "left",
+          "label": "AC bus tap",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.31
+          },
+          "terminal_class": "power_ac",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "PE",
+          "network": "protective_earth",
+          "direction": "output",
+          "side": "bottom",
+          "label": "Protective earth",
+          "anchor": {
+            "x": 0.5,
+            "y": 0.665
+          },
+          "terminal_class": "protective_earth",
+          "required": false,
+          "max_connections": 1
+        }
+      ]
+    },
+    "ac_protection": {
+      "id": "ac_protection",
+      "palette": true,
+      "order": 290,
+      "group": "protection_switching",
+      "category": "protection",
+      "title": "AC protection assembly",
+      "subtitle": "Breaker, isolator, and SPD",
+      "default_rating": "AC rating not specified",
+      "kind": "protection",
+      "tag_prefix": "QFAC",
+      "nominal_size": {
+        "width": 144,
+        "height": 120
+      },
+      "glyph_box": {
+        "x": 35,
+        "y": 12,
+        "width": 74,
+        "height": 68
+      },
+      "optical_center": {
+        "x": 0.5,
+        "y": 0.375
+      },
+      "electrical_center": {
+        "x": 0.5,
+        "y": 0.39
+      },
+      "standard": {
+        "status": "nexorin_assembly",
+        "status_label": "NEXORIN engineering assembly",
+        "family": "IEC circuit breaker and arrester basis",
+        "reference": "IEC 60617",
+        "source_pages": "14, 18",
+        "note": "Composite AC protection assembly.",
+        "certified": false
+      },
+      "transforms": {
+        "rotations": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "mirror_horizontal": true,
+        "mirror_vertical": true,
+        "preserve_terminal_semantics": true
+      },
+      "ports": [
+        {
+          "id": "AC_IN",
+          "network": "ac_power",
+          "direction": "input",
+          "side": "left",
+          "label": "AC input",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.41
+          },
+          "terminal_class": "power_ac",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "AC_OUT",
+          "network": "ac_power",
+          "direction": "output",
+          "side": "right",
+          "label": "Protected AC",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.41
+          },
+          "terminal_class": "power_ac",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "PE",
+          "network": "protective_earth",
+          "direction": "bidirectional",
+          "side": "bottom",
+          "label": "Protective earth",
+          "anchor": {
+            "x": 0.5,
+            "y": 0.665
+          },
+          "terminal_class": "protective_earth",
+          "required": false,
+          "max_connections": 2
+        }
+      ],
+      "source_ports": [
+        {
+          "id": "AC_IN",
+          "network": "ac_power",
+          "direction": "input",
+          "side": "left",
+          "label": "AC input",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.41
+          },
+          "terminal_class": "power_ac",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "AC_OUT",
+          "network": "ac_power",
+          "direction": "output",
+          "side": "right",
+          "label": "Protected AC",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.41
+          },
+          "terminal_class": "power_ac",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "PE",
+          "network": "protective_earth",
+          "direction": "bidirectional",
+          "side": "bottom",
+          "label": "Protective earth",
+          "anchor": {
+            "x": 0.5,
+            "y": 0.665
+          },
+          "terminal_class": "protective_earth",
+          "required": false,
+          "max_connections": 2
+        }
+      ],
+      "aliases": [
+        "ac protection assembly",
+        "breaker isolator spd"
+      ]
+    },
+    "ac_combiner": {
+      "id": "ac_combiner",
+      "palette": true,
+      "order": 300,
+      "group": "ac_distribution_grid",
+      "category": "ac-grid",
+      "title": "AC combiner panel",
+      "subtitle": "Multiple inverter aggregation",
+      "default_rating": "Combiner rating not specified",
+      "kind": "distribution",
+      "tag_prefix": "ACCP",
+      "nominal_size": {
+        "width": 144,
+        "height": 120
+      },
+      "glyph_box": {
+        "x": 35,
+        "y": 12,
+        "width": 74,
+        "height": 68
+      },
+      "optical_center": {
+        "x": 0.5,
+        "y": 0.375
+      },
+      "electrical_center": {
+        "x": 0.5,
+        "y": 0.39
+      },
+      "standard": {
+        "status": "nexorin_assembly",
+        "status_label": "NEXORIN engineering assembly",
+        "family": "IEC distribution-centre and switching basis",
+        "reference": "IEC 60617",
+        "source_pages": "14, 21",
+        "note": "AC aggregation panel.",
+        "certified": false
+      },
+      "transforms": {
+        "rotations": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "mirror_horizontal": true,
+        "mirror_vertical": true,
+        "preserve_terminal_semantics": true
+      },
+      "ports": [
+        {
+          "id": "AC_IN",
+          "network": "ac_power",
+          "direction": "input",
+          "side": "left",
+          "label": "Inverter incoming",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.41
+          },
+          "terminal_class": "power_ac",
+          "required": false,
+          "max_connections": 16
+        },
+        {
+          "id": "AC_OUT",
+          "network": "ac_power",
+          "direction": "output",
+          "side": "right",
+          "label": "Combined AC output",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.41
+          },
+          "terminal_class": "power_ac",
+          "required": false,
+          "max_connections": 2
+        },
+        {
+          "id": "PE",
+          "network": "protective_earth",
+          "direction": "bidirectional",
+          "side": "bottom",
+          "label": "Protective earth",
+          "anchor": {
+            "x": 0.32,
+            "y": 0.665
+          },
+          "terminal_class": "protective_earth",
+          "required": false,
+          "max_connections": 2
+        },
+        {
+          "id": "N",
+          "network": "neutral",
+          "direction": "bidirectional",
+          "side": "bottom",
+          "label": "Neutral",
+          "anchor": {
+            "x": 0.68,
+            "y": 0.665
+          },
+          "terminal_class": "neutral",
+          "required": false,
+          "max_connections": 2
+        }
+      ]
+    },
+    "panel": {
+      "id": "panel",
+      "palette": true,
+      "order": 310,
+      "group": "ac_distribution_grid",
+      "category": "ac-grid",
+      "title": "Distribution board",
+      "subtitle": "AC distribution",
+      "default_rating": "Bus and breaker rating not specified",
+      "kind": "distribution",
+      "tag_prefix": "DB",
+      "nominal_size": {
+        "width": 144,
+        "height": 120
+      },
+      "glyph_box": {
+        "x": 35,
+        "y": 12,
+        "width": 74,
+        "height": 68
+      },
+      "optical_center": {
+        "x": 0.5,
+        "y": 0.375
+      },
+      "electrical_center": {
+        "x": 0.5,
+        "y": 0.39
+      },
+      "standard": {
+        "status": "iec_simplified",
+        "status_label": "IEC simplified form",
+        "family": "IEC 60617 distribution centre",
+        "reference": "IEC 60617",
+        "source_pages": "21",
+        "note": "Simplified distribution board.",
+        "certified": false
+      },
+      "transforms": {
+        "rotations": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "mirror_horizontal": true,
+        "mirror_vertical": true,
+        "preserve_terminal_semantics": true
+      },
+      "ports": [
+        {
+          "id": "AC_IN",
+          "network": "ac_power",
+          "direction": "input",
+          "side": "left",
+          "label": "Incoming feeder",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.41
+          },
+          "terminal_class": "power_ac",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "AC_OUT",
+          "network": "ac_power",
+          "direction": "output",
+          "side": "right",
+          "label": "Outgoing feeder",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.41
+          },
+          "terminal_class": "power_ac",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "PE",
+          "network": "protective_earth",
+          "direction": "bidirectional",
+          "side": "bottom",
+          "label": "Protective earth",
+          "anchor": {
+            "x": 0.32,
+            "y": 0.665
+          },
+          "terminal_class": "protective_earth",
+          "required": false,
+          "max_connections": 2
+        },
+        {
+          "id": "N",
+          "network": "neutral",
+          "direction": "bidirectional",
+          "side": "bottom",
+          "label": "Neutral",
+          "anchor": {
+            "x": 0.68,
+            "y": 0.665
+          },
+          "terminal_class": "neutral",
+          "required": false,
+          "max_connections": 2
+        }
+      ]
+    },
+    "main_panel": {
+      "id": "main_panel",
+      "palette": true,
+      "order": 320,
+      "group": "ac_distribution_grid",
+      "category": "ac-grid",
+      "title": "Main distribution board",
+      "subtitle": "Main AC distribution",
+      "default_rating": "Main board rating not specified",
+      "kind": "distribution",
+      "tag_prefix": "MDB",
+      "nominal_size": {
+        "width": 144,
+        "height": 120
+      },
+      "glyph_box": {
+        "x": 35,
+        "y": 12,
+        "width": 74,
+        "height": 68
+      },
+      "optical_center": {
+        "x": 0.5,
+        "y": 0.375
+      },
+      "electrical_center": {
+        "x": 0.5,
+        "y": 0.39
+      },
+      "standard": {
+        "status": "iec_simplified",
+        "status_label": "IEC simplified form",
+        "family": "IEC 60617 distribution centre",
+        "reference": "IEC 60617",
+        "source_pages": "21",
+        "note": "Simplified main distribution board.",
+        "certified": false
+      },
+      "transforms": {
+        "rotations": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "mirror_horizontal": true,
+        "mirror_vertical": true,
+        "preserve_terminal_semantics": true
+      },
+      "ports": [
+        {
+          "id": "AC_IN",
+          "network": "ac_power",
+          "direction": "input",
+          "side": "left",
+          "label": "Main incoming",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.41
+          },
+          "terminal_class": "power_ac",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "AC_OUT",
+          "network": "ac_power",
+          "direction": "output",
+          "side": "right",
+          "label": "Main outgoing",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.41
+          },
+          "terminal_class": "power_ac",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "PE",
+          "network": "protective_earth",
+          "direction": "bidirectional",
+          "side": "bottom",
+          "label": "Protective earth",
+          "anchor": {
+            "x": 0.32,
+            "y": 0.665
+          },
+          "terminal_class": "protective_earth",
+          "required": false,
+          "max_connections": 2
+        },
+        {
+          "id": "N",
+          "network": "neutral",
+          "direction": "bidirectional",
+          "side": "bottom",
+          "label": "Neutral",
+          "anchor": {
+            "x": 0.68,
+            "y": 0.665
+          },
+          "terminal_class": "neutral",
+          "required": false,
+          "max_connections": 2
+        }
+      ]
+    },
+    "critical_panel": {
+      "id": "critical_panel",
+      "palette": true,
+      "order": 330,
+      "group": "ac_distribution_grid",
+      "category": "ac-grid",
+      "title": "Critical load panel",
+      "subtitle": "Essential load circuits",
+      "default_rating": "Critical load not specified",
+      "kind": "load",
+      "tag_prefix": "DB-ESS",
+      "nominal_size": {
+        "width": 144,
+        "height": 120
+      },
+      "glyph_box": {
+        "x": 35,
+        "y": 12,
+        "width": 74,
+        "height": 68
+      },
+      "optical_center": {
+        "x": 0.5,
+        "y": 0.375
+      },
+      "electrical_center": {
+        "x": 0.5,
+        "y": 0.39
+      },
+      "standard": {
+        "status": "iec_simplified",
+        "status_label": "IEC simplified form",
+        "family": "IEC 60617 distribution centre",
+        "reference": "IEC 60617",
+        "source_pages": "21",
+        "note": "Simplified essential-load panel.",
+        "certified": false
+      },
+      "transforms": {
+        "rotations": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "mirror_horizontal": true,
+        "mirror_vertical": true,
+        "preserve_terminal_semantics": true
+      },
+      "ports": [
+        {
+          "id": "AC_IN",
+          "network": "ac_power",
+          "direction": "input",
+          "side": "left",
+          "label": "Backup incoming",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.41
+          },
+          "terminal_class": "power_ac",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "PE",
+          "network": "protective_earth",
+          "direction": "bidirectional",
+          "side": "bottom",
+          "label": "Protective earth",
+          "anchor": {
+            "x": 0.32,
+            "y": 0.665
+          },
+          "terminal_class": "protective_earth",
+          "required": false,
+          "max_connections": 2
+        },
+        {
+          "id": "N",
+          "network": "neutral",
+          "direction": "bidirectional",
+          "side": "bottom",
+          "label": "Neutral",
+          "anchor": {
+            "x": 0.68,
+            "y": 0.665
+          },
+          "terminal_class": "neutral",
+          "required": false,
+          "max_connections": 2
+        }
+      ]
+    },
+    "transfer_switch": {
+      "id": "transfer_switch",
+      "palette": true,
+      "order": 340,
+      "group": "protection_switching",
+      "category": "protection",
+      "title": "Automatic transfer switch",
+      "subtitle": "Normal and emergency source selection",
+      "default_rating": "Poles and interlock not specified",
+      "kind": "switching",
+      "tag_prefix": "ATS",
+      "nominal_size": {
+        "width": 144,
+        "height": 120
+      },
+      "glyph_box": {
+        "x": 35,
+        "y": 12,
+        "width": 74,
+        "height": 68
+      },
+      "optical_center": {
+        "x": 0.5,
+        "y": 0.375
+      },
+      "electrical_center": {
+        "x": 0.5,
+        "y": 0.39
+      },
+      "standard": {
+        "status": "iec_simplified",
+        "status_label": "IEC simplified form",
+        "family": "IEC change-over contact / switch basis",
+        "reference": "IEC 60617",
+        "source_pages": "12, 13",
+        "note": "Simplified source transfer function.",
+        "certified": false
+      },
+      "transforms": {
+        "rotations": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "mirror_horizontal": false,
+        "mirror_vertical": false,
+        "preserve_terminal_semantics": true
+      },
+      "ports": [
+        {
+          "id": "AC_NORMAL",
+          "network": "ac_power",
+          "direction": "input",
+          "side": "left",
+          "label": "Normal source",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.25
+          },
+          "terminal_class": "power_ac",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "AC_EMERGENCY",
+          "network": "ac_power",
+          "direction": "input",
+          "side": "left",
+          "label": "Emergency source",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.57
+          },
+          "terminal_class": "power_ac",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "AC_OUT",
+          "network": "ac_power",
+          "direction": "output",
+          "side": "right",
+          "label": "Selected source",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.41
+          },
+          "terminal_class": "power_ac",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "PE",
+          "network": "protective_earth",
+          "direction": "bidirectional",
+          "side": "bottom",
+          "label": "Protective earth",
+          "anchor": {
+            "x": 0.5,
+            "y": 0.665
+          },
+          "terminal_class": "protective_earth",
+          "required": false,
+          "max_connections": 2
+        }
+      ]
+    },
+    "meter": {
+      "id": "meter",
+      "palette": true,
+      "order": 350,
+      "group": "ac_distribution_grid",
+      "category": "ac-grid",
+      "title": "Energy meter",
+      "subtitle": "Import and export boundary",
+      "default_rating": "Bidirectional metering",
+      "kind": "control",
+      "tag_prefix": "MTR",
+      "nominal_size": {
+        "width": 144,
+        "height": 120
+      },
+      "glyph_box": {
+        "x": 35,
+        "y": 12,
+        "width": 74,
+        "height": 68
+      },
+      "optical_center": {
+        "x": 0.5,
+        "y": 0.375
+      },
+      "electrical_center": {
+        "x": 0.5,
+        "y": 0.39
+      },
+      "standard": {
+        "status": "iec_reference",
+        "status_label": "IEC reference form",
+        "family": "IEC 60617 energy meter",
+        "reference": "IEC 60617",
+        "source_pages": "44, 45",
+        "note": "Energy-meter reference form.",
+        "certified": false
+      },
+      "transforms": {
+        "rotations": [
+          0
+        ],
+        "mirror_horizontal": false,
+        "mirror_vertical": false,
+        "preserve_terminal_semantics": true
+      },
+      "ports": [
+        {
+          "id": "AC_IN",
+          "network": "ac_power",
+          "direction": "input",
+          "side": "left",
+          "label": "Customer side",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.41
+          },
+          "terminal_class": "power_ac",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "AC_OUT",
+          "network": "ac_power",
+          "direction": "output",
+          "side": "right",
+          "label": "Utility side",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.41
+          },
+          "terminal_class": "power_ac",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "COM",
+          "network": "communication",
+          "direction": "bidirectional",
+          "side": "bottom",
+          "label": "Meter communication",
+          "anchor": {
+            "x": 0.5,
+            "y": 0.665
+          },
+          "terminal_class": "communication",
+          "required": false,
+          "max_connections": 2
+        }
+      ],
+      "source_ports": [
+        {
+          "id": "AC_IN",
+          "network": "ac_power",
+          "direction": "input",
+          "side": "left",
+          "label": "Customer side",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.41
+          },
+          "terminal_class": "power_ac",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "AC_OUT",
+          "network": "ac_power",
+          "direction": "output",
+          "side": "right",
+          "label": "Utility side",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.41
+          },
+          "terminal_class": "power_ac",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "COM",
+          "network": "communication",
+          "direction": "bidirectional",
+          "side": "bottom",
+          "label": "Meter communication",
+          "anchor": {
+            "x": 0.5,
+            "y": 0.665
+          },
+          "terminal_class": "communication",
+          "required": false,
+          "max_connections": 2
+        }
+      ],
+      "aliases": [
+        "energy meter",
+        "revenue meter",
+        "bidirectional meter",
+        "kwh meter"
+      ]
+    },
+    "app_pln": {
+      "id": "app_pln",
+      "palette": true,
+      "order": 360,
+      "group": "ac_distribution_grid",
+      "category": "ac-grid",
+      "title": "APP PLN / kWh exim",
+      "subtitle": "Alat Pembatas dan Pengukur",
+      "default_rating": "Metering arrangement not specified",
+      "kind": "control",
+      "tag_prefix": "APP",
+      "nominal_size": {
+        "width": 144,
+        "height": 120
+      },
+      "glyph_box": {
+        "x": 35,
+        "y": 12,
+        "width": 74,
+        "height": 68
+      },
+      "optical_center": {
+        "x": 0.5,
+        "y": 0.375
+      },
+      "electrical_center": {
+        "x": 0.5,
+        "y": 0.39
+      },
+      "standard": {
+        "status": "nexorin_assembly",
+        "status_label": "NEXORIN engineering assembly",
+        "family": "IEC metering and service-entrance basis",
+        "reference": "IEC 60617",
+        "source_pages": "21, 44, 45",
+        "note": "Utility metering and limiting assembly.",
+        "certified": false
+      },
+      "transforms": {
+        "rotations": [
+          0
+        ],
+        "mirror_horizontal": false,
+        "mirror_vertical": false,
+        "preserve_terminal_semantics": true
+      },
+      "ports": [
+        {
+          "id": "AC_CUSTOMER",
+          "network": "ac_power",
+          "direction": "bidirectional",
+          "side": "left",
+          "label": "Customer side",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.41
+          },
+          "terminal_class": "power_ac",
+          "required": false,
+          "max_connections": 2
+        },
+        {
+          "id": "AC_PLN",
+          "network": "ac_power",
+          "direction": "bidirectional",
+          "side": "right",
+          "label": "PLN side",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.41
+          },
+          "terminal_class": "power_ac",
+          "required": false,
+          "max_connections": 2
+        },
+        {
+          "id": "COM",
+          "network": "communication",
+          "direction": "bidirectional",
+          "side": "bottom",
+          "label": "Meter communication",
+          "anchor": {
+            "x": 0.5,
+            "y": 0.665
+          },
+          "terminal_class": "communication",
+          "required": false,
+          "max_connections": 2
+        }
+      ]
+    },
+    "pcc": {
+      "id": "pcc",
+      "palette": true,
+      "order": 370,
+      "group": "ac_distribution_grid",
+      "category": "ac-grid",
+      "title": "PCC / POI",
+      "subtitle": "Point of common coupling",
+      "default_rating": "Interconnection data not specified",
+      "kind": "utility",
+      "tag_prefix": "PCC",
+      "nominal_size": {
+        "width": 144,
+        "height": 120
+      },
+      "glyph_box": {
+        "x": 35,
+        "y": 12,
+        "width": 74,
+        "height": 68
+      },
+      "optical_center": {
+        "x": 0.5,
+        "y": 0.375
+      },
+      "electrical_center": {
+        "x": 0.5,
+        "y": 0.39
+      },
+      "standard": {
+        "status": "nexorin_assembly",
+        "status_label": "NEXORIN engineering assembly",
+        "family": "IEC terminal / directed connection basis",
+        "reference": "IEC 60617",
+        "source_pages": "2, 52",
+        "note": "Point-of-common-coupling functional marker.",
+        "certified": false
+      },
+      "transforms": {
+        "rotations": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "mirror_horizontal": true,
+        "mirror_vertical": true,
+        "preserve_terminal_semantics": true
+      },
+      "ports": [
+        {
+          "id": "AC_CUSTOMER",
+          "network": "ac_power",
+          "direction": "bidirectional",
+          "side": "left",
+          "label": "Customer system",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.41
+          },
+          "terminal_class": "power_ac",
+          "required": false,
+          "max_connections": 2
+        },
+        {
+          "id": "AC_UTILITY",
+          "network": "ac_power",
+          "direction": "bidirectional",
+          "side": "right",
+          "label": "Utility system",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.41
+          },
+          "terminal_class": "power_ac",
+          "required": false,
+          "max_connections": 2
+        },
+        {
+          "id": "PE",
+          "network": "protective_earth",
+          "direction": "bidirectional",
+          "side": "bottom",
+          "label": "Earth reference",
+          "anchor": {
+            "x": 0.5,
+            "y": 0.665
+          },
+          "terminal_class": "protective_earth",
+          "required": false,
+          "max_connections": 2
+        }
+      ]
+    },
+    "grid": {
+      "id": "grid",
+      "palette": true,
+      "order": 380,
+      "group": "ac_distribution_grid",
+      "category": "ac-grid",
+      "title": "Utility grid",
+      "subtitle": "PLN utility connection",
+      "default_rating": "Utility supply",
+      "kind": "utility",
+      "tag_prefix": "GRID",
+      "nominal_size": {
+        "width": 144,
+        "height": 120
+      },
+      "glyph_box": {
+        "x": 35,
+        "y": 12,
+        "width": 74,
+        "height": 68
+      },
+      "optical_center": {
+        "x": 0.5,
+        "y": 0.375
+      },
+      "electrical_center": {
+        "x": 0.5,
+        "y": 0.39
+      },
+      "standard": {
+        "status": "nexorin_assembly",
+        "status_label": "NEXORIN engineering assembly",
+        "family": "IEC generating-station / utility-network basis",
+        "reference": "IEC 60617",
+        "source_pages": "18, 19",
+        "note": "Utility network terminal used by PLTS topology.",
+        "certified": false
+      },
+      "transforms": {
+        "rotations": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "mirror_horizontal": true,
+        "mirror_vertical": true,
+        "preserve_terminal_semantics": true
+      },
+      "ports": [
+        {
+          "id": "AC_PCC",
+          "network": "ac_power",
+          "direction": "bidirectional",
+          "side": "left",
+          "label": "Point of common coupling",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.41
+          },
+          "terminal_class": "power_ac",
+          "required": false,
+          "max_connections": 2
+        },
+        {
+          "id": "PE",
+          "network": "protective_earth",
+          "direction": "bidirectional",
+          "side": "bottom",
+          "label": "Utility earth reference",
+          "anchor": {
+            "x": 0.5,
+            "y": 0.665
+          },
+          "terminal_class": "protective_earth",
+          "required": false,
+          "max_connections": 2
+        }
+      ],
+      "source_ports": [
+        {
+          "id": "AC_PCC",
+          "network": "ac_power",
+          "direction": "bidirectional",
+          "side": "left",
+          "label": "Point of common coupling",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.41
+          },
+          "terminal_class": "power_ac",
+          "required": false,
+          "max_connections": 2
+        },
+        {
+          "id": "PE",
+          "network": "protective_earth",
+          "direction": "bidirectional",
+          "side": "bottom",
+          "label": "Utility earth reference",
+          "anchor": {
+            "x": 0.5,
+            "y": 0.665
+          },
+          "terminal_class": "protective_earth",
+          "required": false,
+          "max_connections": 2
+        }
+      ]
+    },
+    "transformer": {
+      "id": "transformer",
+      "palette": true,
+      "order": 390,
+      "group": "ac_distribution_grid",
+      "category": "ac-grid",
+      "title": "Power transformer",
+      "subtitle": "Step-up or step-down transformer",
+      "default_rating": "Transformer rating not specified",
+      "kind": "conversion",
+      "tag_prefix": "TR",
+      "nominal_size": {
+        "width": 144,
+        "height": 120
+      },
+      "glyph_box": {
+        "x": 35,
+        "y": 12,
+        "width": 74,
+        "height": 68
+      },
+      "optical_center": {
+        "x": 0.5,
+        "y": 0.375
+      },
+      "electrical_center": {
+        "x": 0.5,
+        "y": 0.39
+      },
+      "standard": {
+        "status": "iec_reference",
+        "status_label": "IEC reference form",
+        "family": "IEC 60617 two-winding transformer",
+        "reference": "IEC 60617",
+        "source_pages": "34",
+        "note": "Two-winding power transformer.",
+        "certified": false
+      },
+      "transforms": {
+        "rotations": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "mirror_horizontal": false,
+        "mirror_vertical": false,
+        "preserve_terminal_semantics": true
+      },
+      "ports": [
+        {
+          "id": "AC_PRIMARY",
+          "network": "ac_power",
+          "direction": "bidirectional",
+          "side": "left",
+          "label": "Primary",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.41
+          },
+          "terminal_class": "power_ac",
+          "required": false,
+          "max_connections": 2
+        },
+        {
+          "id": "AC_SECONDARY",
+          "network": "ac_power",
+          "direction": "bidirectional",
+          "side": "right",
+          "label": "Secondary",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.41
+          },
+          "terminal_class": "power_ac",
+          "required": false,
+          "max_connections": 2
+        },
+        {
+          "id": "PE",
+          "network": "protective_earth",
+          "direction": "bidirectional",
+          "side": "bottom",
+          "label": "Protective earth",
+          "anchor": {
+            "x": 0.5,
+            "y": 0.665
+          },
+          "terminal_class": "protective_earth",
+          "required": false,
+          "max_connections": 2
+        }
+      ]
+    },
+    "generator": {
+      "id": "generator",
+      "palette": true,
+      "order": 400,
+      "group": "ac_distribution_grid",
+      "category": "ac-grid",
+      "title": "Generator set",
+      "subtitle": "Backup generation source",
+      "default_rating": "Generator rating not specified",
+      "kind": "generation",
+      "tag_prefix": "GEN",
+      "nominal_size": {
+        "width": 144,
+        "height": 120
+      },
+      "glyph_box": {
+        "x": 35,
+        "y": 12,
+        "width": 74,
+        "height": 68
+      },
+      "optical_center": {
+        "x": 0.5,
+        "y": 0.375
+      },
+      "electrical_center": {
+        "x": 0.5,
+        "y": 0.39
+      },
+      "standard": {
+        "status": "iec_reference",
+        "status_label": "IEC reference form",
+        "family": "IEC 60617 machine / generator",
+        "reference": "IEC 60617",
+        "source_pages": "31",
+        "note": "Generator reference form.",
+        "certified": false
+      },
+      "transforms": {
+        "rotations": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "mirror_horizontal": true,
+        "mirror_vertical": true,
+        "preserve_terminal_semantics": true
+      },
+      "ports": [
+        {
+          "id": "AC_OUT",
+          "network": "ac_power",
+          "direction": "output",
+          "side": "right",
+          "label": "Generator output",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.41
+          },
+          "terminal_class": "power_ac",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "CTRL",
+          "network": "control",
+          "direction": "input",
+          "side": "bottom",
+          "label": "Auto-start control",
+          "anchor": {
+            "x": 0.32,
+            "y": 0.665
+          },
+          "terminal_class": "control",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "PE",
+          "network": "protective_earth",
+          "direction": "bidirectional",
+          "side": "bottom",
+          "label": "Protective earth",
+          "anchor": {
+            "x": 0.68,
+            "y": 0.665
+          },
+          "terminal_class": "protective_earth",
+          "required": false,
+          "max_connections": 2
+        }
+      ]
+    },
+    "epo": {
+      "id": "epo",
+      "palette": true,
+      "order": 410,
+      "group": "protection_switching",
+      "category": "protection",
+      "title": "Emergency power off",
+      "subtitle": "Emergency shutdown switch",
+      "default_rating": "EPO circuit not specified",
+      "kind": "safety",
+      "tag_prefix": "EPO",
+      "nominal_size": {
+        "width": 144,
+        "height": 120
+      },
+      "glyph_box": {
+        "x": 35,
+        "y": 12,
+        "width": 74,
+        "height": 68
+      },
+      "optical_center": {
+        "x": 0.5,
+        "y": 0.375
+      },
+      "electrical_center": {
+        "x": 0.5,
+        "y": 0.39
+      },
+      "standard": {
+        "status": "iec_simplified",
+        "status_label": "IEC simplified form",
+        "family": "IEC emergency actuator / stop switch",
+        "reference": "IEC 60617",
+        "source_pages": "9, 13",
+        "note": "Emergency power-off command device.",
+        "certified": false
+      },
+      "transforms": {
+        "rotations": [
+          0
+        ],
+        "mirror_horizontal": false,
+        "mirror_vertical": false,
+        "preserve_terminal_semantics": true
+      },
+      "ports": [
+        {
+          "id": "CTRL_OUT",
+          "network": "control",
+          "direction": "output",
+          "side": "bottom",
+          "label": "Emergency trip command",
+          "anchor": {
+            "x": 0.5,
+            "y": 0.665
+          },
+          "terminal_class": "control",
+          "required": false,
+          "max_connections": 1
+        }
+      ]
+    },
+    "ct": {
+      "id": "ct",
+      "palette": true,
+      "order": 420,
+      "group": "monitoring_metering_safety",
+      "category": "monitoring",
+      "title": "Current transformer",
+      "subtitle": "Current measurement transformer",
+      "default_rating": "CT ratio not specified",
+      "kind": "instrumentation",
+      "tag_prefix": "CT",
+      "nominal_size": {
+        "width": 144,
+        "height": 120
+      },
+      "glyph_box": {
+        "x": 35,
+        "y": 12,
+        "width": 74,
+        "height": 68
+      },
+      "optical_center": {
+        "x": 0.5,
+        "y": 0.375
+      },
+      "electrical_center": {
+        "x": 0.5,
+        "y": 0.39
+      },
+      "standard": {
+        "status": "iec_reference",
+        "status_label": "IEC reference form",
+        "family": "IEC 60617 current transformer",
+        "reference": "IEC 60617",
+        "source_pages": "35, 40, 41",
+        "note": "Current transformer with primary and secondary terminals.",
+        "certified": false
+      },
+      "transforms": {
+        "rotations": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "mirror_horizontal": false,
+        "mirror_vertical": false,
+        "preserve_terminal_semantics": true
+      },
+      "ports": [
+        {
+          "id": "P1",
+          "network": "ac_power",
+          "direction": "input",
+          "side": "left",
+          "label": "Primary P1",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.41
+          },
+          "terminal_class": "power_ac",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "P2",
+          "network": "ac_power",
+          "direction": "output",
+          "side": "right",
+          "label": "Primary P2",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.41
+          },
+          "terminal_class": "power_ac",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "S1",
+          "network": "measurement",
+          "direction": "output",
+          "side": "bottom",
+          "label": "Secondary S1",
+          "anchor": {
+            "x": 0.32,
+            "y": 0.665
+          },
+          "terminal_class": "measurement",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "S2",
+          "network": "measurement",
+          "direction": "output",
+          "side": "bottom",
+          "label": "Secondary S2",
+          "anchor": {
+            "x": 0.68,
+            "y": 0.665
+          },
+          "terminal_class": "measurement",
+          "required": false,
+          "max_connections": 1
+        }
+      ]
+    },
+    "pt": {
+      "id": "pt",
+      "palette": true,
+      "order": 430,
+      "group": "monitoring_metering_safety",
+      "category": "monitoring",
+      "title": "Voltage transformer",
+      "subtitle": "Voltage measurement transformer",
+      "default_rating": "VT ratio not specified",
+      "kind": "instrumentation",
+      "tag_prefix": "VT",
+      "nominal_size": {
+        "width": 144,
+        "height": 120
+      },
+      "glyph_box": {
+        "x": 35,
+        "y": 12,
+        "width": 74,
+        "height": 68
+      },
+      "optical_center": {
+        "x": 0.5,
+        "y": 0.375
+      },
+      "electrical_center": {
+        "x": 0.5,
+        "y": 0.39
+      },
+      "standard": {
+        "status": "iec_reference",
+        "status_label": "IEC reference form",
+        "family": "IEC 60617 voltage transformer",
+        "reference": "IEC 60617",
+        "source_pages": "40",
+        "note": "Voltage transformer with primary and measurement secondary.",
+        "certified": false
+      },
+      "transforms": {
+        "rotations": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "mirror_horizontal": false,
+        "mirror_vertical": false,
+        "preserve_terminal_semantics": true
+      },
+      "ports": [
+        {
+          "id": "PRIMARY",
+          "network": "ac_power",
+          "direction": "input",
+          "side": "top",
+          "label": "Primary voltage",
+          "anchor": {
+            "x": 0.5,
+            "y": 0.105
+          },
+          "terminal_class": "power_ac",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "SECONDARY",
+          "network": "measurement",
+          "direction": "output",
+          "side": "bottom",
+          "label": "Measurement secondary",
+          "anchor": {
+            "x": 0.5,
+            "y": 0.665
+          },
+          "terminal_class": "measurement",
+          "required": false,
+          "max_connections": 1
+        }
+      ]
+    },
+    "relay": {
+      "id": "relay",
+      "palette": true,
+      "order": 440,
+      "group": "monitoring_metering_safety",
+      "category": "monitoring",
+      "title": "Protection relay",
+      "subtitle": "Protection and control functions",
+      "default_rating": "Relay functions not specified",
+      "kind": "control",
+      "tag_prefix": "RY",
+      "nominal_size": {
+        "width": 144,
+        "height": 120
+      },
+      "glyph_box": {
+        "x": 35,
+        "y": 12,
+        "width": 74,
+        "height": 68
+      },
+      "optical_center": {
+        "x": 0.5,
+        "y": 0.375
+      },
+      "electrical_center": {
+        "x": 0.5,
+        "y": 0.39
+      },
+      "standard": {
+        "status": "iec_simplified",
+        "status_label": "IEC simplified form",
+        "family": "IEC 60617 relay coil / measuring relay",
+        "reference": "IEC 60617",
+        "source_pages": "16, 17",
+        "note": "Protection-relay functional unit.",
+        "certified": false
+      },
+      "transforms": {
+        "rotations": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "mirror_horizontal": true,
+        "mirror_vertical": true,
+        "preserve_terminal_semantics": true
+      },
+      "ports": [
+        {
+          "id": "MEAS",
+          "network": "measurement",
+          "direction": "input",
+          "side": "left",
+          "label": "Measurement input",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.41
+          },
+          "terminal_class": "measurement",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "TRIP",
+          "network": "control",
+          "direction": "output",
+          "side": "right",
+          "label": "Trip output",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.41
+          },
+          "terminal_class": "control",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "COM",
+          "network": "communication",
+          "direction": "bidirectional",
+          "side": "bottom",
+          "label": "Communication",
+          "anchor": {
+            "x": 0.5,
+            "y": 0.665
+          },
+          "terminal_class": "communication",
+          "required": false,
+          "max_connections": 2
+        }
+      ]
+    },
+    "monitoring": {
+      "id": "monitoring",
+      "palette": true,
+      "order": 450,
+      "group": "monitoring_metering_safety",
+      "category": "monitoring",
+      "title": "Monitoring gateway",
+      "subtitle": "Data acquisition",
+      "default_rating": "Communication link not specified",
+      "kind": "control",
+      "tag_prefix": "GW",
+      "nominal_size": {
+        "width": 144,
+        "height": 120
+      },
+      "glyph_box": {
+        "x": 35,
+        "y": 12,
+        "width": 74,
+        "height": 68
+      },
+      "optical_center": {
+        "x": 0.5,
+        "y": 0.375
+      },
+      "electrical_center": {
+        "x": 0.5,
+        "y": 0.39
+      },
+      "standard": {
+        "status": "nexorin_assembly",
+        "status_label": "NEXORIN engineering assembly",
+        "family": "IEC indicating instrument / functional unit basis",
+        "reference": "IEC 60617",
+        "source_pages": "5, 43",
+        "note": "Monitoring gateway functional unit.",
+        "certified": false
+      },
+      "transforms": {
+        "rotations": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "mirror_horizontal": true,
+        "mirror_vertical": true,
+        "preserve_terminal_semantics": true
+      },
+      "ports": [
+        {
+          "id": "COM",
+          "network": "communication",
+          "direction": "bidirectional",
+          "side": "left",
+          "label": "Communication",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.41
+          },
+          "terminal_class": "communication",
+          "required": false,
+          "max_connections": 2
+        },
+        {
+          "id": "UPLINK",
+          "network": "communication",
+          "direction": "bidirectional",
+          "side": "right",
+          "label": "Network uplink",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.41
+          },
+          "terminal_class": "communication",
+          "required": false,
+          "max_connections": 2
+        }
+      ],
+      "aliases": [
+        "monitoring gateway",
+        "gateway",
+        "logger"
+      ]
+    },
+    "data_logger": {
+      "id": "data_logger",
+      "palette": true,
+      "order": 446,
+      "group": "monitoring_metering_safety",
+      "category": "monitoring",
+      "title": "Data logger",
+      "subtitle": "PV plant communication gateway",
+      "aliases": [
+        "smartlogger",
+        "smart logger",
+        "logger",
+        "gateway",
+        "data acquisition"
+      ],
+      "default_rating": "Communication capacity not specified",
+      "kind": "control",
+      "tag_prefix": "DL",
+      "nominal_size": {
+        "width": 144,
+        "height": 120
+      },
+      "glyph_box": {
+        "x": 35,
+        "y": 12,
+        "width": 74,
+        "height": 68
+      },
+      "optical_center": {
+        "x": 0.5,
+        "y": 0.375
+      },
+      "electrical_center": {
+        "x": 0.5,
+        "y": 0.39
+      },
+      "standard": {
+        "status": "iec_reference",
+        "status_label": "Reference drawing form",
+        "family": "Functional unit / equipment envelope",
+        "reference": "User-provided IEC 60617 symbol reference",
+        "source_pages": "5, 21",
+        "note": "Project communication block for inverter and meter data acquisition.",
+        "certified": false
+      },
+      "transforms": {
+        "rotations": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "mirror_horizontal": false,
+        "mirror_vertical": false,
+        "preserve_terminal_semantics": true
+      },
+      "ports": [
+        {
+          "id": "COM_1",
+          "network": "communication",
+          "direction": "bidirectional",
+          "side": "left",
+          "label": "RS485 channel 1",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.25
+          },
+          "terminal_class": "communication",
+          "required": false,
+          "max_connections": 16
+        },
+        {
+          "id": "COM_2",
+          "network": "communication",
+          "direction": "bidirectional",
+          "side": "left",
+          "label": "RS485 channel 2",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.57
+          },
+          "terminal_class": "communication",
+          "required": false,
+          "max_connections": 16
+        },
+        {
+          "id": "ETH",
+          "network": "communication",
+          "direction": "bidirectional",
+          "side": "right",
+          "label": "Ethernet uplink",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.25
+          },
+          "terminal_class": "communication",
+          "required": false,
+          "max_connections": 4
+        },
+        {
+          "id": "CTRL",
+          "network": "control",
+          "direction": "bidirectional",
+          "side": "right",
+          "label": "Control interface",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.57
+          },
+          "terminal_class": "control",
+          "required": false,
+          "max_connections": 4
+        },
+        {
+          "id": "PE",
+          "network": "protective_earth",
+          "direction": "bidirectional",
+          "side": "bottom",
+          "label": "Protective earth",
+          "anchor": {
+            "x": 0.5,
+            "y": 0.665
+          },
+          "terminal_class": "protective_earth",
+          "required": false,
+          "max_connections": 2
+        }
+      ]
+    },
+    "plant_controller": {
+      "id": "plant_controller",
+      "palette": true,
+      "order": 448,
+      "group": "monitoring_metering_safety",
+      "category": "monitoring",
+      "title": "Plant controller",
+      "subtitle": "Zero-export and plant control",
+      "aliases": [
+        "plc",
+        "plant controller",
+        "zero export controller",
+        "power plant controller",
+        "ppc"
+      ],
+      "default_rating": "Controller rating not specified",
+      "kind": "control",
+      "tag_prefix": "PLC",
+      "nominal_size": {
+        "width": 144,
+        "height": 120
+      },
+      "glyph_box": {
+        "x": 35,
+        "y": 12,
+        "width": 74,
+        "height": 68
+      },
+      "optical_center": {
+        "x": 0.5,
+        "y": 0.375
+      },
+      "electrical_center": {
+        "x": 0.5,
+        "y": 0.39
+      },
+      "standard": {
+        "status": "iec_reference",
+        "status_label": "Reference drawing form",
+        "family": "Controller / functional unit",
+        "reference": "User-provided IEC 60617 symbol reference",
+        "source_pages": "5, 43",
+        "note": "Project controller block for plant control and zero-export logic.",
+        "certified": false
+      },
+      "transforms": {
+        "rotations": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "mirror_horizontal": false,
+        "mirror_vertical": false,
+        "preserve_terminal_semantics": true
+      },
+      "ports": [
+        {
+          "id": "COM",
+          "network": "communication",
+          "direction": "bidirectional",
+          "side": "left",
+          "label": "Field communication",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.25
+          },
+          "terminal_class": "communication",
+          "required": false,
+          "max_connections": 16
+        },
+        {
+          "id": "MEAS",
+          "network": "measurement",
+          "direction": "input",
+          "side": "left",
+          "label": "Meter measurement",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.57
+          },
+          "terminal_class": "measurement",
+          "required": false,
+          "max_connections": 8
+        },
+        {
+          "id": "CTRL",
+          "network": "control",
+          "direction": "output",
+          "side": "right",
+          "label": "Plant control output",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.25
+          },
+          "terminal_class": "control",
+          "required": false,
+          "max_connections": 8
+        },
+        {
+          "id": "ETH",
+          "network": "communication",
+          "direction": "bidirectional",
+          "side": "right",
+          "label": "Ethernet",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.57
+          },
+          "terminal_class": "communication",
+          "required": false,
+          "max_connections": 4
+        },
+        {
+          "id": "PE",
+          "network": "protective_earth",
+          "direction": "bidirectional",
+          "side": "bottom",
+          "label": "Protective earth",
+          "anchor": {
+            "x": 0.5,
+            "y": 0.665
+          },
+          "terminal_class": "protective_earth",
+          "required": false,
+          "max_connections": 2
+        }
+      ]
+    },
+    "scada": {
+      "id": "scada",
+      "palette": true,
+      "order": 460,
+      "group": "monitoring_metering_safety",
+      "category": "monitoring",
+      "title": "SCADA / RTU",
+      "subtitle": "Supervisory control and data acquisition",
+      "default_rating": "SCADA interface not specified",
+      "kind": "control",
+      "tag_prefix": "RTU",
+      "nominal_size": {
+        "width": 144,
+        "height": 120
+      },
+      "glyph_box": {
+        "x": 35,
+        "y": 12,
+        "width": 74,
+        "height": 68
+      },
+      "optical_center": {
+        "x": 0.5,
+        "y": 0.375
+      },
+      "electrical_center": {
+        "x": 0.5,
+        "y": 0.39
+      },
+      "standard": {
+        "status": "nexorin_assembly",
+        "status_label": "NEXORIN engineering assembly",
+        "family": "IEC controller / functional-unit basis",
+        "reference": "IEC 60617",
+        "source_pages": "5, 43",
+        "note": "SCADA or RTU functional unit.",
+        "certified": false
+      },
+      "transforms": {
+        "rotations": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "mirror_horizontal": true,
+        "mirror_vertical": true,
+        "preserve_terminal_semantics": true
+      },
+      "ports": [
+        {
+          "id": "COM",
+          "network": "communication",
+          "direction": "bidirectional",
+          "side": "left",
+          "label": "Field communication",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.41
+          },
+          "terminal_class": "communication",
+          "required": false,
+          "max_connections": 2
+        },
+        {
+          "id": "UPLINK",
+          "network": "communication",
+          "direction": "bidirectional",
+          "side": "right",
+          "label": "SCADA uplink",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.41
+          },
+          "terminal_class": "communication",
+          "required": false,
+          "max_connections": 2
+        }
+      ],
+      "aliases": [
+        "scada",
+        "rtu",
+        "supervisory control"
+      ]
+    },
+    "weather_station": {
+      "id": "weather_station",
+      "palette": true,
+      "order": 470,
+      "group": "monitoring_metering_safety",
+      "category": "monitoring",
+      "title": "Weather station",
+      "subtitle": "Environmental monitoring",
+      "default_rating": "Sensor package not specified",
+      "kind": "instrumentation",
+      "tag_prefix": "WS",
+      "nominal_size": {
+        "width": 144,
+        "height": 120
+      },
+      "glyph_box": {
+        "x": 35,
+        "y": 12,
+        "width": 74,
+        "height": 68
+      },
+      "optical_center": {
+        "x": 0.5,
+        "y": 0.375
+      },
+      "electrical_center": {
+        "x": 0.5,
+        "y": 0.39
+      },
+      "standard": {
+        "status": "nexorin_assembly",
+        "status_label": "NEXORIN engineering assembly",
+        "family": "IEC measuring-instrument basis",
+        "reference": "IEC 60617",
+        "source_pages": "43, 44",
+        "note": "Environmental measurement assembly.",
+        "certified": false
+      },
+      "transforms": {
+        "rotations": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "mirror_horizontal": true,
+        "mirror_vertical": true,
+        "preserve_terminal_semantics": true
+      },
+      "ports": [
+        {
+          "id": "COM",
+          "network": "communication",
+          "direction": "output",
+          "side": "right",
+          "label": "Weather data",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.41
+          },
+          "terminal_class": "communication",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "POWER",
+          "network": "control",
+          "direction": "input",
+          "side": "left",
+          "label": "Auxiliary power",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.41
+          },
+          "terminal_class": "control",
+          "required": false,
+          "max_connections": 1
+        }
+      ]
+    },
+    "irradiance_sensor": {
+      "id": "irradiance_sensor",
+      "palette": true,
+      "order": 480,
+      "group": "monitoring_metering_safety",
+      "category": "monitoring",
+      "title": "Irradiance sensor",
+      "subtitle": "Pyranometer measurement",
+      "default_rating": "Sensor range not specified",
+      "kind": "instrumentation",
+      "tag_prefix": "PYR",
+      "nominal_size": {
+        "width": 144,
+        "height": 120
+      },
+      "glyph_box": {
+        "x": 35,
+        "y": 12,
+        "width": 74,
+        "height": 68
+      },
+      "optical_center": {
+        "x": 0.5,
+        "y": 0.375
+      },
+      "electrical_center": {
+        "x": 0.5,
+        "y": 0.39
+      },
+      "standard": {
+        "status": "nexorin_assembly",
+        "status_label": "NEXORIN engineering assembly",
+        "family": "IEC measuring-instrument and light basis",
+        "reference": "IEC 60617",
+        "source_pages": "7, 43",
+        "note": "Pyranometer measurement function.",
+        "certified": false
+      },
+      "transforms": {
+        "rotations": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "mirror_horizontal": true,
+        "mirror_vertical": true,
+        "preserve_terminal_semantics": true
+      },
+      "ports": [
+        {
+          "id": "COM",
+          "network": "measurement",
+          "direction": "output",
+          "side": "right",
+          "label": "Irradiance signal",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.41
+          },
+          "terminal_class": "measurement",
+          "required": false,
+          "max_connections": 1
+        }
+      ]
+    },
+    "load": {
+      "id": "load",
+      "palette": true,
+      "order": 490,
+      "group": "ac_distribution_grid",
+      "category": "ac-grid",
+      "title": "Load panel",
+      "subtitle": "Consumer circuits",
+      "default_rating": "Connected load not specified",
+      "kind": "load",
+      "tag_prefix": "LD",
+      "nominal_size": {
+        "width": 144,
+        "height": 120
+      },
+      "glyph_box": {
+        "x": 35,
+        "y": 12,
+        "width": 74,
+        "height": 68
+      },
+      "optical_center": {
+        "x": 0.5,
+        "y": 0.375
+      },
+      "electrical_center": {
+        "x": 0.5,
+        "y": 0.39
+      },
+      "standard": {
+        "status": "nexorin_assembly",
+        "status_label": "NEXORIN engineering assembly",
+        "family": "IEC consumer terminal / distribution basis",
+        "reference": "IEC 60617",
+        "source_pages": "21",
+        "note": "Consumer load group.",
+        "certified": false
+      },
+      "transforms": {
+        "rotations": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "mirror_horizontal": true,
+        "mirror_vertical": true,
+        "preserve_terminal_semantics": true
+      },
+      "ports": [
+        {
+          "id": "AC_IN",
+          "network": "ac_power",
+          "direction": "input",
+          "side": "left",
+          "label": "Load input",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.41
+          },
+          "terminal_class": "power_ac",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "PE",
+          "network": "protective_earth",
+          "direction": "bidirectional",
+          "side": "bottom",
+          "label": "Protective earth",
+          "anchor": {
+            "x": 0.32,
+            "y": 0.665
+          },
+          "terminal_class": "protective_earth",
+          "required": false,
+          "max_connections": 2
+        },
+        {
+          "id": "N",
+          "network": "neutral",
+          "direction": "bidirectional",
+          "side": "bottom",
+          "label": "Neutral",
+          "anchor": {
+            "x": 0.68,
+            "y": 0.665
+          },
+          "terminal_class": "neutral",
+          "required": false,
+          "max_connections": 2
+        }
+      ]
+    },
+    "backup_panel": {
+      "id": "backup_panel",
+      "palette": false,
+      "order": 500,
+      "group": "internal",
+      "category": "internal",
+      "title": "Backup panel",
+      "subtitle": "Critical load circuits",
+      "default_rating": "Essential load not specified",
+      "kind": "load",
+      "tag_prefix": "DB-ESS",
+      "nominal_size": {
+        "width": 144,
+        "height": 120
+      },
+      "glyph_box": {
+        "x": 35,
+        "y": 12,
+        "width": 74,
+        "height": 68
+      },
+      "optical_center": {
+        "x": 0.5,
+        "y": 0.375
+      },
+      "electrical_center": {
+        "x": 0.5,
+        "y": 0.39
+      },
+      "standard": {
+        "status": "iec_simplified",
+        "status_label": "IEC simplified form",
+        "family": "IEC 60617 distribution centre",
+        "reference": "IEC 60617",
+        "source_pages": "21",
+        "note": "Generated backup-load panel.",
+        "certified": false
+      },
+      "transforms": {
+        "rotations": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "mirror_horizontal": true,
+        "mirror_vertical": true,
+        "preserve_terminal_semantics": true
+      },
+      "ports": [
+        {
+          "id": "AC_IN",
+          "network": "ac_power",
+          "direction": "input",
+          "side": "left",
+          "label": "Backup AC input",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.41
+          },
+          "terminal_class": "power_ac",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "PE",
+          "network": "protective_earth",
+          "direction": "bidirectional",
+          "side": "bottom",
+          "label": "Protective earth",
+          "anchor": {
+            "x": 0.32,
+            "y": 0.665
+          },
+          "terminal_class": "protective_earth",
+          "required": false,
+          "max_connections": 2
+        },
+        {
+          "id": "N",
+          "network": "neutral",
+          "direction": "bidirectional",
+          "side": "bottom",
+          "label": "Neutral",
+          "anchor": {
+            "x": 0.68,
+            "y": 0.665
+          },
+          "terminal_class": "neutral",
+          "required": false,
+          "max_connections": 2
+        }
+      ],
+      "source_ports": [
+        {
+          "id": "AC_IN",
+          "network": "ac_power",
+          "direction": "input",
+          "side": "left",
+          "label": "Backup AC input",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.41
+          },
+          "terminal_class": "power_ac",
+          "required": false,
+          "max_connections": 8
+        },
+        {
+          "id": "PE",
+          "network": "protective_earth",
+          "direction": "bidirectional",
+          "side": "bottom",
+          "label": "Protective earth",
+          "anchor": {
+            "x": 0.32,
+            "y": 0.665
+          },
+          "terminal_class": "protective_earth",
+          "required": false,
+          "max_connections": 2
+        },
+        {
+          "id": "N",
+          "network": "neutral",
+          "direction": "bidirectional",
+          "side": "bottom",
+          "label": "Neutral",
+          "anchor": {
+            "x": 0.68,
+            "y": 0.665
+          },
+          "terminal_class": "neutral",
+          "required": false,
+          "max_connections": 2
+        }
+      ]
+    },
+    "ground": {
+      "id": "ground",
+      "palette": true,
+      "order": 510,
+      "group": "monitoring_metering_safety",
+      "category": "monitoring",
+      "title": "Protective earth",
+      "subtitle": "Protective earthing system",
+      "default_rating": "Earthing design not specified",
+      "kind": "safety",
+      "tag_prefix": "PE",
+      "nominal_size": {
+        "width": 144,
+        "height": 120
+      },
+      "glyph_box": {
+        "x": 35,
+        "y": 12,
+        "width": 74,
+        "height": 68
+      },
+      "optical_center": {
+        "x": 0.5,
+        "y": 0.375
+      },
+      "electrical_center": {
+        "x": 0.5,
+        "y": 0.39
+      },
+      "standard": {
+        "status": "iec_reference",
+        "status_label": "IEC reference form",
+        "family": "IEC 60617 earth, general symbol",
+        "reference": "IEC 60617",
+        "source_pages": "11",
+        "note": "Protective-earth reference form.",
+        "certified": false
+      },
+      "transforms": {
+        "rotations": [
+          0
+        ],
+        "mirror_horizontal": false,
+        "mirror_vertical": false,
+        "preserve_terminal_semantics": true
+      },
+      "ports": [
+        {
+          "id": "PE",
+          "network": "protective_earth",
+          "direction": "bidirectional",
+          "side": "top",
+          "label": "Protective earth",
+          "anchor": {
+            "x": 0.5,
+            "y": 0.105
+          },
+          "terminal_class": "protective_earth",
+          "required": false,
+          "max_connections": 2
+        }
+      ],
+      "aliases": [
+        "protective earth",
+        "earth",
+        "ground"
+      ]
+    },
+    "pe_bus": {
+      "id": "pe_bus",
+      "palette": true,
+      "order": 458,
+      "group": "monitoring_metering_safety",
+      "category": "monitoring",
+      "title": "PE busbar",
+      "subtitle": "Protective-earth collection bus",
+      "aliases": [
+        "pe bus",
+        "earth bus",
+        "ground bus",
+        "protective earth busbar",
+        "grounding bus"
+      ],
+      "default_rating": "PE conductor rating not specified",
+      "kind": "earthing",
+      "tag_prefix": "PE-BUS",
+      "nominal_size": {
+        "width": 144,
+        "height": 120
+      },
+      "glyph_box": {
+        "x": 35,
+        "y": 12,
+        "width": 74,
+        "height": 68
+      },
+      "optical_center": {
+        "x": 0.5,
+        "y": 0.375
+      },
+      "electrical_center": {
+        "x": 0.5,
+        "y": 0.39
+      },
+      "standard": {
+        "status": "iec_reference",
+        "status_label": "Reference drawing form",
+        "family": "Protective bonding / protective conductor",
+        "reference": "User-provided IEC 60617 symbol reference",
+        "source_pages": "11, 20",
+        "note": "Dedicated protective-earth bus for equipment bonding and grounding collection.",
+        "certified": false
+      },
+      "transforms": {
+        "rotations": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "mirror_horizontal": false,
+        "mirror_vertical": false,
+        "preserve_terminal_semantics": true
+      },
+      "ports": [
+        {
+          "id": "PE_IN",
+          "network": "protective_earth",
+          "direction": "bidirectional",
+          "side": "left",
+          "label": "PE collection",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.41
+          },
+          "terminal_class": "protective_earth",
+          "required": false,
+          "max_connections": 32
+        },
+        {
+          "id": "PE_OUT",
+          "network": "protective_earth",
+          "direction": "bidirectional",
+          "side": "right",
+          "label": "PE to earth system",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.41
+          },
+          "terminal_class": "protective_earth",
+          "required": false,
+          "max_connections": 8
+        }
+      ]
+    },
+    "ground_rod": {
+      "id": "ground_rod",
+      "palette": true,
+      "order": 520,
+      "group": "monitoring_metering_safety",
+      "category": "monitoring",
+      "title": "Grounding electrode",
+      "subtitle": "Ground rod or earth electrode",
+      "default_rating": "Electrode data not specified",
+      "kind": "safety",
+      "tag_prefix": "ER",
+      "nominal_size": {
+        "width": 144,
+        "height": 120
+      },
+      "glyph_box": {
+        "x": 35,
+        "y": 12,
+        "width": 74,
+        "height": 68
+      },
+      "optical_center": {
+        "x": 0.5,
+        "y": 0.375
+      },
+      "electrical_center": {
+        "x": 0.5,
+        "y": 0.39
+      },
+      "standard": {
+        "status": "iec_simplified",
+        "status_label": "IEC simplified form",
+        "family": "IEC functional earthing basis",
+        "reference": "IEC 60617",
+        "source_pages": "11, 52",
+        "note": "Earth-electrode representation.",
+        "certified": false
+      },
+      "transforms": {
+        "rotations": [
+          0
+        ],
+        "mirror_horizontal": false,
+        "mirror_vertical": false,
+        "preserve_terminal_semantics": true
+      },
+      "ports": [
+        {
+          "id": "PE",
+          "network": "protective_earth",
+          "direction": "bidirectional",
+          "side": "top",
+          "label": "Earthing conductor",
+          "anchor": {
+            "x": 0.5,
+            "y": 0.105
+          },
+          "terminal_class": "protective_earth",
+          "required": false,
+          "max_connections": 2
+        }
+      ],
+      "aliases": [
+        "grounding electrode",
+        "earth electrode",
+        "ground rod"
+      ]
+    },
+    "lightning_arrester": {
+      "id": "lightning_arrester",
+      "palette": true,
+      "order": 530,
+      "group": "monitoring_metering_safety",
+      "category": "monitoring",
+      "title": "Lightning arrester",
+      "subtitle": "Direct lightning surge diversion",
+      "default_rating": "Arrester rating not specified",
+      "kind": "safety",
+      "tag_prefix": "LA",
+      "nominal_size": {
+        "width": 144,
+        "height": 120
+      },
+      "glyph_box": {
+        "x": 35,
+        "y": 12,
+        "width": 74,
+        "height": 68
+      },
+      "optical_center": {
+        "x": 0.5,
+        "y": 0.375
+      },
+      "electrical_center": {
+        "x": 0.5,
+        "y": 0.39
+      },
+      "standard": {
+        "status": "iec_reference",
+        "status_label": "IEC reference form",
+        "family": "IEC 60617 surge diverter / lightning arrester",
+        "reference": "IEC 60617",
+        "source_pages": "18",
+        "note": "Surge-diversion reference form.",
+        "certified": false
+      },
+      "transforms": {
+        "rotations": [
+          0
+        ],
+        "mirror_horizontal": false,
+        "mirror_vertical": false,
+        "preserve_terminal_semantics": true
+      },
+      "ports": [
+        {
+          "id": "LINE",
+          "network": "ac_power",
+          "direction": "input",
+          "side": "top",
+          "label": "Protected line",
+          "anchor": {
+            "x": 0.5,
+            "y": 0.105
+          },
+          "terminal_class": "power_ac",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "PE",
+          "network": "protective_earth",
+          "direction": "output",
+          "side": "bottom",
+          "label": "Earth discharge",
+          "anchor": {
+            "x": 0.5,
+            "y": 0.665
+          },
+          "terminal_class": "protective_earth",
+          "required": false,
+          "max_connections": 1
+        }
+      ]
+    }
+  },
+  "symbol_count": 61,
+  "palette_count": 60,
+  "release_note": "Professional PLTS protection, earthing, and plant-control symbol expansion.",
+  "metadata": {
+    "claim": "Controlled NEXORIN engineering symbol registry based on project requirements and user-provided reference drawings. No certification claim."
+  }
+}

@@ -52,7 +52,7 @@ class CompanyManagementTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertSee('Company Directory')
+            ->assertSee('Companies')
             ->assertSee('NEXORIN Energy');
     }
 

@@ -12,7 +12,9 @@ use App\Models\Quotation;
 use App\Models\Role;
 use App\Models\TechnicalCalculation;
 use App\Models\User;
+use App\Services\Pdf\PdfRenderingException;
 use App\Services\Report\ClientReleaseGate;
+use App\Services\Report\PremiumProjectReportPdfRenderer;
 use Database\Seeders\RbacSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -133,6 +135,40 @@ class ClientProposalPdfBuilderTest extends TestCase
         $this->assertSame($quotation->snapshot_hash, $quotation->client_proposal_pdf_snapshot_hash);
         $this->assertSame($quotation->source_fingerprint, $quotation->client_proposal_pdf_source_fingerprint);
         $this->assertStringEndsWith('-client-proposal.pdf', (string) $quotation->client_proposal_pdf_filename);
+    }
+
+    public function test_premium_client_proposal_fallback_uses_customer_safe_quotation_renderer(): void
+    {
+        config()->set('nexorin_pdf.allow_legacy_fallback', true);
+        $this->generateQuotation();
+        $quotation = $this->approveQuotation();
+
+        $this->app->instance(PremiumProjectReportPdfRenderer::class, new class extends PremiumProjectReportPdfRenderer {
+            public function __construct() {}
+
+            public function render(Project $project, string $reportMode = 'internal'): string
+            {
+                throw new PdfRenderingException('Forced premium renderer failure for fallback test.');
+            }
+        });
+
+        $response = $this
+            ->actingAs($this->superAdmin)
+            ->get(route('companies.projects.report.client-proposal.pdf', [$this->company, $this->project]));
+
+        $response
+            ->assertOk()
+            ->assertHeader('X-NEXORIN-Premium-Renderer', 'quotation-safe-fallback')
+            ->assertHeader('X-NEXORIN-Client-Proposal-Snapshot', (string) $quotation->snapshot_hash);
+
+        $pdf = $response->baseResponse->getContent();
+        $this->assertStringStartsWith('%PDF-1.4', $pdf);
+        $this->assertStringContainsString('Premium Client Proposal', $pdf);
+        $this->assertStringContainsString('intentionally excludes internal unit cost', $pdf);
+        $this->assertStringNotContainsString('Material Cost Subtotal', $pdf);
+        $this->assertStringNotContainsString('Grand Cost', $pdf);
+        $this->assertStringNotContainsString('Gross Margin', $pdf);
+        $this->assertStringNotContainsString('Internal Supplier', $pdf);
     }
 
     public function test_release_gate_requires_current_client_proposal_pdf_for_snapshot_controlled_quotation(): void

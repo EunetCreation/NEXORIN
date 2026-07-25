@@ -1,21 +1,58 @@
 {
-    "$schema": "https://www.schemastore.org/package.json",
-    "private": true,
-    "type": "module",
-    "scripts": {
-        "build": "vite build",
-        "dev": "vite",
-        "pdf:install": "playwright install chromium",
-        "pdf:render-help": "node scripts/render-pdf.mjs"
-    },
-    "devDependencies": {
-        "@tailwindcss/vite": "^4.0.0",
-        "concurrently": "^9.0.1",
-        "laravel-vite-plugin": "^3.1",
-        "tailwindcss": "^4.0.0",
-        "vite": "^8.0.0"
-    },
-    "dependencies": {
-        "playwright": "^1.49.1"
-    }
+  "$schema": "https://www.schemastore.org/package.json",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "vite build && npm run build:sld",
+    "dev": "vite",
+    "pdf:install": "playwright install chromium",
+    "pdf:render-help": "node scripts/render-pdf.mjs",
+    "build:sld": "vite build --config vite.sld.config.js",
+    "test:sld": "node scripts/run-sld-e2e.mjs",
+    "test:sld:headed": "node scripts/run-sld-e2e.mjs --headed",
+    "test:sld:ui": "playwright test -c playwright.sld.config.mjs --ui",
+    "test:sld:report": "node -e \"console.log(require('fs').readFileSync('test-results/sld-e2e-summary.md', 'utf8'))\"",
+    "validate:sld-registry": "node scripts/validate-sld-registry.mjs",
+    "validate:sld-rules": "node scripts/validate-sld-rules.mjs",
+    "test:sld-rules:js": "node scripts/test-sld-rules.mjs",
+    "test:sld-router:js": "node scripts/test-sld-router.mjs",
+    "test:sld-router:php": "php scripts/test-sld-router.php",
+    "test:sld-router": "npm run test:sld-router:js && npm run test:sld-router:php",
+    "test:sld-controller:php": "php scripts/test-sld-engineering-controller.php",
+    "test:sld-app67n1:php": "php scripts/test-app67n1-material-traceability.php",
+    "test:sld-app67l1:php": "php scripts/test-app67l1-symbol-data.php",
+    "test:sld-app67l2:php": "php scripts/test-app67l2-professional-topology.php",
+    "test:sld-app67l3:php": "php scripts/test-app67l3-professional-a3.php",
+    "test:sld-app67l4:php": "php scripts/test-app67l4-production-workflow.php",
+    "test:sld-app67l4-final:php": "php scripts/test-app67l4-final-closure.php",
+    "test:sld-geometry:js": "node scripts/test-sld-geometry-foundation.mjs",
+    "test:sld-geometry:php": "php scripts/test-sld-geometry-foundation.php",
+    "test:sld-geometry": "npm run test:sld-geometry:js && npm run test:sld-geometry:php",
+    "test:sld-app67l4-closure": "npm run test:sld-app67l4:php && npm run test:sld-app67l4-final:php && npm run test:sld-app67l3:php",
+    "test:sld-app67m1-hf1": "node scripts/test-app67m1-hf1-runtime-contract.mjs",
+    "test:sld-app67m1-hf2": "node scripts/test-app67m1-hf2-drag-performance.mjs",
+    "test:sld-app67m2:js": "node scripts/test-app67m2-orthogonal-routing.mjs",
+    "test:sld-app67m2:php": "php scripts/test-app67m2-orthogonal-routing.php",
+    "test:sld-app67m2": "npm run test:sld-app67m2:js && npm run test:sld-app67m2:php",
+    "test:sld-app67m2:bundle": "node scripts/test-app67m2-browser-bundle.mjs",
+    "test:sld-app67m3:js": "node scripts/test-app67m3-label-placement.mjs",
+    "test:sld-app67m3:php": "php scripts/test-app67m3-label-placement.php",
+    "test:sld-app67m3": "npm run test:sld-app67m3:js && npm run test:sld-app67m3:php",
+    "test:sld-app67m3:bundle": "node scripts/test-app67m3-browser-bundle.mjs",
+    "test:sld-app67m4:js": "node scripts/test-app67m4-visual-regression.mjs",
+    "test:sld-app67m4:php": "php scripts/test-app67m4-visual-regression.php",
+    "test:sld-app67m4": "npm run test:sld-app67m4:js && npm run test:sld-app67m4:php",
+    "test:sld-app67m4:bundle": "node scripts/test-app67m4-browser-bundle.mjs"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.0.0",
+    "concurrently": "^9.0.1",
+    "laravel-vite-plugin": "^3.1",
+    "playwright": "^1.61.1",
+    "tailwindcss": "^4.0.0",
+    "vite": "^8.0.0"
+  },
+  "dependencies": {
+    "@maxgraph/core": "0.24.0"
+  }
 }

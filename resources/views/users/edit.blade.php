@@ -4,37 +4,18 @@
 @section('page-eyebrow', 'Platform administration')
 @section('page-heading', 'Edit User')
 
+@push('styles')
+    <link href="{{ asset('css/nexorin-user-governance.css') }}?v=55a" rel="stylesheet">
+@endpush
+
 @section('content')
-    <div class="ui-page">
-        <header class="ui-page-header">
-            <div>
-                <div class="ui-page-kicker">
-                    Account configuration
-                </div>
-
-                <h2 class="ui-page-title">
-                    Edit {{ $user->name }}
-                </h2>
-
-                <p class="ui-page-description">
-                    Update account details, platform privileges, and company role assignments.
-                </p>
-            </div>
-
-            <div class="ui-page-actions">
-                <a href="{{ route('users.show', $user) }}" class="ui-button ui-button-secondary">
-                    View User
-                </a>
-            </div>
-        </header>
-
-        <section class="ui-card">
-            <form method="POST" action="{{ route('users.update', $user) }}" class="ui-card-body">
-                @csrf
-                @method('PUT')
-
-                @include('users.partials.form', ['user' => $user])
-            </form>
-        </section>
-    </div>
+    <form method="POST" action="{{ route('users.update', $user) }}" class="nxug-editor" data-nxug-editor data-nxug-mode="edit" data-user-name="{{ $user->name }}" data-initial-status="{{ $user->status }}">
+        @csrf
+        @method('PUT')
+        @include('users.partials.form', ['user' => $user])
+    </form>
 @endsection
+
+@push('scripts')
+    <script src="{{ asset('js/nexorin-user-governance.js') }}?v=55a" defer></script>
+@endpush

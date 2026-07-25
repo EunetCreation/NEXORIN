@@ -25,12 +25,39 @@
     $canViewQuotations = $topbarCompany
         && $topbarUser->hasAnyCompanyPermission($topbarCompany, ['quotation.view', 'quotation.view_own']);
 
-    $openQuotationCount = $canViewQuotations
-        ? \App\Models\Quotation::query()
+    $topbarProjects = collect();
+    $topbarQuotationProjects = collect();
+    $openQuotationCount = 0;
+
+    if ($topbarCompany && $canSearchProjects) {
+        $visibleProjectQuery = \App\Models\Project::query()
             ->where('company_id', $topbarCompany->getKey())
-            ->whereNotIn('status', ['accepted', 'rejected', 'cancelled', 'expired'])
-            ->count()
-        : 0;
+            ->whereNull('archived_at');
+
+        if (! $topbarUser->hasCompanyPermission($topbarCompany, 'project.view')) {
+            $visibleProjectQuery->ownedBy($topbarUser);
+        }
+
+        $topbarProjects = (clone $visibleProjectQuery)
+            ->with('customer:id,name')
+            ->latest('updated_at')
+            ->take(6)
+            ->get();
+
+        if ($canViewQuotations) {
+            $topbarQuotationProjects = (clone $visibleProjectQuery)
+                ->whereHas('quotation')
+                ->with(['customer:id,name', 'quotation'])
+                ->latest('updated_at')
+                ->take(4)
+                ->get();
+
+            $openQuotationCount = (clone $visibleProjectQuery)
+                ->whereHas('quotation', fn ($query) => $query
+                    ->whereNotIn('status', ['accepted', 'rejected', 'cancelled', 'expired']))
+                ->count();
+        }
+    }
 @endphp
 
 <header class="topbar">
@@ -50,20 +77,105 @@
 
         <div class="topbar-actions">
             @if ($canSearchProjects)
-                <form action="{{ route('companies.projects.index', $topbarCompany) }}" method="GET" class="topbar-search" role="search">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
-                        <circle cx="11" cy="11" r="7"/>
-                        <path d="M20 20l-3.5-3.5"/>
-                    </svg>
-                    <input
-                        type="search"
-                        name="search"
-                        value="{{ request('search') }}"
-                        placeholder="Search project or customer"
-                        aria-label="Search projects"
+                <div class="topbar-search-shell">
+                    <form
+                        action="{{ route('companies.projects.index', $topbarCompany) }}"
+                        method="GET"
+                        id="globalSearchForm"
+                        class="topbar-search"
+                        role="search"
+                        autocomplete="off"
                     >
-                    <kbd>/</kbd>
-                </form>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
+                            <circle cx="11" cy="11" r="7"/>
+                            <path d="M20 20l-3.5-3.5"/>
+                        </svg>
+                        <input
+                            id="globalSearchInput"
+                            type="search"
+                            name="search"
+                            value="{{ request('search') }}"
+                            placeholder="Search project or customer"
+                            aria-label="Search projects, customers, and quotations"
+                            aria-controls="commandPalette"
+                            aria-expanded="false"
+                        >
+                        <kbd>/</kbd>
+                    </form>
+
+                    <div id="commandPalette" class="command-palette" role="dialog" aria-label="Workspace search" hidden>
+                        <div class="command-palette-header">
+                            <div>
+                                <span>Workspace search</span>
+                                <strong>Jump directly to a record</strong>
+                            </div>
+                            <span class="command-palette-esc">ESC</span>
+                        </div>
+
+                        <div class="command-palette-results" data-command-results>
+                            <div class="command-group">
+                                <span class="command-group-label">Projects</span>
+                                @forelse ($topbarProjects as $searchProject)
+                                    <a
+                                        href="{{ route('companies.projects.show', [$topbarCompany, $searchProject]) }}"
+                                        class="command-item"
+                                        data-command-item
+                                        data-search-value="{{ str($searchProject->name.' '.$searchProject->project_number.' '.($searchProject->customer?->name ?? ''))->lower() }}"
+                                    >
+                                        <span class="command-item-icon">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                                                <path d="M4 15h16l-2-8H6l-2 8z"/><path d="M8 7l-1 8M12 7v8M16 7l1 8M3 18h18"/>
+                                            </svg>
+                                        </span>
+                                        <span class="command-item-copy">
+                                            <strong>{{ $searchProject->name }}</strong>
+                                            <small>{{ $searchProject->customer?->name ?? 'No customer' }} · {{ $searchProject->status_label }}</small>
+                                        </span>
+                                        <span class="command-item-arrow">↗</span>
+                                    </a>
+                                @empty
+                                    <span class="command-empty">No visible projects yet.</span>
+                                @endforelse
+                            </div>
+
+                            @if ($canViewQuotations && $topbarQuotationProjects->isNotEmpty())
+                                <div class="command-group">
+                                    <span class="command-group-label">Quotations</span>
+                                    @foreach ($topbarQuotationProjects as $quotationProject)
+                                        <a
+                                            href="{{ route('companies.quotations.show', [$topbarCompany, $quotationProject]) }}"
+                                            class="command-item"
+                                            data-command-item
+                                            data-search-value="{{ str(($quotationProject->quotation?->quote_number ?? 'draft quotation').' '.$quotationProject->name.' '.($quotationProject->customer?->name ?? ''))->lower() }}"
+                                        >
+                                            <span class="command-item-icon tone-purple">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                                                    <path d="M6 3h9l3 3v15H6z"/><path d="M15 3v4h4M9 11h6M9 15h6"/>
+                                                </svg>
+                                            </span>
+                                            <span class="command-item-copy">
+                                                <strong>{{ $quotationProject->quotation?->quote_number ?: 'Draft quotation' }}</strong>
+                                                <small>{{ $quotationProject->name }}</small>
+                                            </span>
+                                            <span class="command-item-arrow">↗</span>
+                                        </a>
+                                    @endforeach
+                                </div>
+                            @endif
+
+                            <div class="command-no-results" data-command-empty hidden>
+                                <span>No matching workspace record</span>
+                                <small>Press Enter to search the full project list.</small>
+                            </div>
+                        </div>
+
+                        <div class="command-palette-footer">
+                            <span><kbd>↑</kbd><kbd>↓</kbd> navigate</span>
+                            <span><kbd>Enter</kbd> open</span>
+                            <span><kbd>/</kbd> focus</span>
+                        </div>
+                    </div>
+                </div>
             @endif
 
             <button id="themeToggle" class="topbar-icon-button theme-toggle" type="button" aria-label="Change color theme" title="Change color theme">
@@ -77,7 +189,14 @@
             </button>
 
             @if ($canViewQuotations)
-                <a href="{{ route('companies.quotations.index', $topbarCompany) }}" class="topbar-icon-button notification-button" aria-label="Open quotations">
+                <button
+                    id="notificationToggle"
+                    class="topbar-icon-button notification-button"
+                    type="button"
+                    aria-label="Open workspace notifications"
+                    aria-controls="notificationDrawer"
+                    aria-expanded="false"
+                >
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
                         <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/>
                         <path d="M10 21h4"/>
@@ -85,10 +204,10 @@
                     @if ($openQuotationCount > 0)
                         <span class="notification-count">{{ min($openQuotationCount, 9) }}{{ $openQuotationCount > 9 ? '+' : '' }}</span>
                     @endif
-                </a>
+                </button>
             @endif
 
-            @if ($canCreateProject)
+            @if ($canCreateProject && ! request()->routeIs('companies.projects.create'))
                 <a href="{{ route('companies.projects.create', $topbarCompany) }}" class="topbar-primary-action">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                         <path d="M12 5v14M5 12h14"/>
@@ -147,3 +266,52 @@
         </div>
     </div>
 </header>
+
+@if ($canViewQuotations)
+        <button id="notificationBackdrop" class="notification-backdrop" type="button" aria-label="Close notifications"></button>
+        <aside id="notificationDrawer" class="notification-drawer" aria-hidden="true" aria-label="Workspace notifications">
+            <header class="notification-drawer-header">
+                <div>
+                    <span>Workspace signals</span>
+                    <strong>Notifications</strong>
+                </div>
+                <button id="notificationClose" type="button" aria-label="Close notifications">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+                </button>
+            </header>
+
+            <div class="notification-summary">
+                <span class="notification-summary-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M6 3h9l3 3v15H6z"/><path d="M15 3v4h4M9 11h6M9 15h6"/></svg>
+                </span>
+                <div>
+                    <strong>{{ $openQuotationCount }} open quotation{{ $openQuotationCount === 1 ? '' : 's' }}</strong>
+                    <span>Commercial records that are still active in this workspace.</span>
+                </div>
+            </div>
+
+            <div class="notification-feed">
+                @forelse ($topbarQuotationProjects as $notificationProject)
+                    <a href="{{ route('companies.quotations.show', [$topbarCompany, $notificationProject]) }}" class="notification-item">
+                        <span class="notification-item-dot"></span>
+                        <span class="notification-item-copy">
+                            <strong>{{ $notificationProject->quotation?->quote_number ?: 'Draft quotation' }}</strong>
+                            <span>{{ $notificationProject->name }}</span>
+                            <small>{{ $notificationProject->quotation?->status_label ?? 'Draft' }} · {{ $notificationProject->updated_at->diffForHumans() }}</small>
+                        </span>
+                        <span class="notification-item-arrow">↗</span>
+                    </a>
+                @empty
+                    <div class="notification-empty">
+                        <strong>No active quotation signals</strong>
+                        <span>New quotation activity will appear here.</span>
+                    </div>
+                @endforelse
+            </div>
+
+            <a href="{{ route('companies.quotations.index', $topbarCompany) }}" class="notification-drawer-action">
+                View all quotations
+                <span>→</span>
+            </a>
+        </aside>
+@endif

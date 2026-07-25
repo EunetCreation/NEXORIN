@@ -181,6 +181,16 @@ class HtmlToPdfRenderer
         $env['TMP'] = $processTempDir;
         $env['TMPDIR'] = $processTempDir;
 
+        $chromiumPath = trim((string) config('nexorin_pdf.chromium_path', ''));
+
+        if ($chromiumPath !== '') {
+            if (! File::exists($chromiumPath)) {
+                throw new PdfRenderingException('Configured Chromium executable does not exist: '.$chromiumPath);
+            }
+
+            $env['NEXORIN_CHROMIUM_PATH'] = $chromiumPath;
+        }
+
         putenv('TEMP='.$processTempDir);
         putenv('TMP='.$processTempDir);
         putenv('TMPDIR='.$processTempDir);

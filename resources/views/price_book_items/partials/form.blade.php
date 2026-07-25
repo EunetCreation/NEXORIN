@@ -13,10 +13,11 @@
                 <option value="">Select material</option>
                 @foreach ($materials as $material)
                     <option value="{{ $material->id }}" @selected((string) old('material_id', $priceBookItem->material_id ?? '') === (string) $material->id)>
-                        {{ $material->name }} · {{ $material->sku }}{{ $material->brand ? ' · '.$material->brand : '' }}{{ $material->model ? ' '.$material->model : '' }}{{ $material->category ? ' · '.$material->category->name : '' }}
+                        {{ $material->name }} · {{ $material->sku }}{{ $material->brand ? ' · '.$material->brand : '' }}{{ $material->model ? ' '.$material->model : '' }}{{ $material->category ? ' · '.$material->category->name : '' }} · {{ ($material->catalog_status === 'approved' && $material->compliance_status === 'compliant') ? 'Catalog Approved' : 'Catalog Review Required' }}
                     </option>
                 @endforeach
             </select>
+            <small class="ui-help">Approved catalog materials are preferred by project pricing. Draft materials may be staged in a price book, but project-compatible BOQ resolution retains a catalog review trace.</small>
             @error('material_id') <div class="ui-error">{{ $message }}</div> @enderror
         </div>
 

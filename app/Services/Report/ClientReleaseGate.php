@@ -87,6 +87,14 @@ class ClientReleaseGate
             );
         }
 
+        if ($bom && (int) ($bomSummary['catalog_review_item_count'] ?? 0) > 0) {
+            $commercialBlockers[] = $this->issue(
+                'warning',
+                'BOQ uses material records that still require catalog approval.',
+                'Approve the linked catalog materials, then reprice the BOM before client release.'
+            );
+        }
+
         if ($bom && (int) ($bomSummary['low_margin_item_count'] ?? 0) > 0) {
             $commercialBlockers[] = $this->issue(
                 'critical',
@@ -398,6 +406,7 @@ class ClientReleaseGate
             && (int) ($summary['missing_price_item_count'] ?? 0) === 0
             && (int) ($summary['expired_price_item_count'] ?? 0) === 0
             && (int) ($summary['unavailable_price_item_count'] ?? 0) === 0
+            && (int) ($summary['catalog_review_item_count'] ?? 0) === 0
             && (int) ($summary['low_margin_item_count'] ?? 0) === 0
             && (int) ($summary['discount_limit_exceeded_count'] ?? 0) === 0
             && (int) ($summary['tax_review_issue_count'] ?? 0) === 0
@@ -467,6 +476,7 @@ class ClientReleaseGate
                 'missing_price_item_count' => (int) (($bom?->summary ?? [])['missing_price_item_count'] ?? 0),
                 'expired_price_item_count' => (int) (($bom?->summary ?? [])['expired_price_item_count'] ?? 0),
                 'unavailable_price_item_count' => (int) (($bom?->summary ?? [])['unavailable_price_item_count'] ?? 0),
+                'catalog_review_item_count' => (int) (($bom?->summary ?? [])['catalog_review_item_count'] ?? 0),
                 'low_margin_item_count' => (int) (($bom?->summary ?? [])['low_margin_item_count'] ?? 0),
                 'discount_limit_exceeded_count' => (int) (($bom?->summary ?? [])['discount_limit_exceeded_count'] ?? 0),
                 'tax_review_issue_count' => (int) (($bom?->summary ?? [])['tax_review_issue_count'] ?? 0),
@@ -491,26 +501,20 @@ class ClientReleaseGate
                 'id' => $quotation?->getKey(),
                 'quote_number' => $quotation?->quote_number,
                 'revision_number' => $quotation?->revision_number,
-                'status' => $quotation?->status,
                 'grand_total_idr' => $quotationGrand !== null ? round($quotationGrand, 2) : null,
-                // Include proposal-facing commercial fields so approval becomes
-                // stale when quotation notes or terms are edited after release
-                // approval, even if the database timestamp has second-level
-                // precision in SQLite tests.
+                // Release approval follows proposal content. Delivery and client
+                // decision metadata such as status, issued_at, accepted_at, and
+                // updated_at must not invalidate an unchanged approved snapshot.
                 'title' => $quotation?->title,
                 'valid_until' => $quotation?->valid_until?->toDateString(),
                 'terms' => $quotation?->terms,
                 'notes' => $quotation?->notes,
                 'snapshot_hash' => $quotation?->snapshot_hash,
                 'source_fingerprint' => $quotation?->source_fingerprint,
-                'client_proposal_pdf_generated_at' => $quotation?->client_proposal_pdf_generated_at?->toISOString(),
                 'client_proposal_pdf_snapshot_hash' => $quotation?->client_proposal_pdf_snapshot_hash,
                 'client_proposal_pdf_source_fingerprint' => $quotation?->client_proposal_pdf_source_fingerprint,
-                'client_proposal_pdf_filename' => $quotation?->client_proposal_pdf_filename,
                 'approved_at' => $quotation?->approved_at?->toISOString(),
                 'approval_notes' => $quotation?->approval_notes,
-                'issued_at' => $quotation?->issued_at?->toISOString(),
-                'updated_at' => $quotation?->updated_at?->toISOString(),
             ],
             'warnings' => $blockingWarnings,
         ];

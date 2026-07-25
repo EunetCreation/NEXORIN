@@ -10,6 +10,7 @@ use App\Models\PriceBook;
 use App\Models\PriceBookItem;
 use App\Models\Supplier;
 use App\Models\User;
+use App\Services\Catalog\MaterialSpecificationSynchronizer;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -41,40 +42,23 @@ class MaterialCatalogSeeder extends Seeder
             ->first();
 
         DB::transaction(function () use ($company, $admin): void {
-            $categories = [
-                ['code' => 'PV_MODULE', 'name' => 'PV Module', 'sort_order' => 10],
-                ['code' => 'POWER_CONVERSION', 'name' => 'Power Conversion', 'sort_order' => 20],
-                ['code' => 'BATTERY_ESS', 'name' => 'Battery / ESS', 'sort_order' => 30],
-                ['code' => 'MOUNTING_STRUCTURE', 'name' => 'Mounting & Structure', 'sort_order' => 40],
-                ['code' => 'DC_ELECTRICAL', 'name' => 'DC Electrical', 'sort_order' => 50],
-                ['code' => 'AC_ELECTRICAL', 'name' => 'AC Electrical', 'sort_order' => 60],
-                ['code' => 'GROUNDING_SAFETY', 'name' => 'Grounding & Safety', 'sort_order' => 70],
-                ['code' => 'MONITORING', 'name' => 'Monitoring', 'sort_order' => 80],
-                ['code' => 'ENGINEERING_SERVICE', 'name' => 'Engineering Service', 'sort_order' => 90],
-            ];
-
-            foreach ($categories as $categoryData) {
-                MaterialCategory::query()->updateOrCreate(
-                    ['code' => $categoryData['code']],
-                    [
-                        'company_id' => null,
-                        'parent_id' => null,
-                        'name' => $categoryData['name'],
-                        'description' => 'Default NEXORIN catalog category for '.$categoryData['name'].'.',
-                        'sort_order' => $categoryData['sort_order'],
-                        'is_active' => true,
-                    ]
-                );
-            }
+            $this->call(ProfessionalCatalogTaxonomySeeder::class);
 
             $categoryIds = MaterialCategory::query()
-                ->whereIn('code', array_column($categories, 'code'))
+                ->whereIn('code', [
+                    'PV_MONO_PERC',
+                    'INV_HYBRID',
+                    'BAT_WALL',
+                    'DC_CABLE_CONNECTOR',
+                    'DC_SPD',
+                    'FIRE_EXTINGUISHER',
+                ])
                 ->pluck('id', 'code');
 
             $materials = [
                 [
                     'sku' => 'PV-MOD-550-MONO',
-                    'category' => 'PV_MODULE',
+                    'category' => 'PV_MONO_PERC',
                     'name' => 'Solar PV Module 550 Wp Mono PERC',
                     'brand' => 'Reference Tier-1',
                     'model' => '550Wp Mono',
@@ -83,23 +67,34 @@ class MaterialCatalogSeeder extends Seeder
                     'uom' => 'pcs',
                     'system_types' => ['on_grid', 'hybrid', 'off_grid'],
                     'project_scales' => ['residential', 'commercial'],
-                    'nominal_power_wp' => 550,
-                    'voltage_v' => 41.9,
-                    'current_a' => 13.13,
-                    'warranty_years' => 12,
                     'default_scope_mode' => 'base_boq',
                     'description' => 'Reference tier-1 PV module used as a starter catalog item for rooftop PV sizing.',
                     'technical_notes' => 'Replace with actual approved brand, model, datasheet, and certificate before procurement.',
-                    'specs' => [
-                        ['module_efficiency', 'Module Efficiency', '21.3', '%'],
-                        ['voc', 'Open Circuit Voltage', '49.8', 'V'],
-                        ['vmp', 'Maximum Power Voltage', '41.9', 'V'],
-                        ['imp', 'Maximum Power Current', '13.13', 'A'],
+                    'technical_specs' => [
+                        'module_technology' => 'Mono PERC',
+                        'module_power_wp' => 550,
+                        'voc' => 49.8,
+                        'vmp' => 41.9,
+                        'isc' => 13.9,
+                        'imp' => 13.13,
+                        'module_efficiency_percent' => 21.3,
+                        'temp_coeff_voc' => -0.25,
+                        'temp_coeff_pmax' => -0.29,
+                        'max_system_voltage' => '1500',
+                        'cell_type' => 'Mono PERC half-cut',
+                        'cell_count' => 144,
+                        'length_mm' => 2278,
+                        'width_mm' => 1134,
+                        'weight_kg' => 27.5,
+                        'connector_type' => 'MC4 compatible',
+                        'frame_material' => 'Anodized aluminium',
+                        'product_warranty_years' => 12,
+                        'performance_warranty_years' => 30,
                     ],
                 ],
                 [
                     'sku' => 'INV-HYB-5KW-1P',
-                    'category' => 'POWER_CONVERSION',
+                    'category' => 'INV_HYBRID',
                     'name' => 'Hybrid Inverter 5 kW Single Phase',
                     'brand' => 'Reference Hybrid',
                     'model' => 'HYB-5K-1P',
@@ -108,23 +103,39 @@ class MaterialCatalogSeeder extends Seeder
                     'uom' => 'pcs',
                     'system_types' => ['hybrid'],
                     'project_scales' => ['residential', 'commercial'],
-                    'rated_power_kw' => 5,
-                    'voltage_v' => 220,
-                    'electrical_phase' => 'Single Phase',
-                    'ip_rating' => 'IP65',
-                    'warranty_years' => 5,
                     'default_scope_mode' => 'base_boq',
                     'description' => 'Reference single-phase hybrid inverter for residential and light-commercial backup planning.',
                     'technical_notes' => 'Final model must be checked for MPPT voltage range, battery compatibility, and grid code settings.',
-                    'specs' => [
-                        ['ac_power', 'AC Rated Power', '5', 'kW'],
-                        ['mppt_qty', 'MPPT Quantity', '2', null],
-                        ['battery_voltage', 'Battery Voltage Range', '48', 'V nominal'],
+                    'technical_specs' => [
+                        'inverter_type' => 'Hybrid inverter',
+                        'rated_ac_power_kw' => 5,
+                        'max_dc_power_kwp' => 7.5,
+                        'max_dc_voltage' => '600',
+                        'mppt_count' => 2,
+                        'mppt_voltage_min' => '120',
+                        'mppt_voltage_max' => '550',
+                        'rated_ac_voltage' => '230',
+                        'rated_ac_current_a' => 21.8,
+                        'phase_type' => 'single_phase',
+                        'efficiency_percent' => 97.6,
+                        'battery_voltage_range' => '40–60',
+                        'max_charge_current_a' => 100,
+                        'max_discharge_current_a' => 100,
+                        'backup_output_kw' => 5,
+                        'surge_power_kw' => 10,
+                        'transfer_time_ms' => 10,
+                        'bms_protocol' => 'CAN / RS485',
+                        'communication_protocol' => 'RS485 / Wi-Fi',
+                        'parallel_limit' => 6,
+                        'genset_support' => '1',
+                        'grid_code_profile' => 'Configurable utility profile',
+                        'ip_rating' => 'IP65',
+                        'warranty_years' => 5,
                     ],
                 ],
                 [
                     'sku' => 'BAT-LFP-5KWH',
-                    'category' => 'BATTERY_ESS',
+                    'category' => 'BAT_WALL',
                     'name' => 'LFP Battery Module 5.12 kWh',
                     'brand' => 'Reference ESS',
                     'model' => 'LFP-5.12',
@@ -133,21 +144,35 @@ class MaterialCatalogSeeder extends Seeder
                     'uom' => 'kWh',
                     'system_types' => ['hybrid', 'off_grid'],
                     'project_scales' => ['residential', 'commercial'],
-                    'nominal_capacity_kwh' => 5.12,
-                    'voltage_v' => 51.2,
-                    'warranty_years' => 5,
                     'default_scope_mode' => 'base_boq',
                     'description' => 'Reference LFP battery module for hybrid and off-grid energy storage planning.',
                     'technical_notes' => 'Final battery selection must match inverter battery protocol, BMS limits, and installation environment.',
-                    'specs' => [
-                        ['chemistry', 'Chemistry', 'LFP', null],
-                        ['nominal_capacity', 'Nominal Capacity', '5.12', 'kWh'],
-                        ['dod', 'Recommended Depth of Discharge', '80', '%'],
+                    'technical_specs' => [
+                        'battery_chemistry' => 'lfp',
+                        'nominal_voltage_v' => 51.2,
+                        'capacity_ah' => 100,
+                        'capacity_kwh' => 5.12,
+                        'usable_capacity_kwh' => 4.61,
+                        'dod_percent' => 90,
+                        'round_trip_efficiency_percent' => 95,
+                        'cycle_life' => 6000,
+                        'max_charge_current_a' => 100,
+                        'max_discharge_current_a' => 100,
+                        'c_rate' => 1,
+                        'parallel_limit' => 16,
+                        'mounting_type' => 'Wall mounted',
+                        'dimensions_mm' => '480 × 460 × 180',
+                        'weight_kg' => 48,
+                        'communication_protocol' => 'CAN / RS485',
+                        'operating_temperature' => '-10 to 50',
+                        'ip_rating' => 'IP54',
+                        'fire_safety_required' => '1',
+                        'warranty_years' => 5,
                     ],
                 ],
                 [
                     'sku' => 'CABLE-PV1F-4MM',
-                    'category' => 'DC_ELECTRICAL',
+                    'category' => 'DC_CABLE_CONNECTOR',
                     'name' => 'PV1-F DC Cable 4 mm² Red / Black',
                     'brand' => 'Reference Cable',
                     'model' => 'PV1-F 4mm²',
@@ -156,18 +181,30 @@ class MaterialCatalogSeeder extends Seeder
                     'uom' => 'm',
                     'system_types' => ['on_grid', 'hybrid', 'off_grid'],
                     'project_scales' => ['residential', 'commercial'],
-                    'voltage_v' => 1500,
                     'default_scope_mode' => 'base_boq',
                     'description' => 'Reference PV cable for DC string routing.',
                     'technical_notes' => 'Cable size must be checked against current, voltage drop, routing condition, and local standard.',
-                    'specs' => [
-                        ['conductor_size', 'Conductor Size', '4', 'mm²'],
-                        ['insulation', 'Insulation', 'PV1-F', null],
+                    'technical_specs' => [
+                        'device_or_cable_type' => 'PV1-F solar cable',
+                        'conductor_material' => 'Tinned copper',
+                        'conductor_size_mm2' => '4',
+                        'rated_voltage' => '1500',
+                        'rated_current' => '55',
+                        'insulation' => 'Cross-linked halogen-free compound',
+                        'uv_resistance' => 'UV and ozone resistant',
+                        'temperature_rating' => '-40 to 90',
+                        'flame_rating' => 'IEC 60332-1',
+                        'outer_diameter_mm' => 5.8,
+                        'minimum_bending_radius_mm' => 23.2,
+                        'drum_length_m' => 500,
+                        'cable_color' => 'Red / black',
+                        'connector_type' => 'MC4 compatible termination',
+                        'standard' => 'EN 50618 / IEC 62930',
                     ],
                 ],
                 [
                     'sku' => 'SPD-DC-T2-1000V',
-                    'category' => 'DC_ELECTRICAL',
+                    'category' => 'DC_SPD',
                     'name' => 'DC Surge Protection Device Type II 1000V',
                     'brand' => 'Reference Protection',
                     'model' => 'DC-SPD-T2-1000',
@@ -176,38 +213,61 @@ class MaterialCatalogSeeder extends Seeder
                     'uom' => 'pcs',
                     'system_types' => ['on_grid', 'hybrid', 'off_grid'],
                     'project_scales' => ['residential', 'commercial'],
-                    'voltage_v' => 1000,
                     'default_scope_mode' => 'base_boq',
                     'description' => 'Reference DC SPD for PV array protection.',
                     'technical_notes' => 'Final SPD class, pole configuration, and voltage rating must follow array voltage and protection design.',
-                    'specs' => [
-                        ['type', 'SPD Type', 'Type II', null],
-                        ['rated_voltage', 'Rated DC Voltage', '1000', 'Vdc'],
+                    'technical_specs' => [
+                        'device_type' => 'DC surge protection device',
+                        'spd_type' => 'Type II',
+                        'pole_count' => 2,
+                        'uc_voltage' => '1000',
+                        'up_voltage_kv' => '3.5',
+                        'in_current' => 20,
+                        'imax_current' => 40,
+                        'short_circuit_withstand_ka' => 10,
+                        'response_time_ns' => 25,
+                        'remote_contact' => '0',
+                        'replaceable_cartridge' => '1',
+                        'visual_indicator' => '1',
+                        'ip_rating' => 'IP20',
+                        'standard' => 'IEC 61643-31',
                     ],
                 ],
                 [
                     'sku' => 'FIRE-EXT-BASIC-SET',
-                    'category' => 'GROUNDING_SAFETY',
+                    'category' => 'FIRE_EXTINGUISHER',
                     'name' => 'Portable Fire Extinguisher and Basic Safety Equipment Allowance',
                     'brand' => 'Reference Safety',
                     'model' => 'Basic Safety Set',
                     'material_type' => 'Safety equipment',
-                    'cost_group' => 'Electrical BOS',
+                    'cost_group' => 'Safety & HSE',
                     'uom' => 'lot',
                     'system_types' => ['on_grid', 'hybrid', 'off_grid'],
                     'project_scales' => ['residential', 'commercial'],
                     'default_scope_mode' => 'base_boq',
                     'description' => 'Basic safety allowance for electrical panel, inverter, and battery area readiness.',
                     'technical_notes' => 'Final fire safety scope must follow site risk assessment and applicable regulation.',
-                    'specs' => [
-                        ['scope', 'Scope', 'Portable extinguisher, labels, and basic safety accessories', null],
+                    'technical_specs' => [
+                        'device_or_service_type' => 'Portable fire extinguisher set',
+                        'extinguishing_agent' => 'Dry chemical powder',
+                        'capacity' => 6,
+                        'fire_rating' => 'ABC',
+                        'operating_pressure_bar' => 15,
+                        'discharge_time_s' => 15,
+                        'mounting_bracket_included' => '1',
+                        'maintenance_interval' => '12 months',
+                        'application_area' => 'Electrical panel, inverter, and battery support area',
+                        'standard' => 'Applicable local fire safety standard',
+                        'warranty_years' => 1,
                     ],
                 ],
             ];
 
+            $synchronizer = app(MaterialSpecificationSynchronizer::class);
+
             foreach ($materials as $materialData) {
-                $specs = $materialData['specs'];
-                unset($materialData['specs']);
+                $technicalSpecs = $materialData['technical_specs'];
+                unset($materialData['technical_specs']);
 
                 $categoryCode = $materialData['category'];
                 unset($materialData['category']);
@@ -219,27 +279,15 @@ class MaterialCatalogSeeder extends Seeder
                     ],
                     array_merge($materialData, [
                         'material_category_id' => $categoryIds[$categoryCode] ?? null,
+                        'catalog_status' => 'draft',
+                        'compliance_status' => 'needs_review',
                         'is_active' => true,
                         'created_by' => $admin?->getKey(),
                         'updated_by' => $admin?->getKey(),
                     ])
                 );
 
-                foreach ($specs as $index => $spec) {
-                    MaterialSpec::query()->updateOrCreate(
-                        [
-                            'material_id' => $material->getKey(),
-                            'spec_key' => $spec[0],
-                        ],
-                        [
-                            'spec_label' => $spec[1],
-                            'spec_value' => $spec[2],
-                            'spec_unit' => $spec[3],
-                            'sort_order' => ($index + 1) * 10,
-                            'is_filterable' => true,
-                        ]
-                    );
-                }
+                $synchronizer->sync($material, $categoryCode, $technicalSpecs);
             }
 
             $supplier = Supplier::query()->updateOrCreate(

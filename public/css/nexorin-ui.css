@@ -38,7 +38,7 @@
 
 .ui-page-title {
     margin: 0;
-    font-family: "Space Grotesk", sans-serif;
+    font-family: var(--nx-font-body, "Inter", sans-serif);
     font-size: clamp(26px, 3vw, 38px);
     line-height: 1.1;
     letter-spacing: -0.045em;
@@ -187,7 +187,7 @@
 
 .ui-card-title {
     margin: 0;
-    font-family: "Space Grotesk", sans-serif;
+    font-family: var(--nx-font-body, "Inter", sans-serif);
     font-size: 18px;
     letter-spacing: -0.03em;
 }
@@ -260,7 +260,7 @@
     z-index: 1;
     display: block;
     margin-top: 17px;
-    font-family: "Space Grotesk", sans-serif;
+    font-family: var(--nx-font-body, "Inter", sans-serif);
     font-size: 27px;
     line-height: 1;
     letter-spacing: -0.04em;
@@ -476,7 +476,7 @@
     place-items: center;
     border-radius: 13px;
     color: var(--navy-950);
-    font-family: "Space Grotesk", sans-serif;
+    font-family: var(--nx-font-body, "Inter", sans-serif);
     font-size: 11px;
     font-weight: 800;
     background: linear-gradient(135deg, var(--teal-400), var(--teal-500));
@@ -579,7 +579,7 @@
 
 .ui-empty h3 {
     margin: 0;
-    font-family: "Space Grotesk", sans-serif;
+    font-family: var(--nx-font-body, "Inter", sans-serif);
     font-size: 17px;
 }
 
@@ -727,7 +727,7 @@
     border: 1px solid rgba(255, 255, 255, 0.14);
     border-radius: 20px;
     color: var(--navy-950);
-    font-family: "Space Grotesk", sans-serif;
+    font-family: var(--nx-font-body, "Inter", sans-serif);
     font-size: 17px;
     font-weight: 800;
     background: linear-gradient(135deg, var(--teal-400), var(--teal-500));
@@ -736,7 +736,7 @@
 
 .ui-detail-copy h2 {
     margin: 0;
-    font-family: "Space Grotesk", sans-serif;
+    font-family: var(--nx-font-body, "Inter", sans-serif);
     font-size: 25px;
     letter-spacing: -0.035em;
 }
@@ -972,7 +972,7 @@
     place-items: center;
     border-radius: 13px;
     color: var(--white);
-    font-family: "Space Grotesk", sans-serif;
+    font-family: var(--nx-font-body, "Inter", sans-serif);
     font-size: 13px;
     font-weight: 800;
     background: linear-gradient(135deg, var(--navy-700), var(--teal-500));
@@ -1023,7 +1023,7 @@
 
 .ui-form-section-heading h3 {
     margin: 0;
-    font-family: "Space Grotesk", sans-serif;
+    font-family: var(--nx-font-body, "Inter", sans-serif);
     font-size: 18px;
     letter-spacing: -0.03em;
 }
@@ -1499,7 +1499,7 @@
 
 .ui-workflow-header h3 {
     margin: 0;
-    font-family: "Space Grotesk", sans-serif;
+    font-family: var(--nx-font-body, "Inter", sans-serif);
     font-size: 20px;
     letter-spacing: -0.03em;
 }
@@ -1736,3 +1736,48 @@
         margin-left: 50px;
     }
 }
+
+/* ========================================================================== 
+   Typography Refinement 37A
+   Unified editorial, interface, and engineering-data type system.
+   ========================================================================== */
+
+.ui-page,
+.ui-card,
+.ui-table,
+.ui-form,
+.ui-workflow-header {
+    font-family: var(--nx-font-body, "Inter", sans-serif);
+}
+
+.ui-page-title,
+.ui-card-title,
+.ui-empty h3,
+.ui-detail-copy h2,
+.ui-form-section-heading h3,
+.ui-workflow-header h3 {
+    font-family: var(--nx-font-display, "Fraunces", Georgia, serif);
+    font-optical-sizing: auto;
+    font-weight: 600;
+    letter-spacing: -.025em;
+}
+
+.ui-stat-value,
+.ui-detail-meta strong,
+.ui-table [data-number],
+.ui-table .is-numeric {
+    font-family: var(--nx-font-data, "JetBrains Mono", monospace);
+    font-variant-numeric: tabular-nums lining-nums;
+}
+
+.ui-page-kicker { font-size: 10px; }
+.ui-page-description { font-size: 13px; line-height: 1.65; }
+.ui-card-title { font-size: 20px; }
+.ui-card-description { font-size: 12px; line-height: 1.55; }
+.ui-button { font-size: 12px; }
+.ui-empty h3 { font-size: 20px; }
+.ui-empty p { font-size: 12px; line-height: 1.6; }
+.ui-form-section-heading h3 { font-size: 20px; }
+.ui-form-section-heading p { font-size: 12px; line-height: 1.55; }
+.ui-workflow-header h3 { font-size: 22px; }
+

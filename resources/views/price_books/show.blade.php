@@ -96,6 +96,7 @@
                     <div class="ui-info-item"><span>Unavailable Items</span><strong>{{ number_format($itemStats['unavailable']) }}</strong></div>
                     <div class="ui-info-item"><span>Low Margin Items</span><strong>{{ number_format($itemStats['low_margin']) }}</strong></div>
                     <div class="ui-info-item"><span>No Selling Reference</span><strong>{{ number_format($itemStats['missing_selling_reference']) }}</strong></div>
+                    <div class="ui-info-item"><span>Catalog Review Required</span><strong>{{ number_format($itemStats['catalog_review']) }}</strong></div>
                 </div>
             </div>
         </section>
@@ -155,7 +156,7 @@
                                     <tr>
                                         <td>
                                             <div class="ui-table-primary">{{ $item->material?->name ?? 'Material unavailable' }}</div>
-                                            <div class="ui-table-secondary">{{ $item->material?->sku ?? 'No SKU' }}</div>
+                                            <div class="ui-table-secondary">{{ $item->material?->sku ?? 'No SKU' }} · {{ ($item->material?->catalog_status === 'approved' && $item->material?->compliance_status === 'compliant') ? 'Catalog Approved' : 'Catalog Review Required' }}</div>
                                         </td>
                                         <td><input class="ui-input" type="number" step="0.01" min="0" name="items[{{ $item->id }}][unit_cost]" value="{{ old('items.'.$item->id.'.unit_cost', $item->unit_cost) }}" required></td>
                                         <td><input class="ui-input" type="number" step="0.01" min="0" name="items[{{ $item->id }}][selling_price]" value="{{ old('items.'.$item->id.'.selling_price', $item->selling_price) }}"></td>
@@ -223,7 +224,7 @@
                                     <tr>
                                         <td>
                                             <div class="ui-table-primary">{{ $item->material?->name ?? 'Material unavailable' }}</div>
-                                            <div class="ui-table-secondary">{{ $item->material?->sku ?? 'No SKU' }}{{ $item->material?->category ? ' · '.$item->material->category->name : '' }}{{ $item->supplier_sku ? ' · Supplier SKU '.$item->supplier_sku : '' }}</div>
+                                            <div class="ui-table-secondary">{{ $item->material?->sku ?? 'No SKU' }}{{ $item->material?->category ? ' · '.$item->material->category->name : '' }}{{ $item->supplier_sku ? ' · Supplier SKU '.$item->supplier_sku : '' }} · {{ ($item->material?->catalog_status === 'approved' && $item->material?->compliance_status === 'compliant') ? 'Catalog Approved' : 'Catalog Review Required' }}</div>
                                         </td>
                                         <td>{{ $item->supplier?->name ?? $priceBook->supplier?->name ?? 'Internal / mixed' }}</td>
                                         <td>{{ $priceBook->currency }} {{ number_format((float) $item->unit_cost, 0, ',', '.') }}</td>

@@ -90,6 +90,20 @@ class ProjectController extends Controller
             ->paginate(12)
             ->withQueryString();
 
+        $recentProject = (clone $baseQuery)
+            ->whereNull('archived_at')
+            ->with([
+                'customer:id,name,customer_number,portal_user_id',
+                'assignedEngineer:id,name',
+                'assignedSales:id,name',
+                'sldRevisions' => fn ($query) => $query
+                    ->where('status', '!=', 'superseded')
+                    ->latest('revision')
+                    ->limit(1),
+            ])
+            ->latest('updated_at')
+            ->first();
+
         $stats = [
             'total' => (clone $baseQuery)->whereNull('archived_at')->count(),
             'draft' => (clone $baseQuery)
@@ -109,6 +123,7 @@ class ProjectController extends Controller
         return view('projects.index', [
             'company' => $company,
             'projects' => $projects,
+            'recentProject' => $recentProject,
             'stats' => $stats,
             'filters' => [
                 'search' => $search,
@@ -121,6 +136,10 @@ class ProjectController extends Controller
             'canCreateProject' => $request->user()->hasAnyCompanyPermission(
                 $company,
                 ['project.create', 'project.create_own']
+            ),
+            'canViewSld' => $request->user()->hasAnyCompanyPermission(
+                $company,
+                ['calculation.view', 'calculation.run', 'calculation.revise', 'calculation.verify', 'calculation.view_own']
             ),
         ]);
     }
@@ -279,6 +298,8 @@ class ProjectController extends Controller
             'technicalCalculation.activeOverrides.creator:id,name',
             'technicalCalculation.calculator:id,name',
             'technicalCalculation.verifier:id,name',
+            'sldRevisions.generator:id,name',
+            'sldRevisions.approver:id,name',
             'billOfMaterial.items',
             'financialAnalysis',
             'quotation.items',

@@ -81,9 +81,23 @@ class Material extends Model
             ->latest('id');
     }
 
+    public function datasheetApplications(): HasMany
+    {
+        return $this->hasMany(MaterialDatasheetApplication::class)
+            ->latest('applied_at')
+            ->latest('id');
+    }
+
     public function certificates(): HasMany
     {
         return $this->hasMany(MaterialCertificate::class)
+            ->latest('issued_at')
+            ->latest('id');
+    }
+
+    public function documents(): HasMany
+    {
+        return $this->hasMany(MaterialDocument::class)
             ->latest('issued_at')
             ->latest('id');
     }
@@ -152,6 +166,26 @@ class Material extends Model
                 default => str($value)->replace('_', ' ')->title()->toString(),
             })
             ->implode(', ');
+    }
+
+    /**
+     * Return the material to governed review after technical or evidence changes.
+     */
+    public function markForCatalogReview(?int $reviewerId = null): bool
+    {
+        $payload = [
+            'compliance_status' => 'needs_review',
+            'last_reviewed_at' => now(),
+            'last_reviewed_by' => $reviewerId,
+            'approved_at' => null,
+            'approved_by' => null,
+        ];
+
+        if ($this->catalog_status === 'approved') {
+            $payload['catalog_status'] = 'needs_review';
+        }
+
+        return $this->forceFill($payload)->save();
     }
 
     protected function casts(): array

@@ -561,15 +561,15 @@ class QuotationController extends Controller
             'delivery_notes' => ['nullable', 'string', 'max:1000'],
         ]);
 
-        $this->quotationLifecycle->markSent($quotation, $request->user(), $delivery);
-
-        if ($project->canTransitionTo('quotation')) {
-            $project->forceFill([
-                'status' => 'quotation',
-                'status_updated_by' => $request->user()->getKey(),
-                'status_changed_at' => now(),
-            ])->save();
-        }
+        DB::transaction(function () use ($quotation, $request, $delivery, $project): void {
+            $this->quotationLifecycle->markSent($quotation, $request->user(), $delivery);
+            $this->transitionProjectStatus(
+                $project,
+                'quotation',
+                $request->user()->getKey(),
+                'Quotation issued to customer.'
+            );
+        });
 
         return back()->with('success', 'Quotation has been sent.');
     }
@@ -603,17 +603,17 @@ class QuotationController extends Controller
             'acceptance_notes' => ['nullable', 'string', 'max:1000'],
         ]);
 
-        $this->quotationLifecycle->markAccepted($quotation, $request->user(), $payload['acceptance_notes'] ?? null);
+        DB::transaction(function () use ($quotation, $request, $payload, $project): void {
+            $this->quotationLifecycle->markAccepted($quotation, $request->user(), $payload['acceptance_notes'] ?? null);
+            $this->transitionProjectStatus(
+                $project,
+                'approved',
+                $request->user()->getKey(),
+                'Customer accepted quotation'.(! empty($payload['acceptance_notes']) ? ': '.$payload['acceptance_notes'] : '.')
+            );
+        });
 
-        if ($project->canTransitionTo('accepted')) {
-            $project->forceFill([
-                'status' => 'accepted',
-                'status_updated_by' => $request->user()->getKey(),
-                'status_changed_at' => now(),
-            ])->save();
-        }
-
-        return back()->with('success', 'Client acceptance has been recorded.');
+        return back()->with('success', 'Client acceptance has been recorded and the project is now approved.');
     }
 
     public function reject(Request $request, Company $company, Project $project): RedirectResponse
@@ -679,6 +679,39 @@ class QuotationController extends Controller
         $this->quotationLifecycle->markCancelled($quotation, $request->user(), $payload['cancellation_reason'] ?? null);
 
         return back()->with('success', 'Quotation has been cancelled.');
+    }
+
+    private function transitionProjectStatus(Project $project, string $targetStatus, int $actorId, ?string $note = null): void
+    {
+        $project->refresh();
+
+        if ($project->status === $targetStatus) {
+            return;
+        }
+
+        if (! $project->canTransitionTo($targetStatus)) {
+            throw ValidationException::withMessages([
+                'project_status' => 'Project cannot transition from '.$project->status.' to '.$targetStatus.'.',
+            ]);
+        }
+
+        $previousStatus = (string) $project->status;
+        $changedAt = now();
+
+        $project->forceFill([
+            'status' => $targetStatus,
+            'status_updated_by' => $actorId,
+            'status_changed_at' => $changedAt,
+            'updated_by' => $actorId,
+        ])->save();
+
+        $project->statusHistories()->create([
+            'from_status' => $previousStatus,
+            'to_status' => $targetStatus,
+            'note' => $note,
+            'changed_by' => $actorId,
+            'changed_at' => $changedAt,
+        ]);
     }
 
     private function approvalNotes(Request $request): ?string

@@ -50,10 +50,68 @@ class TechnicalCalculationEngineTest extends TestCase
         $this->assertGreaterThan(0, $result['maximum_modules_per_string']);
         $this->assertGreaterThan(0, $result['modules_per_string']);
         $this->assertGreaterThan(0, $result['string_count']);
+        $this->assertArrayHasKey('string_module_counts', $result);
+        $this->assertSame($result['module_count'], array_sum($result['string_module_counts']));
 
         $this->assertArrayHasKey('dc_isolator_a', $result['protection']);
         $this->assertArrayHasKey('dc_fuse_a', $result['protection']);
         $this->assertArrayHasKey('ac_breaker_a', $result['protection']);
+    }
+
+    public function test_app67l_baseline_allocates_96_modules_evenly_across_two_inverters(): void
+    {
+        $result = $this->engine->calculate(
+            new Project(),
+            $this->baseInput([
+                'system_type' => 'on_grid',
+                'inverter_ac_power_kw' => 25,
+                'inverter_max_dc_voltage_v' => 1100,
+                'inverter_mppt_min_voltage_v' => 200,
+                'inverter_mppt_max_voltage_v' => 1000,
+                'inverter_mppt_count' => 4,
+                'desired_dc_ac_ratio' => 1.05,
+                'inverter_efficiency_percent' => 98,
+                'minimum_site_temperature_c' => 15,
+                'dc_cable_length_m' => 30,
+                'ac_cable_length_m' => 20,
+                'ac_cable_area_mm2' => 35,
+            ]),
+            $this->baseSources([
+                'load' => [
+                    'daily_energy_kwh' => 230,
+                    'critical_daily_energy_kwh' => 0,
+                    'peak_demand_kw' => 61,
+                    'supply_phase' => 'three_phase',
+                ],
+                'solar' => ['average_psh' => 4.5],
+                'roof' => [
+                    'usable_area_m2' => 270,
+                    'weighted_shading_percent' => 0,
+                    'warnings' => [],
+                ],
+            ])
+        );
+
+        $this->assertSame(96, $result['module_count']);
+        $this->assertSame(2, $result['inverter_count']);
+        $this->assertSame(6, $result['string_count']);
+        $this->assertSame([16, 16, 16, 16, 16, 16], $result['string_module_counts']);
+        $this->assertSame(96, array_sum($result['string_module_counts']));
+        $this->assertSame('16 + 16 + 16 + 16 + 16 + 16 modules', $result['string_distribution_label']);
+        $this->assertSame(8, $result['available_mppt_inputs']);
+        $this->assertSame(6, $result['used_mppt_inputs']);
+
+        $assignments = $result['inverter_string_assignments'];
+        $this->assertCount(2, $assignments);
+        $this->assertSame(['INV-01', 'INV-02'], array_column($assignments, 'tag'));
+        $this->assertSame([48, 48], array_column($assignments, 'assigned_module_count'));
+        $this->assertSame([3, 3], array_column($assignments, 'used_mppt_count'));
+        $this->assertSame(96, array_sum(array_column($assignments, 'assigned_module_count')));
+        $this->assertEqualsWithDelta(1.056, $assignments[0]['dc_ac_ratio'], 0.001);
+        $this->assertEqualsWithDelta(1.056, $assignments[1]['dc_ac_ratio'], 0.001);
+        $this->assertSame(25.0, $result['inverter_unit_ac_kw']);
+        $this->assertSame(400.0, $result['ac_nominal_voltage_v']);
+        $this->assertGreaterThan(0, $result['inverter_unit_rated_current_a']);
     }
 
     public function test_it_calculates_hybrid_battery_capacity(): void

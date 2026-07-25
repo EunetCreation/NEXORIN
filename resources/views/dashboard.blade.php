@@ -4,6 +4,14 @@
 @section('page-eyebrow', 'Command center')
 @section('page-heading', 'Dashboard')
 
+@push('styles')
+    <link href="{{ asset('css/nexorin-project-flow.css') }}?v=55a" rel="stylesheet">
+@endpush
+
+@push('scripts')
+    <script src="{{ asset('js/nexorin-project-flow.js') }}?v=55a" defer></script>
+@endpush
+
 @php
     $roleLabel = $currentUser->isSuperAdmin()
         ? 'Super Admin'
@@ -80,6 +88,10 @@
     };
 
     $pipelineTotal = max(1, $projectStatusCounts->sum());
+    $pipelineInProgress = collect(['draft', 'survey', 'engineering'])
+        ->sum(fn (string $status): int => (int) $projectStatusCounts->get($status, 0));
+    $pipelineCommercial = collect(['quotation', 'approved', 'completed'])
+        ->sum(fn (string $status): int => (int) $projectStatusCounts->get($status, 0));
     $firstName = str($currentUser->name)->before(' ')->toString();
     $greeting = now('Asia/Jakarta')->hour < 12
         ? 'morning'
@@ -163,211 +175,207 @@
         </article>
     </section>
 
-    <section class="dashboard-grid">
-        <div class="dashboard-main-column">
-            <article class="dashboard-card pipeline-card" data-reveal data-premium-card>
-                <header class="dashboard-card-header">
-                    <div>
-                        <span class="card-kicker">Portfolio overview</span>
-                        <h3>Project Pipeline</h3>
-                        <p>Distribution of projects across the existing NEXORIN workflow.</p>
-                    </div>
-                    @if ($canViewProjects)
-                        <a href="{{ route('companies.projects.index', $currentCompany) }}" class="card-text-link">All projects <span>↗</span></a>
-                    @endif
-                </header>
+    <section class="dashboard-overview-grid" aria-label="Portfolio and catalog overview">
+        <article class="dashboard-card pipeline-card" data-reveal data-premium-card>
+            <header class="dashboard-card-header">
+                <div>
+                    <span class="card-kicker">Portfolio overview</span>
+                    <h3>Project Pipeline</h3>
+                    <p>Distribution of projects across the existing NEXORIN workflow.</p>
+                </div>
+                @if ($canViewProjects)
+                    <a href="{{ route('companies.projects.index', $currentCompany) }}" class="card-text-link">All projects <span>↗</span></a>
+                @endif
+            </header>
 
-                <div class="pipeline-visual" aria-label="Project status distribution">
-                    @foreach (['draft', 'survey', 'engineering', 'quotation', 'approved', 'completed'] as $status)
-                        @php $count = (int) $projectStatusCounts->get($status, 0); @endphp
+            <div class="pipeline-visual" aria-label="Project status distribution">
+                @foreach (['draft', 'survey', 'engineering', 'quotation', 'approved', 'completed'] as $status)
+                    @php $count = (int) $projectStatusCounts->get($status, 0); @endphp
+                    @if ($canViewProjects)
+                        <a
+                            href="{{ route('companies.projects.index', ['company' => $currentCompany, 'status' => $status]) }}"
+                            class="pipeline-segment pipeline-{{ $status }}"
+                            style="--pipeline-weight: {{ max(0.5, ($count / $pipelineTotal) * 100) }}"
+                            aria-label="View {{ $count }} {{ str($statusLabels[$status])->lower() }} project{{ $count === 1 ? '' : 's' }}"
+                            data-pipeline-segment
+                        >
+                            <span class="pipeline-tooltip"><strong>{{ $count }}</strong>{{ $statusLabels[$status] }} project{{ $count === 1 ? '' : 's' }}</span>
+                        </a>
+                    @else
                         <span
                             class="pipeline-segment pipeline-{{ $status }}"
                             style="--pipeline-weight: {{ max(0.5, ($count / $pipelineTotal) * 100) }}"
-                            title="{{ $statusLabels[$status] }}: {{ $count }}"
-                        ></span>
-                    @endforeach
-                </div>
-
-                <div class="pipeline-legend">
-                    @foreach (['draft', 'survey', 'engineering', 'quotation', 'approved', 'completed'] as $status)
-                        <div class="pipeline-legend-item">
-                            <span class="pipeline-dot pipeline-{{ $status }}"></span>
-                            <span>{{ $statusLabels[$status] }}</span>
-                            <strong>{{ $projectStatusCounts->get($status, 0) }}</strong>
-                        </div>
-                    @endforeach
-                </div>
-            </article>
-
-            <article class="dashboard-card work-queue-card" data-reveal>
-                <header class="dashboard-card-header">
-                    <div>
-                        <span class="card-kicker">Continue working</span>
-                        <h3>Project Work Queue</h3>
-                        <p>Module readiness reflects stored project data. Warnings remain visible and still require review.</p>
-                    </div>
-                    <span class="card-count">{{ $projectQueue->count() }} recent</span>
-                </header>
-
-                @if ($projectQueue->isNotEmpty())
-                    <div class="work-queue-table-wrap">
-                        <table class="work-queue-table">
-                            <colgroup>
-                                <col class="queue-col-project">
-                                <col class="queue-col-stage">
-                                <col class="queue-col-system">
-                                <col class="queue-col-progress">
-                                <col class="queue-col-next">
-                                <col class="queue-col-action">
-                            </colgroup>
-                            <thead>
-                                <tr>
-                                    <th>Project</th>
-                                    <th>Stage</th>
-                                    <th>System</th>
-                                    <th>Data Readiness</th>
-                                    <th>Next Step</th>
-                                    <th><span class="sr-only">Open</span></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($projectQueue as $queueItem)
-                                    @php
-                                        $project = $queueItem['project'];
-                                        $status = $project->status ?? 'draft';
-                                        $nextStep = $queueItem['next_step'];
-                                    @endphp
-                                    <tr data-premium-row>
-                                        <td>
-                                            <div class="project-cell">
-                                                <span class="project-symbol" aria-hidden="true">
-                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                                                        <path d="M4 15h16l-2-8H6l-2 8z"/>
-                                                        <path d="M8 7l-1 8M12 7v8M16 7l1 8M3 18h18M12 15v6"/>
-                                                    </svg>
-                                                </span>
-                                                <span class="project-cell-copy">
-                                                    <strong>{{ $project->name }}</strong>
-                                                    <small>{{ $project->customer?->name ?? 'No customer' }} · {{ $project->updated_at->diffForHumans() }}</small>
-                                                </span>
-                                            </div>
-                                        </td>
-                                        <td><span class="status-badge tone-{{ $statusTones[$status] ?? 'neutral' }}">{{ $statusLabels[$status] ?? str($status)->headline() }}</span></td>
-                                        <td><span class="system-label">{{ $systemLabels[$project->proposed_system ?? 'undecided'] ?? str($project->proposed_system)->headline() }}</span></td>
-                                        <td>
-                                            <div class="table-progress">
-                                                <div class="table-progress-track"><span data-progress="{{ $queueItem['completion_percent'] }}"></span></div>
-                                                <strong>
-                                                    {{ $queueItem['completion_percent'] >= 100
-                                                        ? 'Data ready'
-                                                        : $queueItem['completion_percent'].'% ready' }}
-                                                </strong>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <span class="next-step-label">{{ $nextStep['label'] ?? 'Review' }}</span>
-                                            @if ($queueItem['warning_count'] > 0)
-                                                <small class="warning-note">{{ $queueItem['warning_count'] }} warning{{ $queueItem['warning_count'] > 1 ? 's' : '' }}</small>
-                                            @else
-                                                <small>{{ $nextStep['caption'] ?? 'Workflow complete' }}</small>
-                                            @endif
-                                        </td>
-                                        <td>
-                                            <a href="{{ route('companies.projects.show', [$currentCompany, $project]) }}" class="row-action" aria-label="Open {{ $project->name }}">
-                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                @else
-                    <div class="dashboard-empty-state">
-                        <span class="empty-state-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19V9l8-5 8 5v10"/><path d="M8 19v-6h8v6"/><path d="M3 19h18"/></svg>
+                            data-pipeline-segment
+                        >
+                            <span class="pipeline-tooltip"><strong>{{ $count }}</strong>{{ $statusLabels[$status] }} project{{ $count === 1 ? '' : 's' }}</span>
                         </span>
-                        <h4>Your project queue is ready.</h4>
-                        <p>Create the first project without changing the current NEXORIN workflow.</p>
-                        @if ($canCreateProject)
-                            <a href="{{ route('companies.projects.create', $currentCompany) }}" class="dashboard-primary-button">Create Project</a>
-                        @endif
-                    </div>
-                @endif
-            </article>
-        </div>
-
-        <aside class="dashboard-side-column" aria-label="Workspace health and commercial activity">
-            <article class="readiness-card" data-reveal data-premium-card>
-                <div class="readiness-glow"></div>
-                <header>
-                    <span class="card-kicker light">Workspace health</span>
-                    <h3>Catalog Readiness</h3>
-                    <p>Approved materials and active commercial references available for BOQ generation.</p>
-                </header>
-
-                <div class="readiness-score-row">
-                    <div class="readiness-ring" style="--readiness: {{ $catalogReadinessPercent }}">
-                        <div>
-                            <strong data-counter="{{ $catalogReadinessPercent }}">{{ $catalogReadinessPercent }}</strong><span>%</span>
-                            <small>ready</small>
-                        </div>
-                    </div>
-
-                    <div class="readiness-summary">
-                        <strong>{{ $catalogApproved }} / {{ $catalogTotal }}</strong>
-                        <span>approved materials</span>
-                    </div>
-                </div>
-
-                <div class="readiness-stats">
-                    <div><span>Price references</span><strong>{{ $priceReferenceCount }}</strong></div>
-                    <div><span>Open quotations</span><strong>{{ $quotationOpenCount }}</strong></div>
-                    <div><span>Review queue</span><strong>{{ $needsReviewCount }}</strong></div>
-                </div>
-
-                @if ($canViewCatalog)
-                    <a href="{{ route('companies.materials.index', $currentCompany) }}" class="readiness-action">
-                        Review catalog
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-                    </a>
-                @endif
-            </article>
-
-            <article class="dashboard-card quotation-card" data-reveal data-premium-card>
-                <header class="dashboard-card-header compact">
-                    <div>
-                        <span class="card-kicker">Commercial queue</span>
-                        <h3>Recent Quotations</h3>
-                        <p>Latest quotation revisions and current release status.</p>
-                    </div>
-                    @if ($canViewQuotations)
-                        <a href="{{ route('companies.quotations.index', $currentCompany) }}" class="card-icon-link" aria-label="View quotations">↗</a>
                     @endif
-                </header>
+                @endforeach
+            </div>
 
-                <div class="quotation-list">
-                    @forelse ($recentQuotations as $quotation)
-                        <a href="{{ route('companies.quotations.show', [$currentCompany, $quotation->project]) }}" class="quotation-list-item">
-                            <span class="quotation-symbol">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h9l3 3v15H6z"/><path d="M15 3v4h4M9 11h6M9 15h6"/></svg>
-                            </span>
-                            <span class="quotation-copy">
-                                <strong>{{ $quotation->quote_number ?: 'Draft quotation' }}</strong>
-                                <small>{{ $quotation->project?->name ?? 'Unlinked project' }}</small>
-                            </span>
-                            <span class="status-badge tone-{{ $quotationTones[$quotation->status] ?? 'neutral' }}">{{ $quotation->status_label }}</span>
-                        </a>
-                    @empty
-                        <div class="mini-empty-state">
-                            <strong>No quotation activity</strong>
-                            <span>Generated quotation revisions will appear here.</span>
-                        </div>
-                    @endforelse
+            <div class="pipeline-legend">
+                @foreach (['draft', 'survey', 'engineering', 'quotation', 'approved', 'completed'] as $status)
+                    <div class="pipeline-legend-item">
+                        <span class="pipeline-dot pipeline-{{ $status }}"></span>
+                        <span>{{ $statusLabels[$status] }}</span>
+                        <strong>{{ $projectStatusCounts->get($status, 0) }}</strong>
+                    </div>
+                @endforeach
+            </div>
+
+            <div class="pipeline-summary-strip" aria-label="Pipeline summary">
+                <div>
+                    <span>Total portfolio</span>
+                    <strong>{{ $projectStatusCounts->sum() }}</strong>
                 </div>
-            </article>
-        </aside>
+                <div>
+                    <span>In progress</span>
+                    <strong>{{ $pipelineInProgress }}</strong>
+                </div>
+                <div>
+                    <span>Commercial</span>
+                    <strong>{{ $pipelineCommercial }}</strong>
+                </div>
+            </div>
+        </article>
 
+        <article class="readiness-card" data-reveal data-premium-card>
+            <div class="readiness-glow"></div>
+            <header>
+                <span class="card-kicker light">Workspace health</span>
+                <h3>Catalog Readiness</h3>
+                <p>Approved materials and active commercial references available for BOQ generation.</p>
+            </header>
+
+            <div class="readiness-score-row">
+                <div class="readiness-ring" style="--readiness: {{ $catalogReadinessPercent }}">
+                    <div>
+                        <strong data-counter="{{ $catalogReadinessPercent }}">{{ $catalogReadinessPercent }}</strong><span>%</span>
+                        <small>ready</small>
+                    </div>
+                </div>
+
+                <div class="readiness-summary">
+                    <strong>{{ $catalogApproved }} / {{ $catalogTotal }}</strong>
+                    <span>approved materials</span>
+                </div>
+            </div>
+
+            <div class="readiness-stats">
+                <div><span>Price references</span><strong>{{ $priceReferenceCount }}</strong></div>
+                <div><span>Open quotations</span><strong>{{ $quotationOpenCount }}</strong></div>
+                <div><span>Review queue</span><strong>{{ $needsReviewCount }}</strong></div>
+            </div>
+
+            @if ($canViewCatalog)
+                <a href="{{ route('companies.materials.index', $currentCompany) }}" class="readiness-action">
+                    Review catalog
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+                </a>
+            @endif
+        </article>
+    </section>
+
+    <article class="dashboard-card work-queue-card" data-reveal>
+        <header class="dashboard-card-header">
+            <div>
+                <span class="card-kicker">Continue working</span>
+                <h3>Project Work Queue</h3>
+                <p>Module readiness reflects stored project data. Warnings remain visible and still require review.</p>
+            </div>
+            <span class="card-count">{{ $projectQueue->count() }} recent</span>
+        </header>
+
+        @if ($projectQueue->isNotEmpty())
+            <div class="work-queue-table-wrap">
+                <table class="work-queue-table">
+                    <colgroup>
+                        <col class="queue-col-project">
+                        <col class="queue-col-stage">
+                        <col class="queue-col-system">
+                        <col class="queue-col-progress">
+                        <col class="queue-col-next">
+                        <col class="queue-col-action">
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th>Project</th>
+                            <th>Stage</th>
+                            <th>System</th>
+                            <th>Data Readiness</th>
+                            <th>Next Step</th>
+                            <th><span class="sr-only">Open</span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($projectQueue as $queueItem)
+                            @php
+                                $project = $queueItem['project'];
+                                $status = $project->status ?? 'draft';
+                                $nextStep = $queueItem['next_step'];
+                            @endphp
+                            <tr data-premium-row data-row-href="{{ route('companies.projects.show', [$currentCompany, $project]) }}" tabindex="0"
+                                data-project-number="{{ $project->project_number }}"
+                                data-project-name="{{ $project->name }}">
+                                <td>
+                                    <div class="project-cell">
+                                        <span class="project-symbol" aria-hidden="true">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                                <path d="M4 15h16l-2-8H6l-2 8z"/>
+                                                <path d="M8 7l-1 8M12 7v8M16 7l1 8M3 18h18M12 15v6"/>
+                                            </svg>
+                                        </span>
+                                        <span class="project-cell-copy">
+                                            <strong>{{ $project->name }}</strong>
+                                            <small>{{ $project->customer?->name ?? 'No customer' }} · {{ $project->updated_at->diffForHumans() }}</small>
+                                        </span>
+                                    </div>
+                                </td>
+                                <td><span class="status-badge tone-{{ $statusTones[$status] ?? 'neutral' }}">{{ $statusLabels[$status] ?? str($status)->headline() }}</span></td>
+                                <td><span class="system-label">{{ $systemLabels[$project->proposed_system ?? 'undecided'] ?? str($project->proposed_system)->headline() }}</span></td>
+                                <td>
+                                    <div class="table-progress">
+                                        <div class="table-progress-track"><span data-progress="{{ $queueItem['completion_percent'] }}"></span></div>
+                                        <strong>
+                                            {{ $queueItem['completion_percent'] >= 100
+                                                ? 'Data ready'
+                                                : $queueItem['completion_percent'].'% ready' }}
+                                        </strong>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="next-step-label">{{ $nextStep['label'] ?? 'Review' }}</span>
+                                    @if ($queueItem['warning_count'] > 0)
+                                        <small class="warning-note">{{ $queueItem['warning_count'] }} warning{{ $queueItem['warning_count'] > 1 ? 's' : '' }}</small>
+                                    @else
+                                        <small>{{ $nextStep['caption'] ?? 'Workflow complete' }}</small>
+                                    @endif
+                                </td>
+                                <td>
+                                    <a href="{{ route('companies.projects.show', [$currentCompany, $project]) }}" class="row-action" aria-label="Open {{ $project->name }}">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+                                    </a>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @else
+            <div class="dashboard-empty-state">
+                <span class="empty-state-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19V9l8-5 8 5v10"/><path d="M8 19v-6h8v6"/><path d="M3 19h18"/></svg>
+                </span>
+                <h4>Your project queue is ready.</h4>
+                <p>Create the first project without changing the current NEXORIN workflow.</p>
+                @if ($canCreateProject)
+                    <a href="{{ route('companies.projects.create', $currentCompany) }}" class="dashboard-primary-button">Create Project</a>
+                @endif
+            </div>
+        @endif
+    </article>
+
+    <section class="dashboard-utility-grid" aria-label="Commercial activity and workspace shortcuts">
         @if ($currentCompany)
             <article class="dashboard-card command-dock-card" data-reveal>
                 <header class="dashboard-card-header compact command-dock-header">
@@ -426,6 +434,39 @@
                 </div>
             </article>
         @endif
+
+        <article class="dashboard-card quotation-card" data-reveal data-premium-card>
+            <header class="dashboard-card-header compact">
+                <div>
+                    <span class="card-kicker">Commercial queue</span>
+                    <h3>Recent Quotations</h3>
+                    <p>Latest quotation revisions and current release status.</p>
+                </div>
+                @if ($canViewQuotations)
+                    <a href="{{ route('companies.quotations.index', $currentCompany) }}" class="card-icon-link" aria-label="View quotations">↗</a>
+                @endif
+            </header>
+
+            <div class="quotation-list">
+                @forelse ($recentQuotations as $quotation)
+                    <a href="{{ route('companies.quotations.show', [$currentCompany, $quotation->project]) }}" class="quotation-list-item">
+                        <span class="quotation-symbol">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h9l3 3v15H6z"/><path d="M15 3v4h4M9 11h6M9 15h6"/></svg>
+                        </span>
+                        <span class="quotation-copy">
+                            <strong>{{ $quotation->quote_number ?: 'Draft quotation' }}</strong>
+                            <small>{{ $quotation->project?->name ?? 'Unlinked project' }} · {{ $quotation->updated_at->diffForHumans() }}</small>
+                        </span>
+                        <span class="status-badge tone-{{ $quotationTones[$quotation->status] ?? 'neutral' }}">{{ $quotation->status_label }}</span>
+                    </a>
+                @empty
+                    <div class="mini-empty-state">
+                        <strong>No quotation activity</strong>
+                        <span>Generated quotation revisions will appear here.</span>
+                    </div>
+                @endforelse
+            </div>
+        </article>
     </section>
 </div>
 @endsection

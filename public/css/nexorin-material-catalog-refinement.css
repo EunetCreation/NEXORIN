@@ -1,0 +1,168 @@
+/* NEXORIN Material Catalog — 42A visual refinement layer */
+.nxmc-directory,
+.nxmc-record {
+    position: relative;
+    isolation: isolate;
+}
+.nxmc-directory::before,
+.nxmc-record::before {
+    position: fixed;
+    z-index: -1;
+    inset: 0;
+    content: "";
+    pointer-events: none;
+    background-image: linear-gradient(rgba(12, 72, 84, .025) 1px, transparent 1px), linear-gradient(90deg, rgba(12, 72, 84, .025) 1px, transparent 1px);
+    background-size: 24px 24px;
+}
+.nxmc-directory-hero {
+    min-height: 126px;
+    align-items: center;
+    padding: 20px 22px;
+    border: 1px solid #0e3b4a;
+    border-radius: 20px;
+    background:
+        radial-gradient(circle at 92% -15%, rgba(31, 195, 181, .28), transparent 37%),
+        linear-gradient(125deg, #082b3d 0%, #0c3d4d 58%, #0d716f 100%);
+    box-shadow: 0 22px 48px rgba(8, 43, 61, .18);
+}
+.nxmc-directory-hero::after { opacity: .18; }
+.nxmc-directory-copy h2 {
+    color: #f8ffff;
+    font-size: clamp(28px, 3vw, 39px);
+}
+.nxmc-directory-copy p { max-width: 720px; color: rgba(232, 248, 247, .78); }
+.nxmc-directory-copy .nxmc-kicker { color: #a5e5df; }
+.nxmc-directory-copy .nxmc-kicker::before { background: #f3a04f; box-shadow: 0 0 0 5px rgba(243, 160, 79, .16); }
+.nxmc-directory-context { align-self: center; }
+.nxmc-context-chip,
+.nxmc-context-link {
+    border-color: rgba(210, 247, 244, .25);
+    color: rgba(242, 255, 254, .86);
+    background: rgba(255, 255, 255, .08);
+    box-shadow: none;
+}
+.nxmc-context-link { color: #fff; }
+.nxmc-context-link svg { color: #9ce3de; }
+.nxmc-context-link:hover,
+.nxmc-context-chip:hover { border-color: rgba(162, 241, 235, .65); color: #fff; background: rgba(255,255,255,.15); }
+.nxmc-button-primary { background: linear-gradient(135deg, #13aaa2, #0b827e); }
+
+.nxmc-stat-grid { gap: 9px; }
+.nxmc-stat-card {
+    min-height: 118px;
+    padding: 13px 14px 12px;
+    border-radius: 15px;
+    box-shadow: 0 10px 26px rgba(18, 43, 58, .055);
+}
+.nxmc-stat-card::before {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 3px;
+    content: "";
+    background: var(--nxmc-stat-accent);
+}
+.nxmc-stat-card::after { height: 2px; }
+.nxmc-stat-icon { width: 28px; height: 28px; border-radius: 9px; }
+.nxmc-stat-signal { width: 34px; height: 4px; }
+.nxmc-stat-value { font-size: clamp(24px, 2.25vw, 30px); }
+.nxmc-stat-label { margin-top: 5px; font-size: 10px; }
+.nxmc-stat-copy { margin-top: 3px; font-size: 8px; line-height: 1.35; }
+
+.nxmc-portfolio-board { border-radius: 19px; }
+.nxmc-portfolio-head {
+    padding: 15px 17px 13px;
+    background: linear-gradient(120deg, #0a3042, #0c4b56);
+}
+.nxmc-portfolio-head h3 { color: #f4ffff; font-size: 21px; }
+.nxmc-portfolio-head p { color: rgba(226, 247, 246, .72); }
+.nxmc-portfolio-head .nxmc-section-kicker { color: #9ae2dc; }
+.nxmc-portfolio-head .nxmc-section-kicker::before { background: #f3a04f; box-shadow: 0 0 0 5px rgba(243,160,79,.16); }
+.nxmc-health-cluster { border-color: rgba(210,247,244,.2); background: rgba(255,255,255,.08); }
+.nxmc-health-cluster > div { border-color: rgba(210,247,244,.16); }
+.nxmc-health-cluster span { color: rgba(226,247,246,.64); }
+.nxmc-health-cluster strong { color: #fff; }
+.nxmc-domain-grid { gap: 7px; padding: 10px; background: rgba(241,247,247,.78); }
+.nxmc-domain-card { min-height: 144px; padding: 10px; border-radius: 13px; background: rgba(255,255,255,.92); }
+.nxmc-domain-copy strong { font-size: 9.5px; }
+.nxmc-domain-copy p { font-size: 7.3px; -webkit-line-clamp: 2; }
+.nxmc-domain-metrics span { padding: 3px 5px; font-size: 6.4px; }
+.nxmc-domain-card > small { font-size: 6.4px; }
+
+/* Keep the registry compact, but make its information readable at normal
+   desktop zoom. The catalog is an engineering work surface, not a data-wall
+   thumbnail: labels should survive a 100% browser view without squinting. */
+.nxmc-domain-copy p { font-size: 8.5px; }
+.nxmc-domain-metrics span,
+.nxmc-domain-card > small { font-size: 7.4px; }
+.nxmc-registry-head p { font-size: 11px; }
+.nxmc-label { font-size: 9px; }
+.nxmc-input, .nxmc-select { font-size: 11px; }
+.nxmc-registry-columns { font-size: 8px; }
+.nxmc-material-copy strong { font-size: 12px; }
+.nxmc-material-copy small { font-size: 9px; }
+.nxmc-chip { font-size: 8px; }
+.nxmc-registry-cell { font-size: 10px; }
+.nxmc-registry-cell small { font-size: 9px; }
+.nxmc-open-button { font-size: 9px; }
+
+.nxmc-registry { border-radius: 19px; }
+.nxmc-registry-head {
+    align-items: center;
+    padding: 15px 17px 12px;
+    background: #fff;
+}
+.nxmc-registry-head::before { width: 4px; height: 38px; flex: 0 0 auto; border-radius: 3px; background: var(--nxmc-teal); content: ""; }
+.nxmc-registry-head > div { flex: 1; }
+.nxmc-registry-head h3 { font-size: 21px; }
+.nxmc-filter-form { gap: 8px; padding: 11px 15px; background: #f2f7f7; }
+.nxmc-input, .nxmc-select { min-height: 36px; border-radius: 9px; font-size: 10px; }
+.nxmc-registry-columns { min-height: 32px; padding-inline: 15px; background: #eaf3f3; font-size: 7.5px; }
+.nxmc-registry-row { min-height: 88px; padding: 10px 15px; }
+.nxmc-material-identity { grid-template-columns: 34px minmax(0,1fr); gap: 9px; }
+.nxmc-material-glyph { width: 34px; height: 34px; border-radius: 10px; }
+.nxmc-material-copy strong { font-size: 11px; }
+.nxmc-material-copy small { margin-top: 3px; font-size: 8.5px; }
+.nxmc-chip { min-height: 19px; padding-inline: 6px; font-size: 7.5px; }
+.nxmc-open-button { width: 75px; min-height: 31px; border-radius: 9px; font-size: 8.5px; }
+
+.nxmc-record-hero {
+    padding: 20px 21px;
+    border: 1px solid #0e3b4a;
+    background:
+        radial-gradient(circle at 84% 0%, rgba(28,192,181,.22), transparent 31%),
+        linear-gradient(120deg, #082b3d, #0d5260);
+    box-shadow: 0 22px 48px rgba(8,43,61,.16);
+}
+.nxmc-record-copy h2 { color: #f7ffff; }
+.nxmc-record-copy p { color: rgba(231,248,247,.78); }
+.nxmc-record-kicker { color: #a4e4de; }
+.nxmc-record-kicker::before { background: #f3a04f; box-shadow: 0 0 0 5px rgba(243,160,79,.16); }
+.nxmc-record-meta span { border-color: rgba(215,246,244,.22); color: rgba(239,255,254,.8); background: rgba(255,255,255,.09); }
+.nxmc-record-command { border-color: rgba(220,248,245,.25); background: rgba(255,255,255,.96); box-shadow: 0 17px 32px rgba(4,31,43,.18); }
+.nxmc-record-nav { border-color: rgba(136,168,178,.4); box-shadow: 0 8px 22px rgba(18,43,58,.08); }
+.nxmc-panel { box-shadow: 0 12px 31px rgba(18,43,58,.055); }
+.nxmc-panel-head { background: linear-gradient(180deg,#fff,#f6fafa); }
+.nxmc-panel-head h3 { font-size: 20px; }
+.nxmc-record-stat { border-radius: 13px; box-shadow: 0 10px 22px rgba(18,43,58,.05); }
+
+@media (max-width: 1080px) {
+    .nxmc-directory-hero { align-items: flex-start; flex-direction: column; }
+    .nxmc-directory-context { width: 100%; justify-content: flex-start; }
+}
+@media (max-width: 760px) {
+    .nxmc-directory-hero { padding: 17px; }
+    .nxmc-directory-copy h2 { font-size: 29px; }
+    .nxmc-portfolio-head { grid-template-columns: 1fr; gap: 12px; }
+    .nxmc-health-cluster { width: 100%; }
+    .nxmc-record-hero { padding: 16px; }
+}
+[data-theme="dark"] .nxmc-directory::before,
+[data-theme="dark"] .nxmc-record::before { opacity: .35; }
+[data-theme="dark"] .nxmc-directory-hero,
+[data-theme="dark"] .nxmc-record-hero { border-color: rgba(144,223,216,.2); }
+[data-theme="dark"] .nxmc-portfolio-head { background: linear-gradient(120deg,#0a2b3a,#0c4650); }
+[data-theme="dark"] .nxmc-registry-head { background: #102d38; }
+[data-theme="dark"] .nxmc-filter-form { background: #0e2934; }
+[data-theme="dark"] .nxmc-registry-columns { background: #143743; }

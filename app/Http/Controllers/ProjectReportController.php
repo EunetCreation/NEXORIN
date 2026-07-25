@@ -9,6 +9,7 @@ use App\Services\Pdf\PdfRenderingException;
 use App\Services\Report\PremiumProjectReportPdfRenderer;
 use App\Services\Report\ClientReleaseGate;
 use App\Services\Report\ProjectReportPdfRenderer;
+use App\Services\Quotation\QuotationPdfRenderer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -116,7 +117,7 @@ class ProjectReportController extends Controller
         Company $company,
         Project $project,
         PremiumProjectReportPdfRenderer $renderer,
-        ProjectReportPdfRenderer $fallbackRenderer
+        QuotationPdfRenderer $fallbackRenderer
     ): Response {
         $this->authorizeReportAccess($request, $company, $project);
         $this->loadReportRelations($project);
@@ -134,7 +135,7 @@ class ProjectReportController extends Controller
         Company $company,
         Project $project,
         PremiumProjectReportPdfRenderer $renderer,
-        ProjectReportPdfRenderer $fallbackRenderer,
+        QuotationPdfRenderer $fallbackRenderer,
         ClientReleaseGate $gate
     ): Response|RedirectResponse {
         $this->authorizeReportAccess($request, $company, $project);
@@ -143,7 +144,9 @@ class ProjectReportController extends Controller
         $releaseGate = $gate->evaluate($project);
 
         if (! ($releaseGate['ready'] ?? false)) {
-            return back()->with('error', 'Final Client Proposal PDF is blocked until the Client Release Gate is Ready for Client Release. Use Draft Proposal PDF or Preview while review is still open.');
+            return redirect()
+                ->route('companies.projects.report.client-proposal.preview', [$company, $project])
+                ->with('error', 'Final Client Proposal PDF is blocked until the Client Release Gate is Ready for Client Release. Complete the review gate, approval, and current PDF checks first.');
         }
 
         return $this->downloadClientProposal(
@@ -211,7 +214,7 @@ class ProjectReportController extends Controller
     private function downloadClientProposal(
         Project $project,
         PremiumProjectReportPdfRenderer $renderer,
-        ProjectReportPdfRenderer $fallbackRenderer,
+        QuotationPdfRenderer $fallbackRenderer,
         string $rendererHeader,
         bool $final = false
     ): Response {
@@ -235,15 +238,24 @@ class ProjectReportController extends Controller
                 'message' => $exception->getMessage(),
             ]);
 
-            if ((bool) config('nexorin_pdf.allow_legacy_fallback', false)) {
-                $pdf = $fallbackRenderer->render($project);
-                $filename = 'LEGACY-FALLBACK-'.$fallbackRenderer->filename($project);
+            if ((bool) config('nexorin_pdf.allow_legacy_fallback', false) && $project->quotation) {
+                $quotation = $project->quotation->loadMissing([
+                    'items',
+                    'project.customer',
+                    'preparer',
+                    'approver',
+                    'issuer',
+                    'clientProposalPdfGenerator',
+                ]);
+                $pdf = $fallbackRenderer->render($quotation);
+                $filename = 'SAFE-FALLBACK-'.$fallbackRenderer->clientFilename($quotation);
 
                 return response($pdf, 200, [
                     'Content-Type' => 'application/pdf',
                     'Content-Disposition' => 'attachment; filename="'.$filename.'"',
                     'Cache-Control' => 'private, max-age=0, must-revalidate',
-                    'X-NEXORIN-Premium-Renderer' => 'legacy-fallback',
+                    'X-NEXORIN-Premium-Renderer' => 'quotation-safe-fallback',
+                    'X-NEXORIN-Client-Proposal-Snapshot' => (string) ($quotation->snapshot_hash ?? ''),
                 ]);
             }
 

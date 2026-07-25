@@ -4,12 +4,16 @@ namespace App\Services\Pricing;
 
 use App\Models\BillOfMaterialItem;
 use App\Models\Company;
+use App\Models\Material;
 use App\Models\PriceBookItem;
+use App\Models\Project;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 
 class PriceResolver
 {
+    public const MATERIAL_TRACE_VERSION = 'nexorin-price-material-trace-v2';
+
     /**
      * Resolve the best company price book item for one BOQ line.
      *
@@ -31,24 +35,51 @@ class PriceResolver
 
         $today = Carbon::today();
         $markupPercent = $this->boundedPercent($options['material_markup_percent'] ?? 0, 0, 200);
-        $candidates = $this->candidateRows((int) $companyId)
-            ->map(function (PriceBookItem $priceItem) use ($item, $itemCode, $today): array {
+        $project = ($options['project'] ?? null) instanceof Project ? $options['project'] : null;
+        $identityCandidates = $this->candidateRows((int) $companyId)
+            ->map(function (PriceBookItem $priceItem) use ($item, $today, $project): array {
                 $match = $this->matchScore($item, $priceItem);
+                $compatibility = $this->projectCompatibility($priceItem->material, $project);
 
                 return [
                     'price_item' => $priceItem,
                     'match_score' => $match['score'],
                     'matched_by' => $match['matched_by'],
                     'quality_score' => $this->qualityScore($priceItem, $today),
+                    'compatibility' => $compatibility,
                 ];
             })
             ->filter(fn (array $candidate): bool => $candidate['match_score'] > 0)
             ->values();
 
-        if ($candidates->isEmpty()) {
+        if ($identityCandidates->isEmpty()) {
             return $this->missing(
                 'no_company_price_match',
-                sprintf('No active company price book item matches BOQ item %s.', $itemCode)
+                sprintf('No active company price book item matches BOQ item %s.', $itemCode),
+                $this->projectTrace($project)
+            );
+        }
+
+        $candidates = $identityCandidates
+            ->filter(fn (array $candidate): bool => ($candidate['compatibility']['compatible'] ?? true) === true)
+            ->values();
+
+        if ($candidates->isEmpty()) {
+            return $this->missing(
+                'no_project_compatible_price_match',
+                sprintf(
+                    'Company price items match %s, but none are compatible with the project system and scale.',
+                    $itemCode
+                ),
+                array_merge($this->projectTrace($project), [
+                    'rejected_materials' => $identityCandidates
+                        ->map(fn (array $candidate): array => [
+                            'material_id' => $candidate['price_item']->material_id,
+                            'material_sku' => $candidate['price_item']->material?->sku,
+                            'reasons' => $candidate['compatibility']['reasons'] ?? [],
+                        ])
+                        ->all(),
+                ])
             );
         }
 
@@ -88,6 +119,14 @@ class PriceResolver
         $unitPrice = $this->resolveSellingPrice($priceItem, $markupPercent);
         $state = 'priced';
         $warnings = [];
+        $catalogReviewRequired = $priceItem->material?->catalog_status !== 'approved'
+            || $priceItem->material?->compliance_status !== 'compliant';
+        $catalogReviewMessage = $catalogReviewRequired
+            ? sprintf(
+                'Catalog material %s is selected for project-compatible pricing, but its catalog governance status still requires review.',
+                $priceItem->material?->sku ?? $itemCode
+            )
+            : null;
 
         $priceBookExpired = $priceItem->priceBook?->effective_until !== null
             && $priceItem->priceBook->effective_until->isBefore($today);
@@ -120,7 +159,15 @@ class PriceResolver
                 ? round((float) $priceItem->effective_margin_percent, 2)
                 : null,
             'warnings' => $warnings,
-            'trace' => $this->trace($priceItem, $selected, $state),
+            'catalog_review_required' => $catalogReviewRequired,
+            'catalog_review_message' => $catalogReviewMessage,
+            'trace' => array_merge(
+                $this->trace($priceItem, $selected, $state),
+                [
+                    'catalog_review_required' => $catalogReviewRequired,
+                    'catalog_review_message' => $catalogReviewMessage,
+                ]
+            ),
         ];
     }
 
@@ -128,7 +175,12 @@ class PriceResolver
     private function candidateRows(int $companyId): Collection
     {
         return PriceBookItem::query()
-            ->with(['priceBook', 'material.category', 'supplier'])
+            ->with([
+                'priceBook',
+                'material.category',
+                'material.datasheets' => fn ($query) => $query->where('is_active', true),
+                'supplier',
+            ])
             ->whereHas('priceBook', function ($query) use ($companyId): void {
                 $query
                     ->where('company_id', $companyId)
@@ -240,7 +292,111 @@ class PriceResolver
             $score += 5;
         }
 
+        $score += match ($priceItem->material?->catalog_status) {
+            'approved' => 20,
+            'needs_review' => 6,
+            default => 0,
+        };
+
+        if ($priceItem->material?->compliance_status === 'compliant') {
+            $score += 10;
+        }
+
         return $score;
+    }
+
+    /** @return array{compatible:bool,status:string,reasons:array<int,string>,project_system:?string,project_scale:?string,project_supply_phase:?string,project_roof_types:array<int,string>} */
+    private function projectCompatibility(?Material $material, ?Project $project): array
+    {
+        if (! $material || ! $project) {
+            return [
+                'compatible' => true,
+                'status' => 'not_evaluated',
+                'reasons' => [],
+                'project_system' => $project?->proposed_system,
+                'project_scale' => $project?->building_type,
+                'project_supply_phase' => null,
+                'project_roof_types' => [],
+            ];
+        }
+
+        $project->loadMissing([
+            'loadAnalysis:id,project_id,supply_phase',
+            'roofSurfaces:id,project_id,roof_type',
+        ]);
+
+        $reasons = [];
+        $projectSystem = trim((string) $project->proposed_system);
+        $projectScale = trim((string) $project->building_type);
+        $projectSupplyPhase = trim((string) ($project->loadAnalysis?->supply_phase ?? ''));
+        $projectRoofTypes = $project->roofSurfaces
+            ->pluck('roof_type')
+            ->map(fn ($value): string => trim((string) $value))
+            ->filter()
+            ->unique()
+            ->values();
+        $systemTypes = collect($material->system_types ?? [])->map(fn ($value): string => trim((string) $value))->filter();
+        $projectScales = collect($material->project_scales ?? [])->map(fn ($value): string => trim((string) $value))->filter();
+        $materialRoofTypes = collect($material->suitable_roof_types ?? [])->map(fn ($value): string => trim((string) $value))->filter();
+        $materialPhase = trim((string) ($material->electrical_phase ?? ''));
+
+        if ($projectSystem !== '' && $projectSystem !== 'undecided' && $systemTypes->isNotEmpty() && ! $systemTypes->contains($projectSystem)) {
+            $reasons[] = sprintf('Material is not approved for %s systems.', str($projectSystem)->replace('_', ' ')->title());
+        }
+
+        if ($projectScale !== '' && $projectScales->isNotEmpty() && ! $projectScales->contains($projectScale)) {
+            $reasons[] = sprintf('Material is not approved for %s project scale.', str($projectScale)->replace('_', ' ')->title());
+        }
+
+        if (in_array($materialPhase, ['single_phase', 'three_phase'], true)
+            && $projectSupplyPhase !== ''
+            && $materialPhase !== $projectSupplyPhase) {
+            $reasons[] = sprintf(
+                'Material electrical phase %s does not match the project supply phase %s.',
+                str($materialPhase)->replace('_', ' ')->title(),
+                str($projectSupplyPhase)->replace('_', ' ')->title()
+            );
+        }
+
+        if ($materialRoofTypes->isNotEmpty()
+            && $projectRoofTypes->isNotEmpty()
+            && $materialRoofTypes->intersect($projectRoofTypes)->isEmpty()) {
+            $reasons[] = sprintf(
+                'Material roof compatibility (%s) does not match the project roof survey (%s).',
+                $materialRoofTypes->map(fn (string $value): string => str($value)->replace('_', ' ')->title()->toString())->implode(', '),
+                $projectRoofTypes->map(fn (string $value): string => str($value)->replace('_', ' ')->title()->toString())->implode(', ')
+            );
+        }
+
+        return [
+            'compatible' => $reasons === [],
+            'status' => $reasons === [] ? 'compatible' : 'incompatible',
+            'reasons' => $reasons,
+            'project_system' => $projectSystem !== '' ? $projectSystem : null,
+            'project_scale' => $projectScale !== '' ? $projectScale : null,
+            'project_supply_phase' => $projectSupplyPhase !== '' ? $projectSupplyPhase : null,
+            'project_roof_types' => $projectRoofTypes->all(),
+        ];
+    }
+
+    /** @return array<string, mixed> */
+    private function projectTrace(?Project $project): array
+    {
+        if ($project) {
+            $project->loadMissing([
+                'loadAnalysis:id,project_id,supply_phase',
+                'roofSurfaces:id,project_id,roof_type',
+            ]);
+        }
+
+        return [
+            'project_id' => $project?->getKey(),
+            'project_number' => $project?->project_number,
+            'project_system' => $project?->proposed_system,
+            'project_scale' => $project?->building_type,
+            'project_supply_phase' => $project?->loadAnalysis?->supply_phase,
+            'project_roof_types' => $project?->roofSurfaces?->pluck('roof_type')->filter()->unique()->values()->all() ?? [],
+        ];
     }
 
     private function resolveSellingPrice(PriceBookItem $priceItem, float $markupPercent): float
@@ -259,7 +415,11 @@ class PriceResolver
     /** @return array<string, mixed> */
     private function trace(PriceBookItem $priceItem, array $selected, string $state): array
     {
+        $material = $priceItem->material;
+        $datasheet = $material?->datasheets?->first();
+
         return [
+            'material_trace_version' => self::MATERIAL_TRACE_VERSION,
             'resolver' => 'company_price_book',
             'state' => $state,
             'price_book_item_id' => $priceItem->getKey(),
@@ -269,8 +429,21 @@ class PriceResolver
             'price_book_effective_from' => $priceItem->priceBook?->effective_from?->toDateString(),
             'price_book_effective_until' => $priceItem->priceBook?->effective_until?->toDateString(),
             'material_id' => $priceItem->material_id,
-            'material_sku' => $priceItem->material?->sku,
-            'material_name' => $priceItem->material?->name,
+            'material_sku' => $material?->sku,
+            'material_name' => $material?->name,
+            'material_brand' => $material?->brand,
+            'material_model' => $material?->model,
+            'material_category_code' => $material?->category?->code,
+            'material_catalog_status' => $material?->catalog_status,
+            'material_compliance_status' => $material?->compliance_status,
+            'material_system_types' => $material?->system_types ?? [],
+            'material_project_scales' => $material?->project_scales ?? [],
+            'material_suitable_roof_types' => $material?->suitable_roof_types ?? [],
+            'material_electrical_phase' => $material?->electrical_phase,
+            'material_datasheet_id' => $datasheet?->getKey(),
+            'material_datasheet_revision' => $datasheet?->revision,
+            'material_datasheet_sha256' => $datasheet?->sha256,
+            'project_compatibility' => $selected['compatibility'] ?? null,
             'supplier_id' => $priceItem->supplier_id,
             'supplier_name' => $priceItem->supplier?->name,
             'supplier_status' => $priceItem->supplier?->status,

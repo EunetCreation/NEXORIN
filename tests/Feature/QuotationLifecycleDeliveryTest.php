@@ -12,6 +12,7 @@ use App\Models\Quotation;
 use App\Models\Role;
 use App\Models\TechnicalCalculation;
 use App\Models\User;
+use App\Services\Report\ClientReleaseGate;
 use Database\Seeders\RbacSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -132,6 +133,16 @@ class QuotationLifecycleDeliveryTest extends TestCase
             'channel' => 'email',
             'recipient' => 'lifecycle.customer@example.test',
         ]);
+
+        $this->project->refresh()->load(['billOfMaterial.items', 'financialAnalysis', 'quotation']);
+        $currentFingerprint = app(\App\Services\Quotation\QuotationEngine::class)->sourceFingerprint(
+            $this->project,
+            $this->project->billOfMaterial,
+            $this->project->financialAnalysis
+        );
+
+        $this->assertTrue($quotation->isSourceCurrent($currentFingerprint));
+        $this->assertTrue($quotation->hasCurrentClientProposalPdf($currentFingerprint));
     }
 
     public function test_sent_quotation_can_be_accepted_with_audit_trail(): void
@@ -152,6 +163,14 @@ class QuotationLifecycleDeliveryTest extends TestCase
         $this->assertNotNull($quotation->accepted_at);
         $this->assertSame($this->superAdmin->getKey(), $quotation->accepted_by);
         $this->assertSame('Client confirmed by email.', $quotation->acceptance_notes);
+        $this->assertSame('approved', $this->project->fresh()->status);
+
+        $this->assertDatabaseHas('project_status_histories', [
+            'project_id' => $this->project->getKey(),
+            'from_status' => 'quotation',
+            'to_status' => 'approved',
+            'changed_by' => $this->superAdmin->getKey(),
+        ]);
 
         $this->assertDatabaseHas('quotation_events', [
             'quotation_id' => $quotation->getKey(),
@@ -159,6 +178,46 @@ class QuotationLifecycleDeliveryTest extends TestCase
             'status_from' => 'sent',
             'status_to' => 'accepted',
         ]);
+    }
+
+    public function test_issue_and_acceptance_do_not_stale_current_client_release_approval(): void
+    {
+        $this->generateQuotation();
+        $this->approveQuotation();
+
+        $this
+            ->actingAs($this->superAdmin)
+            ->get(route('companies.quotations.pdf', [$this->company, $this->project]))
+            ->assertOk();
+
+        $gate = app(ClientReleaseGate::class);
+        $approval = $gate->approve($this->project->fresh(), $this->superAdmin, 'Approved before delivery.');
+        $this->assertNotNull($approval->getKey());
+        $this->assertTrue($gate->evaluate($this->project->fresh())['ready']);
+
+        $this
+            ->actingAs($this->superAdmin)
+            ->patch(route('companies.quotations.issue', [$this->company, $this->project]), [
+                'delivery_method' => 'email',
+                'sent_to' => 'lifecycle.customer@example.test',
+            ])
+            ->assertRedirect()
+            ->assertSessionHas('success');
+
+        $this->assertTrue($gate->evaluate($this->project->fresh())['ready']);
+
+        $this
+            ->actingAs($this->superAdmin)
+            ->patch(route('companies.quotations.accept', [$this->company, $this->project]), [
+                'acceptance_notes' => 'Customer accepted without content changes.',
+            ])
+            ->assertRedirect()
+            ->assertSessionHas('success');
+
+        $result = $gate->evaluate($this->project->fresh());
+        $this->assertTrue($result['ready']);
+        $this->assertTrue($result['approval_current']);
+        $this->assertFalse($result['approval_stale']);
     }
 
     public function test_rejection_requires_reason_and_records_status(): void

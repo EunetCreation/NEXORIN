@@ -179,7 +179,7 @@ class QuotationPdfRenderer
             ], $snapshotItems));
         }
 
-        return $quotation->items->map(fn ($item): array => [
+        return collect($quotation->items)->map(fn ($item): array => [
             'category' => (string) $item->category,
             'item_code' => (string) $item->item_code,
             'item_name' => (string) $item->item_name,

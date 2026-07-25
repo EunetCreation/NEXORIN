@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('title','Add Roof Surface')
 @section('page-eyebrow','Roof & site survey')
-@section('page-heading','Add Roof Surface')
+@section('page-heading','Roof Surface Editor')
 @section('content')
 @include('roof_site.surfaces.partials.form',[
     'heading'=>'Add Roof Surface',

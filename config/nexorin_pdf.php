@@ -9,6 +9,8 @@ return [
 
     'node_binary' => env('NEXORIN_NODE_BINARY', 'node'),
 
+    'chromium_path' => env('NEXORIN_CHROMIUM_PATH'),
+
     'render_script' => env('NEXORIN_PDF_RENDER_SCRIPT', base_path('scripts/render-pdf.mjs')),
 
     'timeout_seconds' => (int) env('NEXORIN_PDF_TIMEOUT', 120),
@@ -32,4 +34,11 @@ return [
     | Set this true only when production needs emergency fallback.
     */
     'allow_legacy_fallback' => (bool) env('NEXORIN_PREMIUM_PDF_ALLOW_FALLBACK', false),
+
+    /*
+    | SLD PDF must normally use the same SVG renderer as the browser and SVG
+    | download. Enable this only for emergency operation when Chromium cannot
+    | run and visual parity is less important than producing a file.
+    */
+    'sld_allow_vector_fallback' => (bool) env('NEXORIN_SLD_ALLOW_VECTOR_FALLBACK', false),
 ];

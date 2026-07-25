@@ -123,6 +123,8 @@ class PriceBookController extends Controller
             'missing_selling_reference' => $items->filter(fn ($item): bool => $item->price_health_status === 'missing_selling_reference')->count(),
             'low_margin' => $items->filter(fn ($item): bool => $item->price_health_status === 'low_margin')->count(),
             'healthy' => $items->filter(fn ($item): bool => $item->price_health_status === 'healthy')->count(),
+            'catalog_review' => $items->filter(fn ($item): bool => $item->material
+                && ($item->material->catalog_status !== 'approved' || $item->material->compliance_status !== 'compliant'))->count(),
         ];
 
         $materials = Material::query()
@@ -132,7 +134,7 @@ class PriceBookController extends Controller
             ->when($linkedMaterialIds !== [], fn (Builder $query) => $query->whereNotIn('id', $linkedMaterialIds))
             ->orderBy('name')
             ->orderBy('brand')
-            ->get(['id', 'company_id', 'material_category_id', 'sku', 'name', 'brand', 'model', 'uom']);
+            ->get(['id', 'company_id', 'material_category_id', 'sku', 'name', 'brand', 'model', 'uom', 'catalog_status', 'compliance_status', 'system_types', 'project_scales', 'suitable_roof_types', 'electrical_phase']);
 
         return view('price_books.show', [
             'company' => $company,

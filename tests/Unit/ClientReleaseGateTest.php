@@ -173,6 +173,34 @@ class ClientReleaseGateTest extends TestCase
         $this->assertTrue(collect($result['issues'])->contains(fn (array $issue): bool => $issue['title'] === 'BOQ margin is below the minimum guard.'));
     }
 
+    public function test_gate_blocks_client_release_when_boq_uses_catalog_materials_pending_review(): void
+    {
+        $this->project->billOfMaterial->update([
+            'pricing_status' => 'priced',
+            'summary' => [
+                'catalog_review_item_count' => 2,
+                'missing_price_item_count' => 0,
+                'expired_price_item_count' => 0,
+                'unavailable_price_item_count' => 0,
+                'low_margin_item_count' => 0,
+                'discount_limit_exceeded_count' => 0,
+                'tax_review_issue_count' => 0,
+                'commercial_total_consistent' => true,
+            ],
+        ]);
+
+        $gate = app(ClientReleaseGate::class);
+        $result = $gate->evaluate($this->project->fresh());
+
+        $this->assertSame('Needs Commercial Review', $result['status']);
+        $this->assertFalse($result['approval_allowed']);
+        $this->assertFalse($result['ready']);
+        $this->assertTrue(collect($result['issues'])->contains(
+            fn (array $issue): bool => $issue['title'] === 'BOQ uses material records that still require catalog approval.'
+        ));
+        $this->assertSame(2, $result['snapshot']['bom']['catalog_review_item_count']);
+    }
+
     public function test_gate_blocks_when_discount_limit_is_exceeded(): void
     {
         $this->project->billOfMaterial->update([

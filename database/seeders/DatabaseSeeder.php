@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             RbacSeeder::class,
             SuperAdminSeeder::class,
+            ProfessionalCatalogTaxonomySeeder::class,
             DevelopmentCompanySeeder::class,
             DevelopmentRbacUsersSeeder::class,
             MaterialCatalogSeeder::class,
