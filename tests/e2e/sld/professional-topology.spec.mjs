@@ -21,9 +21,12 @@ test.describe('APP67L.4-FINAL · production drawing workflow on professional top
 
         expect(graph.schema_version).toBe('nexorin-sld-v1.9.0');
         expect(graph.meta.topology_profile).toBe('professional_physical');
-        expect(graph.meta.topology_version).toBe('67L.2-R4');
-        expect(graph.meta.physical_equipment_count).toBe(25);
-        expect(graph.meta.physical_connection_count).toBe(45);
+        expect(graph.meta.topology_version).toBe('67L.2-R5-SLD-REF-001');
+        expect(graph.meta.physical_dc_contract).toBe('SLD-REF-001');
+        expect(graph.meta.physical_string_count).toBe(6);
+        expect(graph.meta.physical_mppt_input_count).toBe(6);
+        expect(graph.meta.physical_equipment_count).toBe(29);
+        expect(graph.meta.physical_connection_count).toBe(69);
         expect(graph.meta.grounding_generated).toBe(true);
         expect(graph.meta.monitoring_enabled).toBe(true);
         expect(graph.meta.plant_control_enabled).toBe(true);
@@ -38,10 +41,12 @@ test.describe('APP67L.4-FINAL · production drawing workflow on professional top
         expect(graph.meta.document_control.drawing.register[5].drawing_number).toBe('NX-E2E-2026-001-E-SLD-006');
         expect(graph.meta.document_control.release.not_for_construction).toBe(true);
         expect(ids).toEqual(expect.arrayContaining([
+            'pv_string_001', 'pv_string_002', 'pv_string_003', 'pv_string_004', 'pv_string_005', 'pv_string_006',
             'inverter_01', 'inverter_02', 'pcc_breaker_01', 'ct_01',
             'pcc_disconnect_01', 'meter_01', 'export_relay_01',
             'ac_spd_backup_01', 'ac_spd_01', 'pe_bus_01', 'ground_rod_01',
         ]));
+        expect(ids).not.toContain('pv_group_01');
         expect(ids).not.toContain('dc_bus_01');
         expect(ids).not.toContain('dc_fuse_01');
         expect(ids).not.toContain('if_dc_01');
@@ -51,16 +56,16 @@ test.describe('APP67L.4-FINAL · production drawing workflow on professional top
     test('boots all physical devices and corrected circuits in maxGraph', async ({ page }) => {
         const { browserErrors } = await openEditor(page, professionalPath);
 
-        await expect(page.locator('[data-editor-node-count]')).toHaveText('25');
-        await expect(page.locator('[data-editor-wire-count]')).toHaveText('45');
-        await expect(page.locator('[data-nxsld-node-id]')).toHaveCount(25);
+        await expect(page.locator('[data-editor-node-count]')).toHaveText('29');
+        await expect(page.locator('[data-editor-wire-count]')).toHaveText('69');
+        await expect(page.locator('[data-nxsld-node-id]')).toHaveCount(29);
         await expect(page.locator('[data-nxsld-node-id="pcc_breaker_01"]')).toBeVisible();
         await expect(page.locator('[data-nxsld-node-id="pcc_disconnect_01"]')).toBeVisible();
         await expect(page.locator('[data-nxsld-node-id="export_relay_01"]')).toBeVisible();
 
         const snapshot = await e2eSnapshot(page);
         expect(snapshot.ready).toBe(true);
-        expect(Object.keys(snapshot.editor.positions)).toHaveLength(25);
+        expect(Object.keys(snapshot.editor.positions)).toHaveLength(29);
         expect(snapshot.editor.positions).toHaveProperty('pcc_breaker_01');
         expect(snapshot.editor.positions).toHaveProperty('pcc_disconnect_01');
         expect(snapshot.editor.positions).toHaveProperty('export_relay_01');
@@ -70,8 +75,12 @@ test.describe('APP67L.4-FINAL · production drawing workflow on professional top
     test('resolves canonical ports for PCC power, metering, hardwired trip, SPD, PE and control', async ({ page }) => {
         const { browserErrors } = await openEditor(page, professionalPath);
         const required = [
-            ['pv_group_01', 'DC_OUT', 'dc_power'],
-            ['dc_isolator_01', 'DC_OUT', 'dc_power'],
+            ['pv_string_001', 'DC_POS', 'dc_positive'],
+            ['pv_string_001', 'DC_NEG', 'dc_negative'],
+            ['dc_isolator_01', 'DC_OUT_POS', 'dc_positive'],
+            ['dc_isolator_01', 'DC_OUT_NEG', 'dc_negative'],
+            ['inverter_01', 'DC_MPPT1_POS', 'dc_positive'],
+            ['inverter_01', 'DC_MPPT1_NEG', 'dc_negative'],
             ['dc_spd_01', 'DC_TAP', 'dc_power'],
             ['inverter_02', 'CTRL', 'control'],
             ['ac_combiner_01', 'AC_OUT', 'ac_power'],
@@ -136,7 +145,7 @@ test.describe('APP67L.4-FINAL · production drawing workflow on professional top
         const { browserErrors } = await openEditor(page, professionalPath);
         await page.locator('[data-editor-controller-status]').click();
 
-        await expect(page.locator('[data-editor-controller-cables] article')).toHaveCount(53);
+        await expect(page.locator('[data-editor-controller-cables] article')).toHaveCount(57);
         await expect(page.locator('[data-editor-controller-protection] article')).toHaveCount(13);
         await expect(page.locator('[data-editor-controller-cables]')).toContainText('C-DC-01-STR-01-A');
         await expect(page.locator('[data-editor-controller-cables]')).toContainText('INV-01:MPPT-01');
@@ -148,7 +157,12 @@ test.describe('APP67L.4-FINAL · production drawing workflow on professional top
         const inverter = data.graph.nodes.find((node) => node.id === 'inverter_02');
         expect(inverter.assigned_module_count).toBe(48);
         expect(inverter.string_assignments).toHaveLength(3);
-        expect(inverter.ports.map((port) => port.id)).toEqual(['DC_IN', 'AC_OUT', 'PE', 'COM', 'CTRL']);
+        expect(inverter.ports.map((port) => port.id)).toEqual(expect.arrayContaining([
+            'DC_MPPT1_NEG', 'DC_MPPT1_POS',
+            'DC_MPPT02_IN01_NEG', 'DC_MPPT02_IN01_POS',
+            'DC_MPPT03_IN01_NEG', 'DC_MPPT03_IN01_POS',
+            'AC_OUT', 'PE', 'COM', 'CTRL',
+        ]));
         expect(data.graph.engineering_controller.cable_schedule.some((row) => JSON.stringify(row).includes('IF-DC'))).toBe(false);
         expect(browserErrors).toEqual([]);
     });

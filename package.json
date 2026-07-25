@@ -19,6 +19,7 @@
     "test:sld-router:php": "php scripts/test-sld-router.php",
     "test:sld-router": "npm run test:sld-router:js && npm run test:sld-router:php",
     "test:sld-controller:php": "php scripts/test-sld-engineering-controller.php",
+    "test:sld-ref001:php": "php scripts/test-sld-ref001-physical-dc.php",
     "test:sld-app67n1:php": "php scripts/test-app67n1-material-traceability.php",
     "test:sld-app67l1:php": "php scripts/test-app67l1-symbol-data.php",
     "test:sld-app67l2:php": "php scripts/test-app67l2-professional-topology.php",

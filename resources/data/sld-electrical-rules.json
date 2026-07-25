@@ -544,22 +544,40 @@
       "critical_path": true,
       "requirements": [
         {
-          "id": "dc_input",
+          "id": "dc_positive_input",
           "ports": [
-            "DC_IN"
+            "DC_IN",
+            "DC_IN_POS"
           ],
-          "mode": "all",
           "severity": "error",
-          "label": "DC isolator input"
+          "label": "DC isolator positive input"
         },
         {
-          "id": "dc_output",
+          "id": "dc_negative_input",
           "ports": [
-            "DC_OUT"
+            "DC_IN",
+            "DC_IN_NEG"
           ],
-          "mode": "all",
           "severity": "error",
-          "label": "DC isolator output"
+          "label": "DC isolator negative input"
+        },
+        {
+          "id": "dc_positive_output",
+          "ports": [
+            "DC_OUT",
+            "DC_OUT_POS"
+          ],
+          "severity": "error",
+          "label": "DC isolator positive output"
+        },
+        {
+          "id": "dc_negative_output",
+          "ports": [
+            "DC_OUT",
+            "DC_OUT_NEG"
+          ],
+          "severity": "error",
+          "label": "DC isolator negative output"
         }
       ]
     },

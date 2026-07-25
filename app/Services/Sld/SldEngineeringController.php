@@ -7,7 +7,7 @@ use App\Support\CalculationWarning;
 
 class SldEngineeringController
 {
-    public const VERSION = '67L.3-R4';
+    public const VERSION = '67L.3-R5-SLD-REF-001';
 
     public function __construct(
         private readonly SldProfessionalTopologyPlan $professionalTopologyPlan,
@@ -98,9 +98,18 @@ class SldEngineeringController
      */
     public function bindConnections(Project $project, array $connections): array
     {
-        $schedule = collect($this->cableSchedule($project))
-            ->groupBy(static fn (array $row): string => (string) ($row['source_connection_key'] ?? $row['connection_key'] ?? ''))
-            ->map(static fn ($rows): ?array => collect($rows)->first());
+        $schedule = collect();
+        foreach ($this->cableSchedule($project) as $row) {
+            $keys = array_values(array_filter(array_map(
+                'strval',
+                is_array($row['source_connection_keys'] ?? null)
+                    ? $row['source_connection_keys']
+                    : [($row['source_connection_key'] ?? $row['connection_key'] ?? '')]
+            )));
+            foreach ($keys as $key) {
+                $schedule->put($key, $row);
+            }
+        }
 
         return array_map(static function (array $connection, int $index) use ($schedule): array {
             $key = self::connectionKey($connection);
@@ -186,23 +195,30 @@ class SldEngineeringController
         $expectedCables = collect($this->cableSchedule($project))->keyBy('connection_key');
         $connections = collect($graph['connections'] ?? [])->keyBy(fn (array $connection): string => self::connectionKey($connection));
         foreach ($expectedCables as $key => $expected) {
-            $graphKey = (string) ($expected['source_connection_key'] ?? $key);
-            $actual = $connections->get($graphKey);
-            if (! is_array($actual)) {
-                $conflicts[] = $this->conflict('K020', 'error', 'cable', 'Controlled circuit is missing', sprintf('%s is not present in the sourced SLD topology.', $expected['label']), 'Synchronize the draft from Technical Calculation.', [$expected['from'], $expected['to']]);
-                continue;
-            }
-
-            $differences = [];
-            foreach (['cable_type', 'cable_size', 'cores', 'voltage_class'] as $field) {
-                $expectedValue = (string) ($expected[$field] ?? '');
-                $actualValue = (string) ($actual[$field] ?? '');
-                if ($expectedValue !== '' && $expectedValue !== $actualValue) {
-                    $differences[] = sprintf('%s: %s → %s', str_replace('_', ' ', $field), $actualValue !== '' ? $actualValue : 'missing', $expectedValue);
+            $graphKeys = array_values(array_filter(array_map(
+                'strval',
+                is_array($expected['source_connection_keys'] ?? null)
+                    ? $expected['source_connection_keys']
+                    : [($expected['source_connection_key'] ?? $key)]
+            )));
+            foreach ($graphKeys as $graphKey) {
+                $actual = $connections->get($graphKey);
+                if (! is_array($actual)) {
+                    $conflicts[] = $this->conflict('K020', 'error', 'cable', 'Controlled circuit is missing', sprintf('%s conductor is not present in the sourced SLD topology.', $expected['label']), 'Synchronize the draft from Technical Calculation.', [$expected['from'], $expected['to']], $graphKey);
+                    continue;
                 }
-            }
-            if ($differences !== []) {
-                $conflicts[] = $this->conflict('K021', 'error', 'cable', 'Cable schedule differs from Technical Calculation', implode('; ', $differences), 'Apply the current engineering source. Cable ratings on sourced circuits are not drawing-authority values.', [$expected['from'], $expected['to']], $graphKey);
+
+                $differences = [];
+                foreach (['cable_type', 'cable_size', 'cores', 'voltage_class'] as $field) {
+                    $expectedValue = (string) ($expected[$field] ?? '');
+                    $actualValue = (string) ($actual[$field] ?? '');
+                    if ($expectedValue !== '' && $expectedValue !== $actualValue) {
+                        $differences[] = sprintf('%s: %s → %s', str_replace('_', ' ', $field), $actualValue !== '' ? $actualValue : 'missing', $expectedValue);
+                    }
+                }
+                if ($differences !== []) {
+                    $conflicts[] = $this->conflict('K021', 'error', 'cable', 'Cable schedule differs from Technical Calculation', implode('; ', $differences), 'Apply the current engineering source. Cable ratings on sourced circuits are not drawing-authority values.', [$expected['from'], $expected['to']], $graphKey);
+                }
             }
         }
 
@@ -361,6 +377,7 @@ class SldEngineeringController
 
         return [
             'pv_array' => ['authority' => 'technical_calculation', 'source_keys' => ['results.module_count', 'results.string_module_counts', 'results.inverter_string_assignments', 'results.installed_pv_kw'], 'bom_item_codes' => ['PV-MODULE'], 'controlled_fields' => $controlled],
+            'pv_string' => ['authority' => 'technical_calculation', 'source_keys' => ['results.string_module_counts', 'results.inverter_string_assignments', 'inputs.module_power_wp', 'inputs.module_voc_v', 'inputs.module_vmp_v'], 'bom_item_codes' => ['PV-MODULE'], 'controlled_fields' => $controlled],
             'dc_isolator' => ['authority' => 'technical_calculation', 'source_keys' => ['results.protection.dc_isolator_a', 'inputs.inverter_max_dc_voltage_v'], 'bom_item_codes' => ['DC-ISOLATOR'], 'controlled_fields' => $controlled],
             'dc_fuse' => ['authority' => 'technical_calculation', 'source_keys' => ['results.protection.string_fuse_a'], 'bom_item_codes' => ['DC-FUSE-SET'], 'controlled_fields' => $controlled],
             'dc_busbar' => ['authority' => 'technical_calculation', 'source_keys' => ['results.protection.dc_isolator_a', 'inputs.inverter_max_dc_voltage_v'], 'bom_item_codes' => [], 'controlled_fields' => $controlled],
@@ -562,16 +579,46 @@ class SldEngineeringController
         $validNodeIds = collect($freshGraph['nodes'] ?? [])->pluck('id')->map(fn ($id) => (string) $id)->all();
         $freshPositions = collect($freshEditor['positions'] ?? [])->only($validNodeIds)->all();
         $preservedPositions = collect($editor['positions'] ?? [])->only($validNodeIds)->all();
+        $validConnectionIds = collect($freshGraph['connections'] ?? [])
+            ->flatMap(fn (array $connection): array => array_values(array_filter([
+                isset($connection['id']) ? (string) $connection['id'] : null,
+                isset($connection['_id']) ? (string) $connection['_id'] : null,
+            ])))
+            ->unique()
+            ->values()
+            ->all();
+        $manualConnectionIds = collect($editor['manual_connections'] ?? [])
+            ->pluck('id')
+            ->filter()
+            ->map(fn ($id) => (string) $id)
+            ->all();
+        $validRouteIds = array_values(array_unique(array_merge($validConnectionIds, $manualConnectionIds)));
+        $freshRoutes = collect($freshEditor['routes'] ?? [])->only($validRouteIds)->all();
+        $preservedRoutes = collect($editor['routes'] ?? [])->only($validRouteIds)->all();
+        $migratedPositions = $this->migrateLegacyPvGroupPositions(
+            is_array($editor['positions'] ?? null) ? $editor['positions'] : [],
+            is_array($freshGraph['nodes'] ?? null) ? $freshGraph['nodes'] : [],
+            $freshPositions,
+            $preservedPositions,
+        );
 
         // Keep the fresh APP67L.2 professional layout for newly introduced
         // physical equipment, while retaining user-adjusted geometry for any
         // sourced node whose deterministic ID still exists.
         $merged = array_replace($freshEditor, $editor);
-        $merged['positions'] = array_replace($freshPositions, $preservedPositions);
+        $merged['positions'] = array_replace($freshPositions, $migratedPositions, $preservedPositions);
+        $merged['routes'] = array_replace($freshRoutes, $preservedRoutes);
         $merged['excluded_nodes'] = collect($editor['excluded_nodes'] ?? [])
             ->filter(fn ($id) => in_array((string) $id, $validNodeIds, true))
             ->values()
             ->all();
+        $freshLabelPlacement = is_array($freshEditor['label_placement'] ?? null) ? $freshEditor['label_placement'] : [];
+        $preservedLabelPlacement = is_array($editor['label_placement'] ?? null) ? $editor['label_placement'] : [];
+        $freshLabelPositions = collect($freshLabelPlacement['positions'] ?? [])->only($validNodeIds)->all();
+        $preservedLabelPositions = collect($preservedLabelPlacement['positions'] ?? [])->only($validNodeIds)->all();
+        $merged['label_placement'] = array_replace($freshLabelPlacement, $preservedLabelPlacement, [
+            'positions' => array_replace($freshLabelPositions, $preservedLabelPositions),
+        ]);
         $merged['version'] = max(16, (int) ($merged['version'] ?? 16));
         $merged['geometry'] = $this->geometryFoundation->metadata(
             is_array($merged['positions'] ?? null) ? $merged['positions'] : [],
@@ -599,6 +646,73 @@ class SldEngineeringController
         $merged['visual_regression'] = $this->visualRegression->normalizeMetadata($merged);
 
         return $merged;
+    }
+
+    /**
+     * APP67L revisions represented one inverter's PV strings as a single
+     * `pv_group_XX` node. SLD-REF-001 replaces that aggregate with physical
+     * `pv_string_###` nodes. Preserve the user's former group placement by
+     * translating the fresh physical-string cluster around the old group
+     * centre. Any already-saved physical string position remains authoritative.
+     *
+     * @param  array<string, array<string, mixed>>  $legacyPositions
+     * @param  array<int, array<string, mixed>>  $freshNodes
+     * @param  array<string, array<string, mixed>>  $freshPositions
+     * @param  array<string, array<string, mixed>>  $preservedPositions
+     * @return array<string, array<string, mixed>>
+     */
+    private function migrateLegacyPvGroupPositions(array $legacyPositions, array $freshNodes, array $freshPositions, array $preservedPositions): array
+    {
+        $migrated = [];
+        $stringNodes = collect($freshNodes)
+            ->filter(fn (array $node): bool => ($node['symbol'] ?? null) === 'pv_string')
+            ->groupBy(fn (array $node): int => max(1, (int) $node['inverter_index'] ?? 1));
+
+        foreach ($stringNodes as $inverterIndex => $nodes) {
+            $legacyId = sprintf('pv_group_%02d', (int) $inverterIndex);
+            $legacy = $legacyPositions[$legacyId] ?? null;
+            if (! is_array($legacy)) {
+                continue;
+            }
+
+            $cluster = collect($nodes)
+                ->map(function (array $node) use ($freshPositions): ?array {
+                    $id = (string) ($node['id'] ?? '');
+                    $position = $freshPositions[$id] ?? null;
+                    return $id !== '' && is_array($position) ? ['id' => $id, 'position' => $position] : null;
+                })
+                ->filter()
+                ->values();
+            if ($cluster->isEmpty()) {
+                continue;
+            }
+
+            $freshCentreX = $cluster->avg(fn (array $item): float => $this->positionCentre($item['position'], 'x', 'w'));
+            $freshCentreY = $cluster->avg(fn (array $item): float => $this->positionCentre($item['position'], 'y', 'h'));
+            $legacyCentreX = $this->positionCentre($legacy, 'x', 'w');
+            $legacyCentreY = $this->positionCentre($legacy, 'y', 'h');
+            $deltaX = $legacyCentreX - $freshCentreX;
+            $deltaY = $legacyCentreY - $freshCentreY;
+
+            foreach ($cluster as $item) {
+                $id = $item['id'];
+                if (isset($preservedPositions[$id])) {
+                    continue;
+                }
+                $position = $item['position'];
+                $position['x'] = round((float) ($position['x'] ?? 0) + $deltaX, 3);
+                $position['y'] = round((float) ($position['y'] ?? 0) + $deltaY, 3);
+                $migrated[$id] = $position;
+            }
+        }
+
+        return $migrated;
+    }
+
+    /** @param array<string, mixed> $position */
+    private function positionCentre(array $position, string $axis, string $dimension): float
+    {
+        return (float) ($position[$axis] ?? 0) + ((float) ($position[$dimension] ?? 0) / 2);
     }
 
     /** @return array<string, mixed> */

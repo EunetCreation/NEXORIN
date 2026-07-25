@@ -2823,7 +2823,7 @@
         "family": "Disconnector / switch-disconnector",
         "reference": "User-provided IEC 60617 symbol reference",
         "source_pages": "14–15",
-        "note": "Individual DC isolator for the series power path.",
+        "note": "Individual or multi-channel DC isolator with explicit positive and negative terminals; legacy combined source ports remain supported.",
         "certified": false
       },
       "transforms": {
@@ -2838,6 +2838,64 @@
         "preserve_terminal_semantics": true
       },
       "ports": [
+        {
+          "id": "DC_IN_NEG",
+          "network": "dc_negative",
+          "direction": "input",
+          "side": "left",
+          "label": "DC negative input",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.25
+          },
+          "terminal_class": "power_dc_negative",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "DC_IN_POS",
+          "network": "dc_positive",
+          "direction": "input",
+          "side": "left",
+          "label": "DC positive input",
+          "anchor": {
+            "x": 0.245,
+            "y": 0.57
+          },
+          "terminal_class": "power_dc_positive",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "DC_OUT_NEG",
+          "network": "dc_negative",
+          "direction": "output",
+          "side": "right",
+          "label": "Isolated DC negative output",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.25
+          },
+          "terminal_class": "power_dc_negative",
+          "required": false,
+          "max_connections": 1
+        },
+        {
+          "id": "DC_OUT_POS",
+          "network": "dc_positive",
+          "direction": "output",
+          "side": "right",
+          "label": "Isolated DC positive output",
+          "anchor": {
+            "x": 0.755,
+            "y": 0.57
+          },
+          "terminal_class": "power_dc_positive",
+          "required": false,
+          "max_connections": 1
+        }
+      ],
+      "source_ports": [
         {
           "id": "DC_IN",
           "network": "dc_power",

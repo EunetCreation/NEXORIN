@@ -32,7 +32,8 @@ $symbols = $registry->symbols();
 $assert(count($symbols) === 61, 'The controlled registry must contain 61 symbols.');
 $assert(count(array_filter($symbols, static fn (array $symbol): bool => ($symbol['palette'] ?? false) === true)) === 60, 'The palette must publish 60 symbols.');
 $assert(($registry->all()['version'] ?? null) === '67L.1', 'Registry version must be 67L.1.');
-$assert(array_column($registry->ports('dc_isolator'), 'id') === ['DC_IN', 'DC_OUT'], 'DC isolator ports must be explicit.');
+$assert(array_column($registry->ports('dc_isolator'), 'id') === ['DC_IN_NEG', 'DC_IN_POS', 'DC_OUT_NEG', 'DC_OUT_POS'], 'DC isolator runtime ports must expose explicit polarity.');
+$assert(array_column($registry->ports('dc_isolator', true), 'id') === ['DC_IN', 'DC_OUT'], 'DC isolator legacy aggregate ports must remain source-only compatible.');
 $assert(array_column($registry->ports('dc_spd'), 'id') === ['DC_TAP', 'PE'], 'DC SPD must be a bus tap with PE.');
 $assert(array_column($registry->ports('ac_breaker'), 'id') === ['AC_IN', 'AC_OUT'], 'AC breaker ports must be explicit.');
 $assert(array_column($registry->ports('ac_spd'), 'id') === ['AC_TAP', 'PE'], 'AC SPD must be a bus tap with PE.');
@@ -150,7 +151,11 @@ foreach (['inverter_01', 'inverter_02'] as $inverterId) {
     $assert((float) ($inverter['rated_current'] ?? 0) > 0, "{$inverterId} rated current must be populated.");
     $assert(($inverter['assigned_module_count'] ?? null) === 48, "{$inverterId} must receive 48 modules.");
     $assert(count($inverter['string_assignments'] ?? []) === 3, "{$inverterId} must expose three string assignments.");
-    $assert(array_column($inverter['ports'] ?? [], 'id') === ['DC_IN', 'AC_OUT', 'PE', 'COM', 'CTRL'], "{$inverterId} must expose on-grid power, protective-earth, communication, and direct-control ports without battery or backup ports.");
+    $portIds = array_column($inverter['ports'] ?? [], 'id');
+    foreach (['DC_MPPT1_NEG', 'DC_MPPT1_POS', 'DC_MPPT02_IN01_NEG', 'DC_MPPT02_IN01_POS', 'DC_MPPT03_IN01_NEG', 'DC_MPPT03_IN01_POS', 'DC_MPPT04_IN01_NEG', 'DC_MPPT04_IN01_POS', 'AC_OUT', 'PE', 'COM', 'CTRL'] as $portId) {
+        $assert(in_array($portId, $portIds, true), "{$inverterId} must expose {$portId}.");
+    }
+    $assert(! in_array('DC_IN', $portIds, true) && ! in_array('BAT_DC', $portIds, true) && ! in_array('AC_BACKUP', $portIds, true), "{$inverterId} must expose dynamic MPPT terminals without legacy aggregate, battery, or backup ports.");
 }
 
 foreach (['dc_isolator_01', 'dc_spd_01', 'ac_breaker_01', 'ac_isolator_01', 'ac_spd_01', 'pe_bus_01', 'data_logger_01', 'plant_controller_01'] as $physicalId) {

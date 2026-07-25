@@ -15,11 +15,13 @@ use App\Models\TechnicalCalculation;
  */
 final class SldProfessionalTopologyPlan
 {
-    public const VERSION = '67L.2-R4';
+    public const VERSION = '67L.2-R5-SLD-REF-001';
     public const PROFILE = 'professional_physical';
 
-    public function __construct(private readonly SldSymbolRegistry $symbolRegistry)
-    {
+    public function __construct(
+        private readonly SldSymbolRegistry $symbolRegistry,
+        private readonly SldPhysicalDcTopology $physicalDcTopology,
+    ) {
     }
 
     /**
@@ -61,17 +63,21 @@ final class SldProfessionalTopologyPlan
         $nodes = [];
         $connections = [];
         $positions = [];
-        $rowGap = 300.0;
         $firstRowY = 80.0;
+        $currentRowY = $firstRowY;
+        $inverterCenters = [];
+        $physicalStringCount = 0;
+        $physicalMpptInputCount = 0;
 
         foreach ($assignments as $index => $assignment) {
             $instance = $index + 1;
             $suffix = sprintf('%02d', $instance);
-            $rowY = $firstRowY + ($index * $rowGap);
             $strings = array_values(array_filter(
                 is_array($assignment['strings'] ?? null) ? $assignment['strings'] : [],
                 'is_array'
             ));
+            $strings = $this->physicalDcTopology->normalizeStrings($strings, $instance);
+            $assignments[$index]['strings'] = $strings;
             $stringCounts = array_values(array_map(
                 static fn (array $string): int => max(0, (int) ($string['modules'] ?? 0)),
                 $strings
@@ -81,10 +87,13 @@ final class SldProfessionalTopologyPlan
             $usedMppt = $this->integer($assignment['used_mppt_count'] ?? count($strings));
             $availableMppt = max(1, $this->integer($assignment['available_mppt_count'] ?? $calculation?->inverter_mppt_count));
             $dcAcRatio = $this->number($assignment['dc_ac_ratio'] ?? ($unitAcKw > 0 ? $assignedDcKw / $unitAcKw : 0));
-            $stringLabel = $this->stringGroupLabel($strings, $assignedModules);
+            $rowHeight = max(300.0, count($strings) * 150.0);
+            $rowY = $currentRowY + (($rowHeight - 120.0) / 2);
+            $inverterCenters[] = $rowY;
+            $physicalStringCount += count($strings);
+            $physicalMpptInputCount += count($strings);
 
             $ids = [
-                'pv' => "pv_group_{$suffix}",
                 'dc_iso' => "dc_isolator_{$suffix}",
                 'dc_spd' => "dc_spd_{$suffix}",
                 'inv' => "inverter_{$suffix}",
@@ -92,44 +101,49 @@ final class SldProfessionalTopologyPlan
                 'ac_iso' => "ac_isolator_{$suffix}",
             ];
 
-            $nodes[] = $this->node(
-                $ids['pv'], 'pv_array', "PVA-{$suffix}", "PV string group {$instance}",
-                $stringLabel,
-                sprintf('%s kWp · %d/%d MPPT', $this->display($assignedDcKw, 2), $usedMppt, $availableMppt),
-                'generation', 'pv_array', $this->position(40, $rowY), true,
-                [
-                    'rated_power' => $assignedDcKw,
-                    'rated_voltage' => $this->number($results['string_vmp_hot_v'] ?? null),
-                    'rated_current' => $this->number($results['dc_input_current_a'] ?? null),
-                    'equipment_count' => 1,
-                    'inverter_index' => $instance,
-                    'assigned_module_count' => $assignedModules,
-                    'assigned_string_count' => count($strings),
-                    'used_mppt_count' => $usedMppt,
-                    'available_mppt_count' => $availableMppt,
-                    'strings' => $strings,
-                    'dc_ac_ratio' => round($dcAcRatio, 3),
-                ]
-            );
+            foreach ($strings as $stringOffset => $string) {
+                $modules = max(0, (int) ($string['modules'] ?? 0));
+                $dcKw = $this->number($string['dc_kw'] ?? (($modules * $modulePowerWp) / 1000));
+                $stringY = $currentRowY + ($stringOffset * 150.0);
+                $nodes[] = $this->node(
+                    (string) $string['node_id'], 'pv_string', (string) $string['tag'], 'PV string',
+                    sprintf('%d modules · INV-%s / %s / %s', $modules, $suffix, (string) $string['mppt_label'], (string) $string['input_label']),
+                    sprintf('%s kWp · Voc %s V · Vmp %s V', $this->display($dcKw, 3), $this->display($string['voc_cold_v'] ?? $results['string_voc_cold_v'] ?? null, 1), $this->display($string['vmp_hot_v'] ?? $results['string_vmp_hot_v'] ?? null, 1)),
+                    'generation', 'pv_string', $this->position(40, $stringY), false,
+                    [
+                        'rated_power' => $dcKw,
+                        'rated_voltage' => $this->number($string['vmp_hot_v'] ?? $results['string_vmp_hot_v'] ?? null),
+                        'rated_current' => $this->number($calculation?->module_imp_a),
+                        'equipment_count' => $modules,
+                        'module_count' => $modules,
+                        'inverter_index' => $instance,
+                        'mppt_index' => (int) $string['mppt_index'],
+                        'input_index' => (int) $string['input_index'],
+                        'channel_index' => (int) $string['channel_index'],
+                        'calculation_string' => $string,
+                    ]
+                );
+            }
+
             $nodes[] = $this->node(
                 $ids['dc_iso'], 'dc_isolator', "QS-DC-{$suffix}", 'DC input isolator assembly',
-                "Inverter {$suffix} independent MPPT disconnect channels",
+                sprintf('Inverter %s · %d independent string channels', $suffix, count($strings)),
                 sprintf('%s A · %s VDC', $this->display($dcIsolatorA, 0), $this->display($dcVoltage, 0)),
-                'protection', 'dc_isolator', $this->position(220, $rowY), false,
-                ['rated_voltage' => $dcVoltage, 'rated_current' => $dcIsolatorA, 'inverter_index' => $instance, 'channel_count' => count($strings), 'equipment_count' => count($strings), 'ports' => $this->dcIsolatorAssemblyPorts()]
+                'protection', 'dc_isolator', array_replace($this->position(260, $rowY), ['h' => $this->physicalDcTopology->nodeHeight(count($strings))]), false,
+                ['rated_voltage' => $dcVoltage, 'rated_current' => $dcIsolatorA, 'inverter_index' => $instance, 'channel_count' => count($strings), 'equipment_count' => count($strings), 'ports' => $this->physicalDcTopology->isolatorPorts($strings)]
             );
             $nodes[] = $this->node(
                 $ids['dc_spd'], 'dc_spd', "SPD-DC-{$suffix}", 'DC SPD',
                 'Parallel PV surge-protection branch',
                 (string) ($protection['dc_spd'] ?? 'DC SPD rating pending'),
-                'protection', 'dc_spd', $this->position(580, $rowY + 135), false,
+                'protection', 'dc_spd', $this->position(600, $rowY + 150), false,
                 ['rated_voltage' => $dcVoltage, 'inverter_index' => $instance, 'connection_mode' => 'parallel_shunt', 'channel_count' => count($strings)]
             );
             $nodes[] = $this->node(
                 $ids['inv'], 'inverter', "INV-{$suffix}", 'String inverter',
                 sprintf('%d strings · %d/%d MPPT used', count($strings), $usedMppt, $availableMppt),
                 sprintf('%s kW AC · %s kWp DC · ratio %s', $this->display($unitAcKw, 2), $this->display($assignedDcKw, 2), $this->display($dcAcRatio, 3)),
-                'conversion', 'inverter', $this->position(760, $rowY), true,
+                'conversion', 'inverter', array_replace($this->position(780, $rowY), ['h' => $this->physicalDcTopology->nodeHeight(max($availableMppt, count($strings)))]), false,
                 [
                     'rated_power' => $unitAcKw,
                     'rated_voltage' => $acVoltage,
@@ -143,32 +157,45 @@ final class SldProfessionalTopologyPlan
                     'assigned_module_count' => $assignedModules,
                     'assigned_dc_kw' => $assignedDcKw,
                     'dc_ac_ratio' => round($dcAcRatio, 3),
-                    'ports' => $this->inverterPorts($systemType),
+                    'ports' => $this->physicalDcTopology->inverterPorts($strings, $availableMppt, $systemType, $this->symbolRegistry->ports('inverter', true)),
                 ]
             );
             $nodes[] = $this->node(
                 $ids['ac_breaker'], 'ac_breaker', "QF-AC-{$suffix}", 'AC circuit breaker',
                 "Inverter {$suffix} feeder protection",
                 sprintf('%s A · %s VAC', $this->display($acBreakerA, 0), $this->display($acVoltage, 0)),
-                'protection', 'ac_breaker', $this->position(940, $rowY), false,
+                'protection', 'ac_breaker', $this->position(980, $rowY), false,
                 ['rated_voltage' => $acVoltage, 'rated_current' => $acBreakerA, 'inverter_index' => $instance]
             );
             $nodes[] = $this->node(
                 $ids['ac_iso'], 'ac_isolator', "QS-AC-{$suffix}", 'AC isolator',
                 "Inverter {$suffix} load-break disconnect",
                 sprintf('%s A · %s VAC', $this->display($acIsolatorA, 0), $this->display($acVoltage, 0)),
-                'protection', 'ac_isolator', $this->position(1120, $rowY), false,
+                'protection', 'ac_isolator', $this->position(1160, $rowY), false,
                 ['rated_voltage' => $acVoltage, 'rated_current' => $acIsolatorA, 'inverter_index' => $instance]
             );
 
-            $connections[] = $this->connection("C-DC-{$suffix}-01", $ids['pv'], $ids['dc_iso'], 'Independent PV string circuits', $stringLabel.' · external string fuse omitted provisionally for one string per MPPT', 'DC_OUT', 'DC_IN', 'dc_power');
-            $connections[] = $this->connection("C-DC-{$suffix}-02", $ids['dc_iso'], $ids['inv'], 'Independent MPPT input circuits', sprintf('Three independent MPPT channels · Voc %s V · Vmp %s V', $this->display($results['string_voc_cold_v'] ?? null, 1), $this->display($results['string_vmp_hot_v'] ?? null, 1)), 'DC_OUT', 'DC_IN', 'dc_power');
-            $connections[] = $this->connection("C-DC-SPD-{$suffix}", $ids['dc_iso'], $ids['dc_spd'], 'DC SPD branch', 'Parallel shunt from the inverter-side DC terminals to PE; polarity and backup protection TBC', 'DC_OUT', 'DC_TAP', 'dc_power', false);
+            foreach ($strings as $string) {
+                $stringTagKey = strtoupper(preg_replace('/[^A-Z0-9]+/', '-', (string) $string['tag']) ?: 'STRING');
+                $stringNodeId = (string) $string['node_id'];
+                $isolatorPorts = (array) $string['isolator_ports'];
+                $inverterPorts = (array) $string['inverter_ports'];
+                $stageAPair = "C-DC-{$suffix}-{$stringTagKey}-A";
+                $stageBPair = "C-DC-{$suffix}-{$stringTagKey}-B";
+                $stageDetail = sprintf('%s · %s / %s · %d modules', (string) $string['tag'], (string) $string['mppt_label'], (string) $string['input_label'], (int) $string['modules']);
+
+                $connections[] = $this->pairedDcConnection("{$stageAPair}-POS", "{$stageAPair}-NEG", $stageAPair, $stringNodeId, $ids['dc_iso'], 'PV string cable', $stageDetail, 'DC_POS', (string) $isolatorPorts['positive_input'], 'dc_positive', 'positive', true);
+                $connections[] = $this->pairedDcConnection("{$stageAPair}-NEG", "{$stageAPair}-POS", $stageAPair, $stringNodeId, $ids['dc_iso'], 'PV string cable', $stageDetail, 'DC_NEG', (string) $isolatorPorts['negative_input'], 'dc_negative', 'negative', false);
+                $connections[] = $this->pairedDcConnection("{$stageBPair}-POS", "{$stageBPair}-NEG", $stageBPair, $ids['dc_iso'], $ids['inv'], 'MPPT input cable', $stageDetail, (string) $isolatorPorts['positive_output'], (string) $inverterPorts['positive'], 'dc_positive', 'positive', true);
+                $connections[] = $this->pairedDcConnection("{$stageBPair}-NEG", "{$stageBPair}-POS", $stageBPair, $ids['dc_iso'], $ids['inv'], 'MPPT input cable', $stageDetail, (string) $isolatorPorts['negative_output'], (string) $inverterPorts['negative'], 'dc_negative', 'negative', false);
+                $connections[] = $this->connection("C-PE-{$stringTagKey}", $stringNodeId, 'pe_bus_01', 'PV string frame PE', 'Protective-earth conductor', 'PE', 'PE_IN', 'protective_earth', false);
+            }
+
+            $connections[] = $this->connection("C-DC-SPD-{$suffix}", $ids['dc_iso'], $ids['dc_spd'], 'DC SPD branch', 'Parallel shunt from the inverter-side DC terminals to PE; polarity and backup protection TBC', 'SPD_TAP', 'DC_TAP', 'dc_power', false);
             $connections[] = $this->connection("C-AC-{$suffix}-01", $ids['inv'], $ids['ac_breaker'], 'Inverter AC feeder', sprintf('%s kW · %s VAC', $this->display($unitAcKw, 2), $this->display($acVoltage, 0)), 'AC_OUT', 'AC_IN', 'ac_power');
             $connections[] = $this->connection("C-AC-{$suffix}-02", $ids['ac_breaker'], $ids['ac_iso'], 'Protected AC feeder', 'Circuit breaker to AC isolator', 'AC_OUT', 'AC_IN', 'ac_power');
             $connections[] = $this->connection("C-AC-{$suffix}-03", $ids['ac_iso'], 'ac_combiner_01', 'Inverter incoming', "INV-{$suffix} to AC combiner", 'AC_OUT', 'AC_IN', 'ac_power');
             $connections[] = $this->connection("C-COM-INV-{$suffix}", $ids['inv'], 'data_logger_01', 'Inverter communication', 'RS485 field communication', 'COM', 'COM_1', 'communication', false);
-            $connections[] = $this->connection("C-PE-PVA-{$suffix}", $ids['pv'], 'pe_bus_01', 'PV frame PE', 'Protective-earth conductor', 'PE', 'PE_IN', 'protective_earth', false);
             $connections[] = $this->connection("C-PE-SPD-DC-{$suffix}", $ids['dc_spd'], 'pe_bus_01', 'DC SPD PE', 'Shortest practical SPD earth path', 'PE', 'PE_IN', 'protective_earth', false);
             $connections[] = $this->connection("C-PE-INV-{$suffix}", $ids['inv'], 'pe_bus_01', 'Inverter PE', 'Protective-earth conductor', 'PE', 'PE_IN', 'protective_earth', false);
 
@@ -176,10 +203,12 @@ final class SldProfessionalTopologyPlan
                 $connections[] = $this->connection("C-BAT-{$suffix}", 'battery_01', $ids['inv'], 'Battery DC bus', 'Battery system to hybrid inverter', 'BAT_DC', 'BAT_DC', 'battery_dc');
                 $connections[] = $this->connection("C-AC-BK-{$suffix}", $ids['inv'], 'backup_panel_01', 'Backup AC feeder', 'Hybrid inverter backup output', 'AC_BACKUP', 'AC_IN', 'ac_power');
             }
+
+            $currentRowY += $rowHeight + 80.0;
         }
 
-        $centerY = $firstRowY + (($inverterCount - 1) * $rowGap / 2);
-        $sharedBottomY = max($firstRowY + (($inverterCount - 1) * $rowGap) + 300, $centerY + 440);
+        $centerY = $inverterCenters === [] ? $firstRowY : array_sum($inverterCenters) / count($inverterCenters);
+        $sharedBottomY = max($currentRowY + 120.0, $centerY + 440.0);
 
         $nodes[] = $this->node(
             'ac_combiner_01', 'ac_combiner', 'ACCB-01', 'AC combiner panel',
@@ -499,6 +528,9 @@ final class SldProfessionalTopologyPlan
                 'topology_profile' => self::PROFILE,
                 'topology_version' => self::VERSION,
                 'physical_inverter_count' => $inverterCount,
+                'physical_string_count' => $physicalStringCount,
+                'physical_mppt_input_count' => $physicalMpptInputCount,
+                'physical_dc_contract' => SldPhysicalDcTopology::VERSION,
                 'physical_equipment_count' => count($nodes),
                 'physical_connection_count' => count($connections),
                 'string_groups' => array_map(static fn (array $assignment): array => [
@@ -539,6 +571,84 @@ final class SldProfessionalTopologyPlan
         );
         $handled = [];
 
+        foreach ($groups as $suffix => $group) {
+            $strings = array_values(array_filter((array) ($group['strings'] ?? []), 'is_array'));
+            foreach ($strings as $index => $string) {
+                $stringTag = (string) ($string['tag'] ?? ('STR-'.sprintf('%02d', $index + 1)));
+                $stringTagKey = strtoupper(preg_replace('/[^A-Z0-9]+/', '-', $stringTag) ?: 'STRING');
+                $mppt = (string) ($string['mppt_label'] ?? ('MPPT-'.sprintf('%02d', $index + 1)));
+                $input = (string) ($string['input_label'] ?? 'IN-01');
+                $stringNodeId = (string) ($string['node_id'] ?? sprintf('pv_string_%03d', (int) ($string['string_index'] ?? ($index + 1))));
+                $isolatorPorts = (array) ($string['isolator_ports'] ?? $this->physicalDcTopology->isolatorPortIds($index + 1));
+                $inverterPorts = (array) ($string['inverter_ports'] ?? $this->physicalDcTopology->inverterPortIds((int) ($string['mppt_index'] ?? ($index + 1)), (int) ($string['input_index'] ?? 1)));
+                $isoNodeId = 'dc_isolator_'.$suffix;
+                $invNodeId = 'inverter_'.$suffix;
+                $knownRoute = is_numeric($dcLength) && (float) $dcLength > 0;
+
+                $stageA = $this->cableRow(
+                    'C-DC-'.$suffix.'-'.$stringTagKey.'-A',
+                    'Independent '.$stringTag.' circuit',
+                    $stringTag,
+                    'QS-DC-'.$suffix.'/'.($index + 1),
+                    'dc_power',
+                    'PV1-F',
+                    $dcArea,
+                    2,
+                    '1.5 kV DC',
+                    'Dedicated positive and negative string conductors from array to inverter-side protection assembly',
+                    $knownRoute ? $dcLength : '',
+                    'DC-CABLE-PV1F',
+                    ['inputs.dc_cable_area_mm2', 'inputs.dc_cable_length_m'],
+                    'DC_POS/NEG',
+                    'DC_IN_POS/NEG',
+                    1,
+                    'array_to_inverter_route',
+                    $knownRoute ? 'calculation_route_input' : 'tbc'
+                );
+                $stageA['string_tag'] = $stringTag;
+                $stageA['mppt'] = $mppt;
+                $stageA['input'] = $input;
+                $stageA['size_display'] = '2 x 1C x '.$this->display($calculation?->dc_cable_area_mm2, 2).' mm²';
+                $stageA['source_connection_keys'] = [
+                    $stringNodeId.':DC_POS>'.$isoNodeId.':'.(string) $isolatorPorts['positive_input'].'|dc_positive',
+                    $stringNodeId.':DC_NEG>'.$isoNodeId.':'.(string) $isolatorPorts['negative_input'].'|dc_negative',
+                ];
+                $stageA['source_connection_key'] = $stageA['source_connection_keys'][0];
+                $rows[] = $stageA;
+
+                $stageB = $this->cableRow(
+                    'C-DC-'.$suffix.'-'.$stringTagKey.'-B',
+                    'Independent '.$stringTag.' MPPT input circuit',
+                    'QS-DC-'.$suffix.'/'.($index + 1),
+                    'INV-'.$suffix.':'.$mppt.'/'.$input,
+                    'dc_power',
+                    'PV1-F',
+                    $dcArea,
+                    2,
+                    '1.5 kV DC',
+                    'Local positive and negative interconnection from DC isolator channel to the assigned inverter MPPT input',
+                    '',
+                    'DC-CABLE-PV1F',
+                    ['inputs.dc_cable_area_mm2'],
+                    'DC_OUT_POS/NEG',
+                    $mppt.'/'.$input,
+                    1,
+                    'local_equipment_interconnect',
+                    'tbc'
+                );
+                $stageB['string_tag'] = $stringTag;
+                $stageB['mppt'] = $mppt;
+                $stageB['input'] = $input;
+                $stageB['size_display'] = '2 x 1C x '.$this->display($calculation?->dc_cable_area_mm2, 2).' mm²';
+                $stageB['source_connection_keys'] = [
+                    $isoNodeId.':'.(string) $isolatorPorts['positive_output'].'>'.$invNodeId.':'.(string) $inverterPorts['positive'].'|dc_positive',
+                    $isoNodeId.':'.(string) $isolatorPorts['negative_output'].'>'.$invNodeId.':'.(string) $inverterPorts['negative'].'|dc_negative',
+                ];
+                $stageB['source_connection_key'] = $stageB['source_connection_keys'][0];
+                $rows[] = $stageB;
+            }
+        }
+
         foreach ($topology['connections'] as $connection) {
             $network = (string) ($connection['network'] ?? '');
             $id = (string) ($connection['id'] ?? '');
@@ -546,54 +656,7 @@ final class SldProfessionalTopologyPlan
             $from = (string) ($connection['from'] ?? '');
             $to = (string) ($connection['to'] ?? '');
 
-            if (preg_match('/^C-DC-(\d{2})-(01|02)$/', $id, $match) === 1) {
-                $suffix = $match[1];
-                $stage = $match[2];
-                $group = (array) ($groups->get($suffix) ?? []);
-                $strings = array_values(array_filter((array) ($group['strings'] ?? []), 'is_array'));
-                foreach ($strings as $index => $string) {
-                    $stringTag = (string) ($string['tag'] ?? ('STR-'.sprintf('%02d', $index + 1)));
-                    $mppt = (string) ($string['mppt_label'] ?? ('MPPT-'.sprintf('%02d', $index + 1)));
-                    $isoTag = 'QS-DC-'.$suffix.'/'.($index + 1);
-                    $invTag = 'INV-'.$suffix.':'.$mppt;
-                    [$rowFrom, $rowTo, $segment] = $stage === '01'
-                        ? [$stringTag, $isoTag, 'A']
-                        : [$isoTag, $invTag, 'B'];
-                    $knownRoute = $stage === '01' && is_numeric($dcLength) && (float) $dcLength > 0;
-                    $row = $this->cableRow(
-                        'C-DC-'.$suffix.'-'.$stringTag.'-'.$segment,
-                        'Independent '.$stringTag.' circuit',
-                        $rowFrom,
-                        $rowTo,
-                        'dc_power',
-                        'PV1-F',
-                        $dcArea,
-                        2,
-                        '1.5 kV DC',
-                        $stage === '01'
-                            ? 'Dedicated string route from array to inverter-side protection assembly'
-                            : 'Local independent string interconnection; final internal route TBC',
-                        $knownRoute ? $dcLength : '',
-                        'DC-CABLE-PV1F',
-                        ['inputs.dc_cable_area_mm2', 'inputs.dc_cable_length_m'],
-                        $stage === '01' ? 'DC_OUT' : 'DC_OUT',
-                        $stage === '02' ? $mppt : 'DC_IN',
-                        1,
-                        $stage === '01' ? 'array_to_inverter_route' : 'local_equipment_interconnect',
-                        $knownRoute ? 'calculation_route_input' : 'tbc'
-                    );
-                    $row['string_tag'] = $stringTag;
-                    $row['mppt'] = $mppt;
-                    $row['size_display'] = '2 x 1C x '.$this->display($calculation?->dc_cable_area_mm2, 2).' mm²';
-                    // The graph keeps one physical PV group and one multi-channel
-                    // isolator/inverter envelope. Each paper-space string row is
-                    // therefore reconciled to the aggregate graph connection that
-                    // owns the same calculation-controlled conductor metadata.
-                    $row['source_connection_key'] = $stage === '01'
-                        ? 'pv_group_'.$suffix.':DC_OUT>dc_isolator_'.$suffix.':DC_IN|dc_power'
-                        : 'dc_isolator_'.$suffix.':DC_OUT>inverter_'.$suffix.':DC_IN|dc_power';
-                    $rows[] = $row;
-                }
+            if (($connection['physical_dc_contract'] ?? null) === SldPhysicalDcTopology::VERSION) {
                 continue;
             }
 
@@ -624,7 +687,7 @@ final class SldProfessionalTopologyPlan
                         'tbc'
                     );
                     $row['size_display'] = '2 x 1C x TBC';
-                    $row['source_connection_key'] = 'dc_isolator_'.$suffix.':DC_OUT>dc_spd_'.$suffix.':DC_TAP|dc_power';
+                    $row['source_connection_key'] = 'dc_isolator_'.$suffix.':SPD_TAP>dc_spd_'.$suffix.':DC_TAP|dc_power';
                     $rows[] = $row;
                 }
                 continue;
@@ -878,6 +941,7 @@ final class SldProfessionalTopologyPlan
     public function profileKeyForNodeId(string $nodeId): string
     {
         return match (true) {
+            str_starts_with($nodeId, 'pv_string_') => 'pv_string',
             str_starts_with($nodeId, 'pv_group_') => 'pv_array',
             str_starts_with($nodeId, 'dc_isolator_') => 'dc_isolator',
             str_starts_with($nodeId, 'dc_fuse_') => 'dc_fuse',
@@ -952,7 +1016,7 @@ final class SldProfessionalTopologyPlan
             $assignments[$index]['assigned_dc_kw'] += $dcKw;
         }
         foreach ($assignments as &$assignment) {
-            $assignment['used_mppt_count'] = count($assignment['strings']);
+            $assignment['used_mppt_count'] = count(array_unique(array_column($assignment['strings'], 'mppt_index')));
             $assignment['assigned_dc_kw'] = round((float) $assignment['assigned_dc_kw'], 3);
             $assignment['dc_ac_ratio'] = $unitAcKw > 0 ? round((float) $assignment['assigned_dc_kw'] / $unitAcKw, 3) : 0.0;
         }
@@ -1029,6 +1093,33 @@ final class SldProfessionalTopologyPlan
             'route_strategy' => SldSmartRouter::ENGINE,
             'topology_profile' => self::PROFILE,
         ];
+    }
+
+    /** @return array<string,mixed> */
+    private function pairedDcConnection(
+        string $id,
+        string $pairedConnectionId,
+        string $cableTag,
+        string $from,
+        string $to,
+        string $label,
+        string $detail,
+        string $fromPort,
+        string $toPort,
+        string $network,
+        string $polarity,
+        bool $showLabel
+    ): array {
+        return array_replace(
+            $this->connection($id, $from, $to, $label, $detail, $fromPort, $toPort, $network, $showLabel),
+            [
+                'cable_tag' => $cableTag,
+                'conductor_polarity' => $polarity,
+                'paired_connection_id' => $pairedConnectionId,
+                'physical_circuit' => true,
+                'physical_dc_contract' => SldPhysicalDcTopology::VERSION,
+            ]
+        );
     }
 
     /** @return array<string,mixed> */

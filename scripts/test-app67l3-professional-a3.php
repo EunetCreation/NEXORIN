@@ -151,11 +151,11 @@ $nodeIds = $nodes->pluck('id')->all();
 
 $assert($graph['schema_version'] === 'nexorin-sld-v1.9.0', 'Graph schema must remain nexorin-sld-v1.9.0.');
 $assert(data_get($graph, 'meta.topology_profile') === 'professional_physical', 'Topology profile must remain professional_physical.');
-$assert(data_get($graph, 'meta.topology_version') === '67L.2-R4', 'Topology version must identify the R4 engineering-integrity model.');
-$assert(data_get($graph, 'meta.physical_equipment_count') === 25, 'R4 fixture must contain 25 controlled equipment nodes.');
-$assert(data_get($graph, 'meta.physical_connection_count') === 45, 'R4 fixture must contain 45 port-aware graph connections.');
-$assert(data_get($graph, 'electrical_validation.summary.total') === 0, 'R4 topology must create zero deterministic electrical findings.');
-$assert(data_get($graph, 'electrical_validation.summary.connections_checked') === 45, 'Electrical checker must inspect all 45 graph connections.');
+$assert(data_get($graph, 'meta.topology_version') === '67L.2-R5-SLD-REF-001', 'Topology version must identify the SLD-REF-001 physical-string model.');
+$assert(data_get($graph, 'meta.physical_equipment_count') === 29, 'SLD-REF-001 fixture must contain 29 controlled equipment nodes.');
+$assert(data_get($graph, 'meta.physical_connection_count') === 69, 'SLD-REF-001 fixture must contain 69 port-aware graph connections.');
+$assert(data_get($graph, 'electrical_validation.summary.total') === 0, 'SLD-REF-001 topology must create zero deterministic electrical findings.');
+$assert(data_get($graph, 'electrical_validation.summary.connections_checked') === 69, 'Electrical checker must inspect all 69 graph connections.');
 
 foreach (['pcc_breaker_01', 'ct_01', 'pcc_disconnect_01', 'meter_01', 'export_relay_01', 'ac_spd_backup_01', 'ac_spd_01'] as $id) {
     $assert(in_array($id, $nodeIds, true), "R4 topology must contain {$id}.");
@@ -190,7 +190,7 @@ foreach (['C-MEAS-CT-MTR-S1', 'C-MEAS-CT-MTR-S2', 'C-MEAS-CT-RPR-S1', 'C-MEAS-CT
 $controller = $app->make(SldEngineeringController::class);
 $cables = collect($controller->cableSchedule($project));
 $protections = collect($controller->protectionSchedule($project));
-$assert($cables->count() === 53, 'R4 cable schedule must contain 53 individually traceable rows.');
+$assert($cables->count() === 57, 'SLD-REF-001 cable schedule must contain 57 individually traceable rows.');
 $assert($protections->count() === 13, 'R4 protection schedule must contain 13 controlled devices.');
 $assert(! $cables->contains(fn (array $row): bool => str_contains(strtoupper(json_encode($row)), 'IF-DC')), 'Cable schedule must not contain IF-DC.');
 $assert(! $cables->contains(fn (array $row): bool => str_contains(strtoupper((string) ($row['wire_id'] ?? '')), 'FU-DC')), 'Cable schedule must not use aggregate FU-DC tags.');
@@ -312,4 +312,4 @@ $assert(str_starts_with($pdf, '%PDF-1.4'), 'Fallback export must be a PDF 1.4 do
 $assert(substr_count($pdf, '/Type /Page ') === 6, 'Fallback PDF must contain six A3 pages.');
 $assert(str_contains($pdf, '67L.4-FINAL') && str_contains($pdf, 'DRAFT / NOT FOR CONSTRUCTION'), 'Fallback PDF must preserve APP67L.4 issue and status language.');
 
-fwrite(STDOUT, "[APP67L.4-FINAL] PHP PASS · production-drawing-workflow six-sheet drawing, 25 nodes, 45 graph connections, 53 traceable cable rows, corrected PCC feeder and meter topology, lockable PCC isolation, preliminary independent RPR hardwired trip path, optional string-fuse policy, six A3 sheets, preliminary status controls, open engineering gaps, and zero deterministic electrical findings\n");
+fwrite(STDOUT, "[APP67L.4-FINAL] PHP PASS · production-drawing-workflow six-sheet drawing, 29 nodes, 69 graph connections, 57 traceable cable rows, corrected PCC feeder and meter topology, lockable PCC isolation, preliminary independent RPR hardwired trip path, optional string-fuse policy, six A3 sheets, preliminary status controls, open engineering gaps, and zero deterministic electrical findings\n");

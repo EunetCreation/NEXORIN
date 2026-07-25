@@ -180,10 +180,13 @@ $state = $controller->inspect($project, $graph);
 
 $assert($state['status'] === 'review', 'a current source chain with unresolved protection duties must remain in review rather than claim synchronization.');
 $assert($state['blocking'] === false, 'open protection-duty warnings must not block internal review.');
-$assert(count($state['cable_schedule']) === 24, 'one-inverter APP67L.3-R4 topology must expose twenty-four traceable cable rows.');
+$assert(count($state['cable_schedule']) === 25, 'one-inverter SLD-REF-001 topology must expose twenty-five traceable cable rows.');
 $assert(count($state['protection_schedule']) === 8, 'one-inverter APP67L.3-R4 topology must expose eight protection rows.');
 $assert(data_get($graph, 'connections.0.cable_type') === 'PV1-F', 'controlled DC cable metadata must be bound');
-$assert(data_get($graph, 'connections.5.cable_size') === '10', 'controlled AC cable size must be bound');
+$acFeeder = collect($graph['connections'])->firstWhere('id', 'C-AC-01-01');
+$assert(data_get($acFeeder, 'cable_size') === '10', 'controlled AC cable size must be bound');
+$assert(collect($graph['connections'])->where('network', 'dc_positive')->count() === 4, 'two strings must expose four controlled positive-polarity DC stages.');
+$assert(collect($graph['connections'])->where('network', 'dc_negative')->count() === 4, 'two strings must expose four controlled negative-polarity DC stages.');
 $assert(collect($state['conflicts'])->where('code', 'K030')->count() === 3, 'incomplete PCC and SPD protection duties must remain visible as three review warnings.');
 $inverter = collect($graph['nodes'])->firstWhere('id', 'inverter_01');
 $assert(data_get($inverter, 'engineering_binding.bom_item_codes.0') === 'INV-ON-GRID', 'physical inverter must bind to the system-specific BOM code');
@@ -201,14 +204,35 @@ $assert(collect($mismatchState['conflicts'])->contains(fn (array $finding): bool
 
 $originalPosition = data_get($graph, 'editor.positions.inverter_01');
 $graph['editor']['positions']['inverter_01'] = array_merge((array) $originalPosition, ['x' => 420, 'y' => 240, 'w' => 220, 'h' => 160]);
+$graph['editor']['positions'] = collect($graph['editor']['positions'])
+    ->reject(fn (mixed $position, string $id): bool => str_starts_with($id, 'pv_string_'))
+    ->all();
+$graph['editor']['positions']['pv_group_01'] = ['x' => 80, 'y' => 120, 'w' => 160, 'h' => 240];
 $graph['editor']['manual_lines'] = [['id' => 'manual-line-1', 'points' => [['x' => 20, 'y' => 20], ['x' => 140, 'y' => 20]]]];
 $graph['editor']['manual_nodes'] = [['id' => 'manual-note-1', 'title' => 'Site note']];
+$graph['editor']['manual_connections'] = [['id' => 'manual-wire-1', 'from' => 'manual-note-1', 'to' => 'inverter_01']];
+$graph['editor']['routes'] = [
+    'C-DC-01-01' => [['x' => 10, 'y' => 10], ['x' => 20, 'y' => 10]],
+    'manual-wire-1' => [['x' => 20, 'y' => 20], ['x' => 420, 'y' => 240]],
+];
+$graph['editor']['label_placement']['positions'] = [
+    'pv_group_01' => ['side' => 'bottom', 'x' => 80, 'y' => 380, 'w' => 120, 'h' => 48],
+    'inverter_01' => ['side' => 'right', 'x' => 650, 'y' => 240, 'w' => 120, 'h' => 48],
+];
 $freshGraph = $builder->build($project);
 $reconciled = $controller->reconcile($graph, $freshGraph, 991);
 $assert(data_get($reconciled, 'editor.positions.inverter_01.x') === 420, 'source synchronization must preserve physical inverter layout');
 $assert(data_get($reconciled, 'editor.positions.inverter_01.w') === 220, 'source synchronization must preserve physical inverter envelope width');
 $assert(count(data_get($reconciled, 'editor.manual_lines', [])) === 1, 'source synchronization must preserve manual drafting lines');
 $assert(count(data_get($reconciled, 'editor.manual_nodes', [])) === 1, 'source synchronization must preserve manual nodes');
+$migratedStrings = collect(data_get($reconciled, 'editor.positions', []))->only(['pv_string_001', 'pv_string_002']);
+$assert($migratedStrings->count() === 2, 'legacy aggregate PV group placement must migrate to physical string positions.');
+$assert(abs((float) $migratedStrings->avg(fn (array $position): float => (float) $position['x'] + ((float) $position['w'] / 2)) - 160.0) < 0.001, 'migrated physical string cluster must retain the legacy PV group horizontal centre.');
+$assert(abs((float) $migratedStrings->avg(fn (array $position): float => (float) $position['y'] + ((float) $position['h'] / 2)) - 240.0) < 0.001, 'migrated physical string cluster must retain the legacy PV group vertical centre.');
+$assert(! array_key_exists('C-DC-01-01', data_get($reconciled, 'editor.routes', [])), 'obsolete sourced route evidence must be removed during topology synchronization.');
+$assert(array_key_exists('manual-wire-1', data_get($reconciled, 'editor.routes', [])), 'manual wire route evidence must remain preserved.');
+$assert(! array_key_exists('pv_group_01', data_get($reconciled, 'editor.label_placement.positions', [])), 'obsolete aggregate-node label placement must be removed.');
+$assert(array_key_exists('inverter_01', data_get($reconciled, 'editor.label_placement.positions', [])), 'label placement for retained sourced equipment must remain preserved.');
 $assert(data_get($reconciled, 'engineering_controller.events.0.action') === 'accept_engineering_source', 'source synchronization must create an audit event');
 
-fwrite(STDOUT, "[APP67K-R4] PHP PASS · virtual string-to-graph reconciliation, cable/protection authority, honest review warnings, stale-source blocking, mismatch detection, and layout/manual-layer reconciliation\n");
+fwrite(STDOUT, "[SLD-REF-001 / APP67K] PHP PASS · physical string-to-MPPT reconciliation, paired cable authority, legacy PV-group placement migration, stale-source blocking, mismatch detection, and manual-layer preservation\n");
