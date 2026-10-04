@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 #[Fillable([
     'company_id',
@@ -67,6 +68,38 @@ class Customer extends Model
     public function projects(): HasMany
     {
         return $this->hasMany(Project::class);
+    }
+
+    /**
+     * Get the optional CRM handoff profile for the customer.
+     */
+    public function profile(): HasOne
+    {
+        return $this->hasOne(CustomerProfile::class);
+    }
+
+    /**
+     * Get the customer relationship contacts.
+     */
+    public function contacts(): HasMany
+    {
+        return $this->hasMany(CustomerContact::class)->orderBy('sort_order')->orderBy('id');
+    }
+
+    /**
+     * Get commercial opportunities linked to the customer.
+     */
+    public function opportunities(): HasMany
+    {
+        return $this->hasMany(CustomerOpportunity::class);
+    }
+
+    /**
+     * Get customer governance documents.
+     */
+    public function documents(): HasMany
+    {
+        return $this->hasMany(CustomerDocument::class);
     }
 
     /**

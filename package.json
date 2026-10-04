@@ -43,7 +43,8 @@
     "test:sld-app67m4:js": "node scripts/test-app67m4-visual-regression.mjs",
     "test:sld-app67m4:php": "php scripts/test-app67m4-visual-regression.php",
     "test:sld-app67m4": "npm run test:sld-app67m4:js && npm run test:sld-app67m4:php",
-    "test:sld-app67m4:bundle": "node scripts/test-app67m4-browser-bundle.mjs"
+    "test:sld-app67m4:bundle": "node scripts/test-app67m4-browser-bundle.mjs",
+    "test:sld-landing001:php": "php scripts/test-sld-landing-workspace.php"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.0.0",

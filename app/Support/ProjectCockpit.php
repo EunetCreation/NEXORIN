@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Services\Solar\SolarDatasetAssessment;
 use App\Models\Project;
 use App\Models\TechnicalCalculation;
 
@@ -46,6 +47,7 @@ class ProjectCockpit
     {
         $load = $project->loadAnalysis;
         $solar = $project->solarProfile;
+        $solarAssessment = $solar ? app(SolarDatasetAssessment::class)->assess($project, $solar) : null;
         $roof = $project->roofSiteSurvey;
         $recommendation = $project->systemRecommendation;
         $calculation = $project->technicalCalculation;
@@ -74,8 +76,8 @@ class ProjectCockpit
                 'key' => 'solar',
                 'label' => 'Solar',
                 'caption' => 'Location and irradiation data',
-                'state' => self::solarState($project),
-                'status' => $solar?->quality_status_label ?? 'Missing',
+                'state' => self::solarState($solarAssessment),
+                'status' => $solarAssessment['state_label'] ?? 'Missing',
                 'metric' => $solar ? self::solarMetric($project) : 'No solar profile',
             ],
             [
@@ -144,17 +146,19 @@ class ProjectCockpit
             : 'current';
     }
 
-    private static function solarState(Project $project): string
+    /** @param array<string, mixed>|null $assessment */
+    private static function solarState(?array $assessment): string
     {
-        $solar = $project->solarProfile;
-
-        if (! $solar) {
+        if (! $assessment) {
             return 'missing';
         }
 
-        return in_array($solar->quality_status, ['estimated', 'imported', 'verified'], true)
-            ? ($solar->quality_status === 'verified' ? 'locked' : 'complete')
-            : 'current';
+        return match ($assessment['state']) {
+            'reviewed' => 'locked',
+            'complete' => 'complete',
+            'input_required' => 'current',
+            default => 'missing',
+        };
     }
 
     private static function roofState(Project $project): string

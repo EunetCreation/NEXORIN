@@ -1,0 +1,2094 @@
+:root {
+    color-scheme: dark;
+    --ink-1000: #010811;
+    --ink-975: #020b14;
+    --ink-950: #03111e;
+    --ink-925: #051725;
+    --line: rgba(105, 143, 167, .28);
+    --line-soft: rgba(105, 143, 167, .16);
+    --text: #f3f7fa;
+    --muted: #93a5b3;
+    --cyan: #08c9db;
+    --cyan-bright: #22deeb;
+    --teal: #13d6b3;
+    --gold: #f2b73a;
+    --danger: #ff8088;
+    --focus: rgba(15, 207, 221, .22);
+    --font: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html {
+    min-width: 320px;
+    min-height: 100%;
+    background: var(--ink-1000);
+}
+
+body {
+    min-height: 100vh;
+    margin: 0;
+    overflow-x: hidden;
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 16px;
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: geometricPrecision;
+    background: #010811;
+}
+
+button,
+input { font: inherit; }
+
+a { color: inherit; }
+
+button,
+a,
+input { -webkit-tap-highlight-color: transparent; }
+
+.auth-canvas {
+    width: 100%;
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 52.2% 47.8%;
+    overflow: hidden;
+    isolation: isolate;
+    background: #010811;
+}
+
+.brand-stage,
+.access-stage { min-width: 0; }
+
+/* --------------------------------------------------------------------------
+   Brand / hero stage
+   -------------------------------------------------------------------------- */
+
+.brand-stage {
+    position: relative;
+    min-height: 100vh;
+    overflow: hidden;
+    isolation: isolate;
+    background:
+        radial-gradient(circle at 74% 43%, rgba(0, 96, 124, .09), transparent 36%),
+        #03101c;
+}
+
+.brand-stage__image {
+    --parallax-x: 0px;
+    --parallax-y: 0px;
+    position: absolute;
+    inset: 0;
+    z-index: -5;
+    background-image: url("../images/nexorin-hero.png");
+    background-repeat: no-repeat;
+    background-size: auto 54%;
+    background-position: 80% 34%;
+    transform: translate3d(var(--parallax-x), var(--parallax-y), 0);
+    will-change: transform;
+    -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 10%, #000 87%, rgba(0,0,0,.72) 94%, transparent 100%);
+    mask-image: linear-gradient(180deg, transparent 0%, #000 10%, #000 87%, rgba(0,0,0,.72) 94%, transparent 100%);
+    transition: transform .72s cubic-bezier(.2,.75,.25,1);
+}
+
+.brand-stage__veil {
+    position: absolute;
+    inset: 0;
+    z-index: -4;
+    pointer-events: none;
+    background:
+        linear-gradient(180deg, rgba(1, 8, 15, .12) 0%, rgba(1, 8, 15, .015) 25%, rgba(1, 8, 15, .03) 70%, rgba(1, 8, 15, .30) 100%),
+        linear-gradient(90deg, rgba(1, 8, 15, .25) 0%, rgba(1, 8, 15, .03) 63%, rgba(1, 8, 15, .14) 100%);
+    box-shadow: inset -54px 0 80px rgba(0, 5, 11, .16);
+}
+
+.brand-stage::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    pointer-events: none;
+    background:
+        radial-gradient(ellipse at 86% 29%, rgba(255, 186, 55, .05), transparent 23%),
+        linear-gradient(180deg, transparent 68%, rgba(1, 8, 15, .08) 78%, rgba(1, 8, 15, .48) 100%);
+}
+
+.energy-orbit {
+    position: absolute;
+    z-index: -1;
+    border: 1px solid rgba(246, 179, 49, .13);
+    border-radius: 50%;
+    pointer-events: none;
+    animation: orbitPulse 10s ease-in-out infinite;
+}
+
+.energy-orbit--one {
+    width: 212px;
+    height: 212px;
+    top: 286px;
+    right: -12px;
+}
+
+.energy-orbit--two {
+    width: 174px;
+    height: 174px;
+    top: 305px;
+    right: 7px;
+    animation-delay: -3.7s;
+}
+
+.brand-lockup {
+    position: absolute;
+    top: 132px;
+    left: 20px;
+    width: 500px;
+    max-width: calc(100% - 40px);
+    animation: enterBrand .72s .06s both cubic-bezier(.2,.8,.2,1);
+}
+
+.brand-wordmark {
+    display: block;
+    width: 500px;
+    max-width: 100%;
+    height: auto;
+    filter: drop-shadow(0 1px 8px rgba(0, 12, 25, .24));
+}
+
+.brand-kicker {
+    width: 445px;
+    max-width: calc(100% - 55px);
+    display: grid;
+    grid-template-columns: 32px minmax(0, max-content) 32px;
+    align-items: center;
+    gap: 9px;
+    margin: 12px 0 0 34px;
+}
+
+.brand-kicker span {
+    display: block;
+    height: 2px;
+    background: linear-gradient(90deg, #12dbae, #0fbeaa);
+    box-shadow: 0 0 11px rgba(18, 216, 179, .22);
+}
+
+.brand-kicker p {
+    margin: 0;
+    color: rgba(232, 237, 241, .86);
+    font-size: 10.1px;
+    font-weight: 500;
+    letter-spacing: .19em;
+    line-height: 1;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.brand-story {
+    position: absolute;
+    top: 449px;
+    left: 55px;
+    width: 355px;
+    animation: enterStory .82s .18s both cubic-bezier(.2,.8,.2,1);
+}
+
+.brand-story h1 {
+    margin: 0;
+    color: #f4f7f9;
+    font-size: 43px;
+    font-weight: 400;
+    letter-spacing: -.032em;
+    line-height: 1.23;
+    text-shadow: 0 3px 18px rgba(0, 9, 18, .37);
+}
+
+.brand-story h1 strong {
+    color: #12c7dd;
+    font-weight: 400;
+    text-shadow: 0 0 24px rgba(4, 196, 220, .16);
+}
+
+.story-accent {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin: 27px 0 25px 2px;
+}
+
+.story-accent span {
+    width: 34px;
+    height: 2px;
+    background: var(--gold);
+    box-shadow: 0 0 11px rgba(245, 184, 58, .25);
+}
+
+.story-accent i {
+    width: 5px;
+    height: 2px;
+    background: rgba(245, 184, 58, .55);
+}
+
+.brand-story > p {
+    margin: 0;
+    color: rgba(220, 230, 237, .71);
+    font-size: 15.5px;
+    font-weight: 400;
+    line-height: 1.62;
+    text-shadow: 0 2px 12px rgba(0,0,0,.38);
+}
+
+.impact-metrics {
+    position: absolute;
+    top: 1003px;
+    left: 48px;
+    width: 486px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    animation: enterMetrics .78s .28s both cubic-bezier(.2,.8,.2,1);
+}
+
+.metric-card {
+    position: relative;
+    min-width: 0;
+    padding: 0 7px;
+    text-align: center;
+}
+
+.metric-card:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    top: 20px;
+    right: 0;
+    width: 1px;
+    height: 108px;
+    background: linear-gradient(180deg, transparent, rgba(88, 132, 158, .26) 18%, rgba(88, 132, 158, .26) 84%, transparent);
+}
+
+.metric-card svg {
+    display: block;
+    width: 31px;
+    height: 31px;
+    margin: 0 auto 10px;
+    overflow: visible;
+    fill: none;
+    stroke: #08cbd7;
+    stroke-width: 1.35;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    filter: drop-shadow(0 0 7px rgba(4, 211, 223, .26));
+}
+
+.metric-card p {
+    margin: 0;
+    color: #f6fafc;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.metric-card strong {
+    font-size: 22px;
+    font-weight: 500;
+    letter-spacing: -.025em;
+}
+
+.metric-card p span {
+    color: #d7e0e6;
+    font-size: 12px;
+}
+
+.metric-card small {
+    display: block;
+    margin-top: 11px;
+    color: rgba(203, 217, 226, .66);
+    font-size: 11.2px;
+    line-height: 1.48;
+}
+
+.security-summary {
+    position: absolute;
+    top: 1162px;
+    left: 49px;
+    width: 488px;
+    min-height: 114px;
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    padding: 22px 26px;
+    border: 1px solid rgba(91, 142, 172, .24);
+    border-radius: 11px;
+    background: linear-gradient(110deg, rgba(5, 20, 33, .78), rgba(3, 14, 25, .52));
+    box-shadow: inset 0 1px rgba(255,255,255,.018), 0 12px 34px rgba(0, 7, 13, .14);
+    backdrop-filter: blur(10px);
+    animation: enterMetrics .78s .34s both cubic-bezier(.2,.8,.2,1);
+}
+
+.security-summary__icon,
+.identity-note__icon { flex: 0 0 auto; }
+
+.security-summary__icon svg,
+.identity-note__icon svg {
+    display: block;
+    width: 40px;
+    height: 45px;
+    fill: rgba(2, 168, 175, .05);
+    stroke: #0bd3ce;
+    stroke-width: 1.35;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    filter: drop-shadow(0 0 9px rgba(3, 216, 205, .2));
+}
+
+.security-summary strong {
+    color: #eaf1f5;
+    font-size: 14.4px;
+    font-weight: 500;
+}
+
+.security-summary p {
+    margin: 4px 0 0;
+    color: rgba(188, 205, 215, .69);
+    font-size: 12.2px;
+    line-height: 1.55;
+}
+
+.brand-footer {
+    position: absolute;
+    right: 50px;
+    bottom: 96px;
+    left: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: rgba(171, 189, 201, .53);
+    font-size: 11.2px;
+}
+
+.brand-footer p { margin: 0; }
+
+.brand-footer nav {
+    display: flex;
+    align-items: center;
+    gap: 34px;
+}
+
+.brand-footer a {
+    text-decoration: none;
+    transition: color .18s ease;
+}
+
+.brand-footer a:hover,
+.brand-footer a:focus-visible { color: #d5e6ed; }
+
+/* --------------------------------------------------------------------------
+   Access card
+   -------------------------------------------------------------------------- */
+
+.access-stage {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    padding: 189px 61px 104px 0;
+    background:
+        radial-gradient(circle at 42% 34%, rgba(9, 62, 83, .10), transparent 31%),
+        radial-gradient(circle at 78% 74%, rgba(4, 44, 64, .08), transparent 35%),
+        linear-gradient(180deg, #020a13 0%, #020c16 44%, #010914 100%);
+}
+
+.access-stage::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: .07;
+    background-image:
+        linear-gradient(rgba(62, 108, 135, .13) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(62, 108, 135, .13) 1px, transparent 1px);
+    background-size: 56px 56px;
+    mask-image: radial-gradient(circle at 50% 42%, black, transparent 72%);
+}
+
+.access-card {
+    position: relative;
+    width: 100%;
+    min-height: 1046px;
+    padding: 55px 29px 38px;
+    overflow: hidden;
+    border: 1px solid rgba(110, 146, 168, .31);
+    border-radius: 15px;
+    background: linear-gradient(150deg, rgba(5, 18, 30, .91), rgba(2, 12, 21, .95) 63%, rgba(3, 14, 24, .89));
+    box-shadow: inset 0 1px rgba(255,255,255,.024), 0 38px 95px rgba(0, 0, 0, .24);
+    backdrop-filter: blur(20px) saturate(108%);
+    animation: enterCard .8s .1s both cubic-bezier(.2,.8,.2,1);
+}
+
+.access-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+        radial-gradient(circle at 50% 12%, rgba(9, 143, 165, .05), transparent 23%),
+        linear-gradient(110deg, transparent 0 40%, rgba(255,255,255,.01) 50%, transparent 60%);
+}
+
+.access-card__glow {
+    position: absolute;
+    top: -155px;
+    left: 50%;
+    width: 360px;
+    height: 300px;
+    pointer-events: none;
+    border-radius: 50%;
+    background: rgba(3, 185, 207, .065);
+    filter: blur(72px);
+    transform: translateX(-50%);
+    animation: cardGlow 8s ease-in-out infinite;
+}
+
+.access-header { text-align: center; }
+
+.nexorin-cube {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 40px;
+}
+
+.nexorin-cube svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    fill: none;
+    stroke: #0cd7e4;
+    stroke-width: 1.95;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    filter: drop-shadow(0 0 9px rgba(4, 211, 225, .22));
+    animation: markBreathe 8s ease-in-out 1.1s infinite;
+}
+
+.nexorin-cube path {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: markDraw .82s .22s cubic-bezier(.2,.75,.25,1) forwards;
+}
+
+.nexorin-cube .cube-mid { animation-delay: .34s; }
+.nexorin-cube .cube-core { animation-delay: .46s; }
+
+.access-header h2 {
+    margin: 0;
+    color: #f4f7f9;
+    font-size: 27px;
+    font-weight: 400;
+    letter-spacing: -.025em;
+}
+
+.access-header > p {
+    margin: 6px 0 0;
+    color: rgba(185, 200, 210, .74);
+    font-size: 15px;
+}
+
+.auth-alert {
+    display: flex;
+    gap: 11px;
+    margin: 24px 0 -9px;
+    padding: 12px 14px;
+    border: 1px solid rgba(255, 123, 131, .34);
+    border-radius: 10px;
+    color: #ffd6d8;
+    background: rgba(92, 18, 27, .34);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.auth-alert svg {
+    flex: 0 0 19px;
+    width: 19px;
+    height: 19px;
+    fill: none;
+    stroke: var(--danger);
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.auth-alert strong { font-weight: 600; }
+.auth-alert ul { margin: 3px 0 0; padding-left: 17px; }
+.auth-alert--success { border-color: rgba(91,229,189,.3); color: #c9ffef; background: rgba(7, 76, 59, .28); }
+
+.login-form { margin-top: 30px; }
+.field-group + .field-group { margin-top: 31px; }
+
+.field-group label {
+    display: inline-block;
+    margin: 0 0 9px;
+    color: rgba(224, 231, 236, .83);
+    font-size: 13.7px;
+    font-weight: 400;
+}
+
+.field-shell {
+    position: relative;
+    height: 58px;
+    display: grid;
+    grid-template-columns: 41px 1fr 43px;
+    align-items: center;
+    border: 1px solid rgba(102, 143, 168, .28);
+    border-radius: 9px;
+    background: rgba(2, 13, 23, .46);
+    box-shadow: inset 0 1px 2px rgba(0,0,0,.16);
+    transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
+}
+
+.field-shell:focus-within {
+    border-color: rgba(11, 207, 221, .75);
+    background: rgba(3, 18, 29, .72);
+    box-shadow: 0 0 0 4px var(--focus), inset 0 1px 2px rgba(0,0,0,.18);
+}
+
+.field-shell--invalid { border-color: rgba(255, 124, 130, .72); }
+
+.field-shell > svg {
+    width: 23px;
+    height: 23px;
+    margin-left: 15px;
+    fill: none;
+    stroke: rgba(181, 199, 211, .76);
+    stroke-width: 1.35;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: stroke .18s ease;
+}
+
+.field-shell:focus-within > svg { stroke: #13d4e1; }
+
+.field-shell input {
+    min-width: 0;
+    height: 100%;
+    padding: 0 9px 0 11px;
+    border: 0;
+    outline: 0;
+    color: #f0f6f8;
+    background: transparent;
+    font-size: 14.5px;
+    caret-color: var(--cyan-bright);
+}
+
+.field-shell input::placeholder { color: rgba(158, 176, 188, .64); opacity: 1; }
+
+.password-toggle {
+    width: 42px;
+    height: 100%;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    color: rgba(184, 200, 211, .8);
+    background: transparent;
+    cursor: pointer;
+}
+
+.password-toggle svg {
+    grid-area: 1/1;
+    width: 21px;
+    height: 21px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: opacity .16s ease, transform .16s ease, color .16s ease;
+}
+
+.password-toggle .eye-closed { opacity: 0; transform: scale(.75); }
+.password-toggle.is-revealed .eye-open { opacity: 0; transform: scale(.75); }
+.password-toggle.is-revealed .eye-closed { opacity: 1; transform: scale(1); }
+.password-toggle:hover,
+.password-toggle:focus-visible { color: #1bdae4; }
+
+.form-options {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin-top: 27px;
+    color: rgba(218, 227, 232, .79);
+    font-size: 13.5px;
+}
+
+.form-options > a {
+    color: #08cfdf;
+    text-decoration: none;
+    transition: color .17s ease, text-shadow .17s ease;
+}
+
+.form-options > a:hover,
+.form-options > a:focus-visible {
+    color: #58edf3;
+    text-shadow: 0 0 14px rgba(8, 207, 223, .3);
+}
+
+.remember-control {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.remember-control input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+.remember-control > span {
+    width: 19px;
+    height: 19px;
+    display: grid;
+    place-items: center;
+    border: 1px solid rgba(110, 152, 177, .65);
+    border-radius: 4px;
+    background: rgba(4, 22, 34, .76);
+    transition: border-color .16s ease, background .16s ease, box-shadow .16s ease;
+}
+
+.remember-control svg {
+    width: 14px;
+    height: 14px;
+    fill: none;
+    stroke: white;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    opacity: 0;
+    transform: scale(.65);
+    transition: opacity .15s ease, transform .15s ease;
+}
+
+.remember-control input:checked + span {
+    border-color: #0cc8d9;
+    background: linear-gradient(145deg, #13b8cd, #087c9a);
+    box-shadow: 0 0 14px rgba(7, 190, 210, .25);
+}
+
+.remember-control input:checked + span svg { opacity: 1; transform: scale(1); }
+.remember-control input:focus-visible + span { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+.sign-in-button {
+    position: relative;
+    width: 100%;
+    height: 60px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    margin-top: 38px;
+    padding: 0 27px;
+    overflow: hidden;
+    border: 1px solid rgba(37, 226, 238, .55);
+    border-radius: 8px;
+    color: #fff;
+    background: linear-gradient(115deg, #0795ae 0%, #0aa8bf 50%, #0796ae 100%);
+    box-shadow: inset 0 1px rgba(255,255,255,.14), 0 12px 30px rgba(2, 139, 164, .16);
+    cursor: pointer;
+    transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+}
+
+.sign-in-button::before {
+    content: "";
+    position: absolute;
+    top: -70%;
+    left: -36%;
+    width: 28%;
+    height: 240%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.24), transparent);
+    transform: rotate(18deg);
+    transition: left .6s ease;
+}
+
+.sign-in-button:hover { transform: translateY(-1px); box-shadow: inset 0 1px rgba(255,255,255,.18), 0 17px 34px rgba(2, 154, 179, .23); filter: brightness(1.06); }
+.sign-in-button:hover::before { left: 115%; }
+.sign-in-button:focus-visible { outline: 4px solid var(--focus); outline-offset: 3px; }
+.sign-in-button:active { transform: translateY(0); }
+.sign-in-button:disabled { cursor: wait; opacity: .83; }
+
+.sign-in-button > span:first-child {
+    justify-self: center;
+    margin-left: 24px;
+    font-size: 16.5px;
+    font-weight: 500;
+}
+
+.sign-in-button > svg {
+    width: 24px;
+    height: 24px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.45;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.button-spinner {
+    position: absolute;
+    left: 50%;
+    width: 22px;
+    height: 22px;
+    margin-left: -11px;
+    border: 2px solid rgba(255,255,255,.3);
+    border-top-color: white;
+    border-radius: 50%;
+    opacity: 0;
+    animation: none;
+}
+
+.sign-in-button.is-loading > span:first-child,
+.sign-in-button.is-loading > svg { opacity: 0; }
+.sign-in-button.is-loading .button-spinner { opacity: 1; animation: spin .7s linear infinite; }
+
+.provider-divider {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 19px;
+    margin: 34px 0 20px;
+    color: rgba(178, 195, 205, .67);
+    font-size: 13.2px;
+}
+
+.provider-divider span { height: 1px; background: linear-gradient(90deg, rgba(91, 132, 157, .06), rgba(91, 132, 157, .31)); }
+.provider-divider span:last-child { background: linear-gradient(90deg, rgba(91, 132, 157, .31), rgba(91, 132, 157, .06)); }
+.provider-divider p { margin: 0; }
+
+.google-button {
+    min-height: 58px;
+    display: grid;
+    grid-template-columns: 32px 1fr;
+    align-items: center;
+    gap: 14px;
+    padding: 0 20px;
+    overflow: hidden;
+    border: 1px solid rgba(99, 140, 165, .28);
+    border-radius: 9px;
+    color: rgba(230, 237, 241, .84);
+    background: linear-gradient(120deg, rgba(5, 18, 30, .63), rgba(3, 14, 24, .45));
+    text-decoration: none;
+    box-shadow: inset 0 1px rgba(255,255,255,.014);
+    transition: border-color .18s ease, background .18s ease, transform .18s ease, color .18s ease;
+}
+
+.google-button > svg { width: 25px; height: 25px; }
+.google-button > span { font-size: 14.5px; }
+.google-button:hover,
+.google-button:focus-visible { border-color: rgba(14, 204, 219, .61); color: #fff; background: rgba(5, 28, 40, .76); transform: translateY(-1px); outline: none; }
+
+.identity-note {
+    position: absolute;
+    right: 29px;
+    bottom: 24px;
+    left: 29px;
+    min-height: 76px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 13px 18px 13px 34px;
+    border: 1px solid rgba(62, 111, 138, .20);
+    border-radius: 9px;
+    background: rgba(3, 15, 25, .36);
+}
+
+.identity-note__icon svg { width: 39px; height: 44px; }
+
+.identity-note p {
+    margin: 0;
+    color: rgba(178, 196, 207, .70);
+    font-size: 12.6px;
+    line-height: 1.58;
+}
+
+/* --------------------------------------------------------------------------
+   Motion
+   -------------------------------------------------------------------------- */
+
+@keyframes enterBrand { from { opacity: 0; transform: translateY(-12px); } to { opacity: 1; transform: none; } }
+@keyframes enterStory { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+@keyframes enterMetrics { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+@keyframes enterCard { from { opacity: 0; transform: translateX(18px); } to { opacity: 1; transform: none; } }
+@keyframes markDraw { to { stroke-dashoffset: 0; } }
+@keyframes markBreathe { 0%,100% { opacity: .94; filter: drop-shadow(0 0 8px rgba(4, 211, 225, .2)); } 50% { opacity: 1; filter: drop-shadow(0 0 13px rgba(4, 211, 225, .32)); } }
+@keyframes orbitPulse { 0%,100% { opacity: .28; transform: scale(.97); } 50% { opacity: .61; transform: scale(1.02); } }
+@keyframes cardGlow { 0%,100% { opacity: .62; transform: translateX(-50%) scale(.96); } 50% { opacity: .92; transform: translateX(-50%) scale(1.05); } }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* --------------------------------------------------------------------------
+   Landscape desktop: independent composition, no hard hero cut.
+   -------------------------------------------------------------------------- */
+
+@media (min-width: 900px) and (max-height: 1180px) {
+    .auth-canvas { grid-template-columns: minmax(600px, 58%) minmax(500px, 42%); }
+
+    .brand-stage__image {
+        background-size: auto 98%;
+        background-position: 73% 54%;
+        -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 7%, #000 93%, transparent 100%);
+        mask-image: linear-gradient(180deg, transparent 0%, #000 7%, #000 93%, transparent 100%);
+    }
+
+    .brand-lockup { top: 42px; left: 18px; width: 455px; }
+    .brand-wordmark { width: 455px; }
+    .brand-kicker { width: 405px; margin-left: 31px; }
+    .brand-kicker p { font-size: 9px; }
+
+    .brand-story { top: 278px; left: 58px; }
+    .brand-story h1 { font-size: clamp(39px, 3.1vw, 50px); line-height: 1.16; }
+    .brand-story > p { font-size: 14px; }
+    .story-accent { margin: 20px 0; }
+
+    .impact-metrics { top: auto; bottom: 158px; left: 50px; width: min(530px, calc(100% - 100px)); }
+    .security-summary { top: auto; bottom: 38px; left: 50px; width: min(530px, calc(100% - 100px)); min-height: 94px; padding: 16px 22px; }
+    .brand-footer { display: none; }
+
+    .access-stage { align-items: center; padding: 38px clamp(38px, 4vw, 72px) 38px clamp(24px, 2.6vw, 48px); }
+    .access-card { min-height: 0; max-width: 520px; padding: 31px 34px 27px; }
+    .nexorin-cube { width: 72px; height: 72px; margin-bottom: 15px; }
+    .access-header h2 { font-size: 25px; }
+    .access-header > p { font-size: 13.5px; }
+    .login-form { margin-top: 24px; }
+    .field-group + .field-group { margin-top: 18px; }
+    .field-shell { height: 52px; }
+    .form-options { margin-top: 17px; }
+    .sign-in-button { height: 53px; margin-top: 22px; }
+    .provider-divider { margin: 22px 0 16px; }
+    .google-button { min-height: 52px; }
+    .identity-note { position: static; min-height: 70px; margin-top: 16px; padding: 11px 15px; }
+    .identity-note__icon svg { width: 31px; height: 36px; }
+    .identity-note p { font-size: 11.4px; line-height: 1.45; }
+}
+
+/* --------------------------------------------------------------------------
+   Tablet: compact hero, primary action visible in the first viewport.
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 899px) {
+    .auth-canvas { grid-template-columns: 1fr; min-height: 100svh; overflow: visible; }
+    .brand-stage { min-height: 270px; }
+
+    .brand-stage__image {
+        background-size: auto 135%;
+        background-position: 74% 56%;
+        -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 82%, transparent 100%);
+        mask-image: linear-gradient(180deg, #000 0%, #000 82%, transparent 100%);
+    }
+
+    .brand-lockup { top: 28px; left: 8px; width: min(435px, calc(100% - 16px)); }
+    .brand-wordmark { width: 435px; }
+    .brand-kicker { width: 386px; margin: 8px 0 0 30px; }
+    .brand-kicker p { font-size: 8.7px; }
+
+    .brand-story { top: 143px; left: 38px; width: min(420px, calc(100% - 76px)); }
+    .brand-story h1 { font-size: clamp(31px, 5.8vw, 42px); line-height: 1.1; }
+    .brand-story h1 br:first-of-type { display: none; }
+    .story-accent { margin: 14px 0 0; }
+    .brand-story > p,
+    .impact-metrics,
+    .security-summary,
+    .brand-footer,
+    .energy-orbit { display: none; }
+
+    .access-stage { min-height: auto; padding: 20px clamp(22px, 6vw, 64px) 48px; }
+    .access-card { width: min(590px, 100%); min-height: 0; margin: 0 auto; padding: 29px clamp(24px, 6vw, 44px) 30px; }
+    .nexorin-cube { width: 62px; height: 62px; margin-bottom: 12px; }
+    .access-header h2 { font-size: 25px; }
+    .access-header > p { font-size: 14px; }
+    .login-form { margin-top: 23px; }
+    .field-group + .field-group { margin-top: 18px; }
+    .field-shell { height: 52px; }
+    .form-options { margin-top: 17px; }
+    .sign-in-button { height: 54px; margin-top: 21px; }
+    .provider-divider { margin: 24px 0 17px; }
+    .google-button { min-height: 52px; }
+    .identity-note { position: static; min-height: 68px; margin-top: 16px; padding: 12px 15px; }
+    .identity-note__icon svg { width: 31px; height: 36px; }
+    .identity-note p { font-size: 11.5px; line-height: 1.45; }
+}
+
+/* --------------------------------------------------------------------------
+   Mobile
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 560px) {
+    body { background: #020b14; }
+    .brand-stage { min-height: 208px; }
+
+    .brand-stage__image {
+        background-size: auto 148%;
+        background-position: 72% 54%;
+        transform: none !important;
+    }
+
+    .brand-stage__veil { background: linear-gradient(180deg, rgba(1,8,15,.18), rgba(1,8,15,.50)); }
+    .brand-lockup { top: 22px; left: 0; width: 100%; }
+    .brand-wordmark { width: 300px; }
+    .brand-kicker { width: 270px; grid-template-columns: 20px max-content 20px; gap: 6px; margin: 6px 0 0 21px; }
+    .brand-kicker p { font-size: 6.2px; letter-spacing: .16em; }
+
+    .brand-story { top: 113px; left: 24px; width: calc(100% - 48px); }
+    .brand-story h1 { font-size: 27px; line-height: 1.1; }
+    .story-accent { margin: 12px 0 0; }
+
+    .access-stage { padding: 16px 13px 32px; }
+    .access-card { padding: 25px 20px 23px; border-radius: 14px; }
+    .nexorin-cube { width: 56px; height: 56px; margin-bottom: 10px; }
+    .access-header h2 { font-size: 24px; }
+    .access-header > p { font-size: 13.5px; }
+    .login-form { margin-top: 22px; }
+    .field-group + .field-group { margin-top: 17px; }
+    .field-group label { font-size: 13px; }
+    .field-shell { height: 51px; }
+    .form-options { align-items: center; font-size: 12.5px; }
+    .remember-control { gap: 8px; }
+    .remember-control > span { width: 18px; height: 18px; }
+    .sign-in-button { height: 52px; margin-top: 20px; }
+    .provider-divider { gap: 12px; margin: 23px 0 16px; font-size: 12.4px; }
+    .google-button { min-height: 51px; padding: 0 15px; }
+    .identity-note { align-items: flex-start; min-height: 0; padding: 13px 14px; }
+    .identity-note__icon svg { width: 29px; height: 34px; }
+    .identity-note p { font-size: 11px; }
+    .desktop-only { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        scroll-behavior: auto !important;
+        animation-duration: .001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .001ms !important;
+    }
+
+    .brand-stage__image { transform: none !important; }
+}
+
+/* ========================================================================== 
+   PAGE 001 — PREMIUM MOTION & PRECISION PASS 08
+   ========================================================================== */
+
+.brand-stage__image {
+    -webkit-mask-image: linear-gradient(
+        180deg,
+        transparent 0%,
+        rgba(0, 0, 0, .08) 5%,
+        rgba(0, 0, 0, .34) 11%,
+        rgba(0, 0, 0, .78) 18%,
+        #000 24%,
+        #000 87%,
+        rgba(0, 0, 0, .74) 94%,
+        transparent 100%
+    );
+    mask-image: linear-gradient(
+        180deg,
+        transparent 0%,
+        rgba(0, 0, 0, .08) 5%,
+        rgba(0, 0, 0, .34) 11%,
+        rgba(0, 0, 0, .78) 18%,
+        #000 24%,
+        #000 87%,
+        rgba(0, 0, 0, .74) 94%,
+        transparent 100%
+    );
+}
+
+.hero-motion {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.sun-bloom {
+    position: absolute;
+    top: 25.6%;
+    left: 84.4%;
+    width: 132px;
+    height: 132px;
+    border-radius: 50%;
+    opacity: .34;
+    background:
+        radial-gradient(circle, rgba(255,255,239,.9) 0 3%, rgba(255,220,117,.55) 11%, rgba(255,179,45,.18) 31%, transparent 69%);
+    filter: blur(.2px);
+    transform: translate(-50%, -50%);
+    mix-blend-mode: screen;
+    animation: sunBreathe 8.6s ease-in-out 1s infinite;
+}
+
+.energy-stream {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    opacity: .54;
+    mix-blend-mode: screen;
+}
+
+.energy-stream__rail,
+.energy-stream__pulse {
+    fill: none;
+    stroke-linecap: round;
+}
+
+.energy-stream__rail {
+    stroke: url(#energyTrackGradient);
+    stroke-width: 1.3;
+    opacity: .15;
+    filter: url(#energyGlow);
+}
+
+.energy-stream__pulse {
+    stroke: url(#energyTrackGradient);
+    stroke-width: 2.1;
+    stroke-dasharray: .09 .91;
+    stroke-dashoffset: 1;
+    opacity: .82;
+    filter: url(#energyGlow);
+    animation: energyTravel 9s cubic-bezier(.32,.02,.24,1) 1.1s infinite;
+}
+
+.energy-stream__node {
+    fill: #b9fff5;
+    opacity: .72;
+    filter: url(#energyGlow);
+}
+
+.panel-light-sweep {
+    position: absolute;
+    left: -34%;
+    bottom: 23.5%;
+    width: 42%;
+    height: 22%;
+    opacity: 0;
+    background: linear-gradient(106deg, transparent 39%, rgba(143,251,255,.22) 48%, rgba(255,225,146,.12) 52%, transparent 61%);
+    transform: skewX(-18deg) rotate(-7deg);
+    mix-blend-mode: screen;
+    filter: blur(3px);
+    clip-path: polygon(0 19%, 100% 0, 92% 76%, 4% 100%);
+    animation: panelSweep 12.4s cubic-bezier(.3,.05,.2,1) 3.2s infinite;
+}
+
+.brand-wordmark-shell {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+}
+
+.brand-x-sheen {
+    position: absolute;
+    top: -18%;
+    left: 29%;
+    width: 22%;
+    height: 145%;
+    opacity: 0;
+    background: linear-gradient(105deg, transparent 22%, rgba(211,255,250,.04) 38%, rgba(229,255,251,.72) 49%, rgba(100,243,216,.12) 58%, transparent 75%);
+    transform: translateX(-90%) skewX(-17deg);
+    mix-blend-mode: screen;
+    clip-path: polygon(22% 0, 45% 0, 100% 100%, 74% 100%, 50% 57%, 25% 100%, 0 100%, 37% 50%);
+    animation: logoXSheen 5.8s cubic-bezier(.2,.7,.2,1) .86s 1 both;
+}
+
+.access-card {
+    --card-glow-x: 50%;
+    --card-glow-y: 18%;
+    min-height: 1078px;
+}
+
+.access-card::before {
+    background:
+        radial-gradient(circle at var(--card-glow-x) var(--card-glow-y), rgba(20,199,215,.08), transparent 24%),
+        radial-gradient(circle at 50% 12%, rgba(9,143,165,.05), transparent 23%),
+        linear-gradient(110deg, transparent 0 40%, rgba(255,255,255,.012) 50%, transparent 60%);
+    transition: background-position .24s ease-out;
+}
+
+.access-card > *:not(.access-card__glow):not(.access-card__trace) {
+    position: relative;
+    z-index: 2;
+}
+
+.access-card__trace {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: visible;
+}
+
+.access-card__trace rect {
+    fill: none;
+    stroke: rgba(34, 225, 235, .68);
+    stroke-width: 1.15;
+    stroke-dasharray: .18 .82;
+    stroke-dashoffset: 1;
+    filter: drop-shadow(0 0 7px rgba(17,210,224,.34));
+    animation: cardTrace 1.35s cubic-bezier(.2,.72,.22,1) .12s forwards, traceFade .62s ease 1.18s forwards;
+}
+
+.nexorin-cube {
+    position: relative;
+}
+
+.nexorin-cube::after {
+    content: "";
+    position: absolute;
+    inset: 29%;
+    border: 1px solid rgba(33,231,238,.5);
+    border-radius: 50%;
+    opacity: 0;
+    transform: scale(.35);
+    animation: securePulse 1.05s cubic-bezier(.2,.74,.2,1) .98s 1 both;
+}
+
+.nexorin-cube .cube-lattice { animation-delay: .55s; }
+
+.nexorin-cube .cube-ready-dot {
+    fill: #a9fff4;
+    stroke: #20e7ec;
+    stroke-width: 1.2;
+    opacity: 0;
+    transform-origin: 56px 55.2px;
+    animation: readyDot .72s cubic-bezier(.22,.8,.22,1) .92s forwards;
+}
+
+.access-header,
+.login-form,
+.provider-divider,
+.google-button,
+.identity-note {
+    animation: contentSettle .58s cubic-bezier(.2,.8,.2,1) both;
+}
+
+.access-header { animation-delay: .24s; }
+.login-form { margin-top: 40px; animation-delay: .36s; }
+.provider-divider { animation-delay: .47s; }
+.google-button { animation-delay: .54s; }
+.identity-note { animation-delay: .62s; }
+
+.field-shell::after {
+    content: "";
+    position: absolute;
+    right: 10px;
+    bottom: -1px;
+    left: 10px;
+    height: 1px;
+    opacity: 0;
+    background: linear-gradient(90deg, transparent, rgba(31,226,235,.82), transparent);
+    transform: scaleX(.18);
+    transition: opacity .18s ease, transform .32s cubic-bezier(.2,.8,.2,1);
+}
+
+.field-shell:focus-within::after {
+    opacity: .9;
+    transform: scaleX(1);
+}
+
+.remember-control input:checked + span svg {
+    stroke-dasharray: 20;
+    stroke-dashoffset: 20;
+    animation: checkDraw .34s cubic-bezier(.2,.8,.2,1) forwards;
+}
+
+.sign-in-button {
+    isolation: isolate;
+}
+
+.button-progress {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    opacity: 0;
+    background: linear-gradient(90deg, transparent, rgba(224,255,255,.95), transparent);
+    transform: translateX(-100%);
+}
+
+.sign-in-button.is-loading .button-progress {
+    opacity: 1;
+    animation: authenticateProgress 1.15s ease-in-out infinite;
+}
+
+body.is-authenticating .access-card {
+    box-shadow: inset 0 1px rgba(255,255,255,.03), 0 38px 95px rgba(0,0,0,.24), 0 0 0 1px rgba(15,207,221,.08);
+}
+
+body.is-authenticating .nexorin-cube svg {
+    animation-duration: 1.5s;
+}
+
+body.is-authenticating .nexorin-cube::after {
+    animation: authenticatingPulse 1.4s ease-in-out infinite;
+}
+
+body[data-auth-error="true"] .auth-alert,
+body[data-auth-error="true"] .field-shell--invalid {
+    animation: errorNudge .36s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+body.motion-paused *,
+body.motion-paused *::before,
+body.motion-paused *::after {
+    animation-play-state: paused !important;
+}
+
+@keyframes sunBreathe {
+    0%, 100% { opacity: .28; transform: translate(-50%, -50%) scale(.95); }
+    50% { opacity: .47; transform: translate(-50%, -50%) scale(1.07); }
+}
+
+@keyframes energyTravel {
+    0% { stroke-dashoffset: 1; opacity: 0; }
+    9% { opacity: .82; }
+    72% { opacity: .7; }
+    100% { stroke-dashoffset: 0; opacity: 0; }
+}
+
+@keyframes panelSweep {
+    0%, 68% { left: -34%; opacity: 0; }
+    72% { opacity: .09; }
+    83% { opacity: .2; }
+    92%, 100% { left: 108%; opacity: 0; }
+}
+
+@keyframes logoXSheen {
+    0% { opacity: 0; transform: translateX(-90%) skewX(-17deg); }
+    18% { opacity: .75; }
+    54% { opacity: .38; }
+    100% { opacity: 0; transform: translateX(85%) skewX(-17deg); }
+}
+
+@keyframes cardTrace {
+    from { stroke-dashoffset: 1; opacity: 0; }
+    10% { opacity: .84; }
+    to { stroke-dashoffset: 0; opacity: .7; }
+}
+
+@keyframes traceFade { to { opacity: 0; } }
+
+@keyframes contentSettle {
+    from { opacity: 0; transform: translateY(9px); filter: blur(2px); }
+    to { opacity: 1; transform: none; filter: blur(0); }
+}
+
+@keyframes securePulse {
+    0% { opacity: 0; transform: scale(.35); }
+    42% { opacity: .72; }
+    100% { opacity: 0; transform: scale(1.65); }
+}
+
+@keyframes readyDot {
+    0% { opacity: 0; transform: scale(.2); }
+    55% { opacity: 1; transform: scale(1.35); }
+    100% { opacity: .85; transform: scale(1); }
+}
+
+@keyframes checkDraw { to { stroke-dashoffset: 0; } }
+
+@keyframes authenticateProgress {
+    0% { transform: translateX(-100%); }
+    55% { transform: translateX(15%); }
+    100% { transform: translateX(100%); }
+}
+
+@keyframes authenticatingPulse {
+    0%, 100% { opacity: .12; transform: scale(.75); }
+    50% { opacity: .62; transform: scale(1.5); }
+}
+
+@keyframes errorNudge {
+    10%, 90% { transform: translateX(-2px); }
+    20%, 80% { transform: translateX(4px); }
+    30%, 50%, 70% { transform: translateX(-4px); }
+    40%, 60% { transform: translateX(4px); }
+}
+
+/* Tall V6 reference: keep exact card silhouette while rebalancing internals. */
+@media (min-width: 900px) and (min-height: 1181px) {
+    .impact-metrics { top: 1010px; }
+    .security-summary { top: 1169px; }
+    .brand-footer { bottom: 81px; }
+    .identity-note { bottom: 25px; min-height: 89px; }
+}
+
+/* Landscape desktop: restrained motion calibrated to the independent crop. */
+@media (min-width: 900px) and (max-height: 1180px) {
+    .access-card { min-height: 0; }
+    .login-form { margin-top: 24px; }
+    .sun-bloom { top: 36%; left: 74%; width: 112px; height: 112px; }
+    .energy-stream { opacity: .34; transform: scale(1.08) translate(-3%, -2%); transform-origin: center; }
+    .panel-light-sweep { bottom: 16%; }
+    .access-card__trace { display: none; }
+}
+
+/* Tablet and mobile retain the interaction system but avoid costly ambient layers. */
+@media (max-width: 899px) {
+    .hero-motion { opacity: .45; }
+    .energy-stream { display: none; }
+    .panel-light-sweep { display: none; }
+    .sun-bloom { top: 56%; left: 77%; width: 94px; height: 94px; }
+    .access-card { min-height: 0; }
+    .login-form { margin-top: 23px; }
+    .access-card__trace { display: none; }
+}
+
+@media (max-width: 560px) {
+    .hero-motion { opacity: .34; }
+    .sun-bloom { width: 70px; height: 70px; }
+    .brand-x-sheen { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hero-motion,
+    .brand-x-sheen,
+    .access-card__trace,
+    .nexorin-cube::after,
+    .button-progress { display: none !important; }
+
+    .access-header,
+    .login-form,
+    .provider-divider,
+    .google-button,
+    .identity-note { opacity: 1 !important; transform: none !important; filter: none !important; }
+}
+
+/* Pass 08.1 — final geometry corrections after runtime measurement. */
+@media (min-width: 900px) and (min-height: 1181px) {
+    .access-card { min-height: 1046px; }
+    .access-card > .identity-note {
+        position: absolute;
+        right: 29px;
+        bottom: 24px;
+        left: 29px;
+        width: auto;
+        min-height: 89px;
+        margin: 0;
+    }
+}
+
+.brand-x-sheen {
+    animation-duration: 1.35s;
+    animation-delay: 1.05s;
+}
+
+@media (min-width: 900px) and (min-height: 1181px) {
+    .access-card > .identity-note {
+        position: absolute !important;
+        right: 38px;
+        bottom: 30px;
+        left: 58px;
+        width: auto;
+        min-height: 70px;
+        margin: 0;
+        padding: 0;
+        border: 0;
+        background: transparent;
+    }
+
+    .identity-note__icon svg { width: 42px; height: 47px; }
+    .identity-note p { font-size: 13px; line-height: 1.58; }
+}
+.panel-light-sweep { animation-duration: 10.5s; animation-delay: 1.8s; }
+
+/* ========================================================================== 
+   PAGE 001 — REFINED PREMIUM POLISH PASS 09
+   Motion is deliberately restrained: presence without spectacle.
+   ========================================================================== */
+
+.brand-stage__image {
+    opacity: .945;
+}
+
+.brand-stage__veil {
+    background:
+        linear-gradient(180deg, rgba(1, 8, 15, .15) 0%, rgba(1, 8, 15, .025) 25%, rgba(1, 8, 15, .045) 70%, rgba(1, 8, 15, .33) 100%),
+        linear-gradient(90deg, rgba(1, 8, 15, .27) 0%, rgba(1, 8, 15, .045) 63%, rgba(1, 8, 15, .16) 100%);
+}
+
+.brand-lockup {
+    width: 494px;
+}
+
+.brand-wordmark {
+    width: 494px;
+    opacity: .97;
+    filter:
+        drop-shadow(0 2px 10px rgba(0, 10, 22, .32))
+        drop-shadow(0 0 12px rgba(18, 85, 136, .08));
+}
+
+.brand-kicker {
+    width: 439px;
+}
+
+.sun-bloom {
+    opacity: .24;
+    animation-duration: 10.8s;
+    animation-delay: 1.4s;
+}
+
+.energy-stream {
+    opacity: .43;
+}
+
+.energy-stream__rail {
+    opacity: .10;
+}
+
+.energy-stream__pulse {
+    stroke-width: 1.8;
+    opacity: .62;
+    animation-duration: 10.6s;
+    animation-delay: 1.5s;
+}
+
+.energy-stream__node {
+    opacity: .48;
+}
+
+.panel-light-sweep {
+    animation-duration: 14.6s;
+    animation-delay: 4.4s;
+}
+
+.brand-x-sheen {
+    opacity: 0;
+    animation-duration: 1.05s;
+    animation-delay: .82s;
+}
+
+.access-card::before {
+    background:
+        radial-gradient(circle at var(--card-glow-x) var(--card-glow-y), rgba(20,199,215,.055), transparent 24%),
+        radial-gradient(circle at 50% 12%, rgba(9,143,165,.038), transparent 23%),
+        linear-gradient(110deg, transparent 0 40%, rgba(255,255,255,.009) 50%, transparent 60%);
+}
+
+.access-card__trace rect {
+    stroke: rgba(34, 225, 235, .48);
+    stroke-width: 1;
+    filter: drop-shadow(0 0 5px rgba(17,210,224,.22));
+    animation: cardTrace .98s cubic-bezier(.2,.72,.22,1) .08s forwards, traceFade .44s ease .82s forwards;
+}
+
+.nexorin-cube {
+    width: 108px;
+    height: 108px;
+    margin-bottom: 32px;
+}
+
+.nexorin-cube svg {
+    stroke-width: 1.85;
+    filter: drop-shadow(0 0 6px rgba(4, 211, 225, .16));
+    animation-duration: 10s;
+    animation-delay: 1.25s;
+}
+
+.nexorin-cube path {
+    animation-duration: .68s;
+    animation-delay: .14s;
+}
+
+.nexorin-cube .cube-inner { animation-delay: .27s; }
+.nexorin-cube .cube-lattice { animation-delay: .40s; }
+
+.nexorin-cube::after {
+    inset: 34%;
+    border-color: rgba(33,231,238,.34);
+    animation-duration: .72s;
+    animation-delay: .72s;
+}
+
+.access-header,
+.login-form,
+.provider-divider,
+.google-button,
+.identity-note {
+    animation-duration: .48s;
+}
+
+.access-header { animation-delay: .16s; }
+.login-form { animation-delay: .26s; }
+.provider-divider { animation-delay: .35s; }
+.google-button { animation-delay: .42s; }
+.identity-note { animation-delay: .49s; }
+
+.field-shell:focus-within::after {
+    opacity: .68;
+}
+
+@keyframes sunBreathe {
+    0%, 100% { opacity: .17; transform: translate(-50%, -50%) scale(.975); }
+    50% { opacity: .29; transform: translate(-50%, -50%) scale(1.025); }
+}
+
+@keyframes energyTravel {
+    0% { stroke-dashoffset: 1; opacity: 0; }
+    12% { opacity: .58; }
+    68% { opacity: .48; }
+    100% { stroke-dashoffset: 0; opacity: 0; }
+}
+
+@keyframes panelSweep {
+    0%, 76% { left: -34%; opacity: 0; }
+    80% { opacity: .05; }
+    87% { opacity: .12; }
+    94%, 100% { left: 108%; opacity: 0; }
+}
+
+@keyframes logoXSheen {
+    0% { opacity: 0; transform: translateX(-90%) skewX(-17deg); }
+    26% { opacity: .44; }
+    58% { opacity: .18; }
+    100% { opacity: 0; transform: translateX(85%) skewX(-17deg); }
+}
+
+@keyframes markBreathe {
+    0%,100% { opacity: .96; filter: drop-shadow(0 0 5px rgba(4, 211, 225, .14)); }
+    50% { opacity: 1; filter: drop-shadow(0 0 8px rgba(4, 211, 225, .22)); }
+}
+
+@media (min-width: 900px) and (max-height: 1180px) {
+    .brand-lockup { width: 455px; }
+    .brand-wordmark { width: 455px; }
+    .brand-kicker { width: 405px; }
+    .nexorin-cube { width: 74px; height: 74px; margin-bottom: 16px; }
+    .sun-bloom { opacity: .19; }
+    .energy-stream { opacity: .30; }
+}
+
+@media (max-width: 899px) {
+    .brand-lockup { width: min(435px, calc(100% - 20px)); }
+    .brand-wordmark { width: 435px; }
+    .brand-kicker { width: 385px; }
+    .nexorin-cube { width: 62px; height: 62px; margin-bottom: 12px; }
+}
+
+@media (max-width: 560px) {
+    .brand-lockup { width: calc(100% - 4px); }
+    .brand-wordmark { width: 300px; }
+    .brand-kicker { width: min(300px, calc(100% - 20px)); }
+    .nexorin-cube { width: 56px; height: 56px; margin-bottom: 10px; }
+}
+
+/* Pass 09.1 — exact access-mark lattice and mobile first-viewport cleanup. */
+.nexorin-cube .cube-connectors { animation-delay: .22s; }
+.nexorin-cube .cube-core { animation-delay: .31s; }
+.nexorin-cube .cube-lattice { animation-delay: .39s; }
+.nexorin-cube .cube-core-spokes { animation-delay: .47s; }
+
+@media (max-width: 560px) {
+    .identity-note { display: none; }
+    .access-card { padding-bottom: 22px; }
+}
+
+/* ========================================================================== 
+   PAGE 001 — FINAL MICRO-POLISH PASS 10
+   Precise V6 alignment, no initial white flash, and restrained depth.
+   ========================================================================== */
+
+.brand-wordmark {
+    opacity: 1;
+    filter:
+        drop-shadow(0 2px 10px rgba(0, 10, 22, .30))
+        drop-shadow(0 0 14px rgba(24, 101, 157, .13));
+}
+
+.brand-kicker p {
+    color: rgba(236, 241, 245, .90);
+    font-size: 10.35px;
+}
+
+.nexorin-cube .cube-outer {
+    stroke-width: 2.12;
+}
+
+.nexorin-cube .cube-inner {
+    stroke-width: 1.72;
+    opacity: .96;
+}
+
+.nexorin-cube .cube-core {
+    stroke-width: 1.54;
+    opacity: .94;
+}
+
+.nexorin-cube .cube-connectors,
+.nexorin-cube .cube-lattice,
+.nexorin-cube .cube-core-spokes {
+    stroke-width: 1.28;
+    opacity: .91;
+}
+
+.sun-bloom {
+    opacity: .20;
+}
+
+.energy-stream {
+    opacity: .39;
+}
+
+.panel-light-sweep {
+    filter: blur(3.5px);
+}
+
+@keyframes panelSweep {
+    0%, 78% { left: -34%; opacity: 0; }
+    82% { opacity: .035; }
+    88% { opacity: .085; }
+    95%, 100% { left: 108%; opacity: 0; }
+}
+
+@media (min-width: 900px) and (min-height: 1181px) {
+    .brand-stage__image {
+        background-size: auto 51.5%;
+        background-position: 77.5% 35.5%;
+        opacity: .93;
+    }
+
+    .sun-bloom {
+        top: 27.2%;
+        left: 80.4%;
+        width: 124px;
+        height: 124px;
+    }
+
+    .energy-stream {
+        transform: translate(-1.6%, 1.4%) scale(.985);
+        transform-origin: center;
+    }
+
+    .access-card {
+        min-height: 1078px;
+    }
+
+    .access-card > .identity-note {
+        bottom: 30px;
+    }
+
+    .impact-metrics {
+        top: 1034px;
+    }
+
+    .security-summary {
+        top: 1194px;
+    }
+
+    .brand-footer {
+        bottom: 61px;
+    }
+}
+
+@media (min-width: 900px) and (max-height: 1180px) {
+    .brand-kicker p { font-size: 9.15px; }
+}
+
+@media (max-width: 899px) {
+    .brand-kicker p { font-size: 8.85px; }
+}
+
+@media (max-width: 560px) {
+    .brand-kicker p { font-size: 6.3px; }
+}
+
+/* Pass 10.1 — prevent inherited absolute offsets in non-tall layouts. */
+@media (min-width: 900px) and (max-height: 1180px), (max-width: 899px) {
+    .access-card > .identity-note {
+        top: auto;
+        right: auto;
+        bottom: auto;
+        left: auto;
+    }
+}
+
+/* Pass 10.2 — exact first-viewport completion on tablet and mobile. */
+@media (max-width: 899px) {
+    .access-stage { padding-bottom: 18px; }
+}
+
+@media (max-width: 560px) {
+    .access-stage { padding-bottom: 24px; }
+}
+
+
+/* ========================================================================== 
+   PAGE 001 — PASSWORD-ONLY FINAL LOCK
+   Google SSO is optional and disabled by default. The card contracts naturally
+   instead of leaving an inactive provider region or decorative filler.
+   ========================================================================== */
+
+@media (min-width: 900px) and (min-height: 1181px) {
+    .access-card--password-only {
+        min-height: 888px;
+        padding-bottom: 34px;
+    }
+
+    .access-card--password-only > .identity-note {
+        position: static !important;
+        width: auto;
+        min-height: 70px;
+        margin: 70px 0 0;
+        padding: 0;
+        border: 0;
+        background: transparent;
+    }
+}
+
+@media (min-width: 900px) and (max-height: 1180px) {
+    .access-card--password-only > .identity-note {
+        margin-top: 30px;
+    }
+}
+
+@media (max-width: 899px) and (min-width: 561px) {
+    .access-card--password-only > .identity-note {
+        margin-top: 28px;
+    }
+}
+
+/* ========================================================================== 
+   PAGE 001 — PERFORMANCE LOCK PASS 11
+   Preserve the V6 composition while avoiding permanent GPU/repaint work.
+   ========================================================================== */
+
+.brand-stage__image {
+    background-image: image-set(
+        url("../images/nexorin-hero.webp") type("image/webp"),
+        url("../images/nexorin-hero.png") type("image/png")
+    );
+    transform: none;
+    transition: none;
+    will-change: auto;
+}
+
+.energy-orbit,
+.sun-bloom,
+.energy-stream__pulse,
+.panel-light-sweep,
+.access-card__glow,
+.nexorin-cube svg {
+    animation: none;
+}
+
+.sun-bloom {
+    transform: translate(-50%, -50%);
+}
+
+.energy-stream__rail,
+.energy-stream__pulse,
+.energy-stream__node {
+    filter: none;
+}
+
+.energy-stream__pulse {
+    stroke-dasharray: .11 .89;
+    stroke-dashoffset: .43;
+    opacity: .42;
+}
+
+.energy-stream__node {
+    opacity: .54;
+}
+
+.panel-light-sweep {
+    display: none;
+}
+
+.access-card {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+
+.access-card__glow {
+    top: -110px;
+    width: 420px;
+    height: 290px;
+    opacity: .62;
+    filter: none;
+    transform: translateX(-50%);
+    background: radial-gradient(circle at 50% 50%, rgba(3, 185, 207, .10), rgba(3, 185, 207, .025) 46%, transparent 72%);
+}
+
+.nexorin-cube svg {
+    filter: drop-shadow(0 0 5px rgba(4, 211, 225, .15));
+}
+
+.motion-paused *,
+.motion-paused *::before,
+.motion-paused *::after {
+    animation-play-state: paused !important;
+}
+
+/* ========================================================================== 
+   PAGE 001 — SHORT LANDSCAPE COLLISION FIX 10.3
+   Keep story copy, KPI rail and security summary in independent vertical bands
+   on wide/short desktop viewports (e.g. 1920×800). This prevents the brand
+   paragraph from entering the KPI rail while preserving the V6 composition.
+   ========================================================================== */
+@media (min-width: 900px) and (max-height: 900px) {
+    .brand-story {
+        top: clamp(205px, 29vh, 255px);
+        width: min(355px, calc(100% - 116px));
+    }
+
+    .brand-story h1 {
+        font-size: clamp(36px, 2.55vw, 44px);
+        line-height: 1.10;
+    }
+
+    .story-accent {
+        margin: 14px 0 14px 2px;
+    }
+
+    .brand-story > p {
+        max-width: 315px;
+        font-size: 13.5px;
+        line-height: 1.50;
+    }
+
+    .impact-metrics {
+        top: auto;
+        bottom: 142px;
+        align-items: start;
+    }
+
+    .metric-card svg {
+        width: 28px;
+        height: 28px;
+        margin-bottom: 8px;
+    }
+
+    .metric-card strong {
+        font-size: 21px;
+    }
+
+    .metric-card small {
+        margin-top: 8px;
+        font-size: 10.6px;
+        line-height: 1.42;
+    }
+
+    .metric-card:not(:last-child)::after {
+        top: 17px;
+        height: 94px;
+    }
+
+    .security-summary {
+        top: auto;
+        bottom: 24px;
+        min-height: 92px;
+        padding: 14px 22px;
+    }
+
+    .security-summary__icon svg {
+        width: 36px;
+        height: 41px;
+    }
+
+    .security-summary strong {
+        font-size: 13.8px;
+    }
+
+    .security-summary p {
+        font-size: 11.8px;
+        line-height: 1.45;
+    }
+}
+
+@media (min-width: 900px) and (max-height: 700px) {
+    .brand-story {
+        top: 150px;
+    }
+
+    .brand-story h1 {
+        font-size: 34px;
+    }
+
+    .brand-story > p {
+        font-size: 12.5px;
+        line-height: 1.42;
+    }
+
+    .impact-metrics {
+        bottom: 118px;
+    }
+
+    .security-summary {
+        bottom: 14px;
+        min-height: 82px;
+    }
+}
+
+/* ========================================================================== 
+   PAGE 001 — PREMIUM BRAND + QUIET INTERACTION PASS 12
+   Use the official NEXORIN mark, keep motion event-driven, and make form
+   feedback precise without introducing permanent compositor work.
+   ========================================================================== */
+
+.nexorin-auth-mark {
+    position: relative;
+    width: 84px;
+    height: 90px;
+    display: grid;
+    place-items: center;
+    margin: 0 auto 28px;
+    isolation: isolate;
+}
+
+.nexorin-auth-mark::before {
+    content: "";
+    position: absolute;
+    inset: 10px 3px 1px;
+    z-index: -2;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(7, 205, 219, .11), rgba(6, 132, 173, .035) 48%, transparent 72%);
+}
+
+.nexorin-auth-mark__halo {
+    position: absolute;
+    inset: 13px 7px 4px;
+    z-index: -1;
+    border-radius: 50%;
+    border: 1px solid rgba(32, 210, 217, .10);
+    opacity: .72;
+}
+
+.nexorin-auth-mark img {
+    display: block;
+    width: 78px;
+    height: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 7px 16px rgba(0, 8, 20, .34)) drop-shadow(0 0 10px rgba(12, 182, 193, .08));
+    transform: translateY(0);
+}
+
+.access-header > p {
+    margin-top: 7px;
+    color: rgba(186, 202, 212, .70);
+}
+
+.field-shell {
+    transition: border-color .17s ease, box-shadow .17s ease, background .17s ease, transform .17s ease;
+}
+
+.field-shell:focus-within {
+    border-color: rgba(15, 204, 216, .68);
+    background: rgba(3, 18, 29, .70);
+    box-shadow: 0 0 0 2px rgba(8, 194, 211, .14), inset 0 1px 2px rgba(0,0,0,.18);
+}
+
+.field-shell.is-invalid,
+.field-shell--invalid {
+    border-color: rgba(255, 111, 121, .72);
+    background: rgba(38, 10, 18, .22);
+    box-shadow: 0 0 0 2px rgba(255, 91, 104, .09);
+}
+
+.field-shell.is-invalid > svg,
+.field-shell--invalid > svg {
+    stroke: rgba(255, 145, 153, .92);
+}
+
+.field-message {
+    min-height: 0;
+    margin: 0;
+    color: #ff9ba3;
+    font-size: 11.5px;
+    line-height: 1.35;
+    opacity: 0;
+    transform: translateY(-3px);
+    transition: opacity .16s ease, transform .16s ease, margin-top .16s ease;
+}
+
+.field-message.is-visible {
+    margin-top: 7px;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.sign-in-button {
+    box-shadow: inset 0 1px rgba(255,255,255,.13), 0 10px 25px rgba(2, 139, 164, .13);
+}
+
+.sign-in-button:hover {
+    transform: translateY(-1px);
+    box-shadow: inset 0 1px rgba(255,255,255,.17), 0 14px 30px rgba(2, 154, 179, .19);
+    filter: brightness(1.045);
+}
+
+.identity-note--trust p {
+    display: grid;
+    gap: 3px;
+}
+
+.identity-note--trust p strong {
+    color: rgba(226, 236, 241, .90);
+    font-size: 12.5px;
+    font-weight: 550;
+    letter-spacing: .01em;
+}
+
+.identity-note--trust p span {
+    color: rgba(171, 192, 204, .67);
+    font-size: 11.5px;
+    line-height: 1.45;
+}
+
+@media (min-width: 900px) and (max-height: 1180px) {
+    .nexorin-auth-mark {
+        width: 69px;
+        height: 74px;
+        margin-bottom: 14px;
+    }
+
+    .nexorin-auth-mark img { width: 64px; }
+    .nexorin-auth-mark::before { inset: 8px 2px 0; }
+    .nexorin-auth-mark__halo { inset: 11px 6px 2px; }
+}
+
+@media (max-width: 899px) {
+    .nexorin-auth-mark {
+        width: 64px;
+        height: 69px;
+        margin-bottom: 12px;
+    }
+
+    .nexorin-auth-mark img { width: 59px; }
+}
+
+@media (max-width: 560px) {
+    .nexorin-auth-mark {
+        width: 58px;
+        height: 62px;
+        margin-bottom: 10px;
+    }
+
+    .nexorin-auth-mark img { width: 53px; }
+    .identity-note--trust p span { font-size: 10.8px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .field-shell,
+    .field-message,
+    .sign-in-button,
+    .password-toggle svg,
+    .remember-control > span,
+    .remember-control > span svg {
+        transition: none !important;
+    }
+}

@@ -1,285 +1,281 @@
 @extends('layouts.app')
 
-@section('title', 'Load Analysis')
-@section('page-eyebrow', 'Engineering workspace')
+@section('title', 'Load Analyses')
+@section('page-eyebrow', 'Load engineering')
 @section('page-heading', 'Load Analyses')
+@section('force-theme', 'dark')
+@section('body-class', 'page-load-analysis-index-v6')
+@section('disable-remote-fonts', '1')
 
 @php
-    $totalProjects = max((int) $stats['projects'], 1);
-    $startedProgress = min(100, ((int) $stats['started'] / $totalProjects) * 100);
-    $equipmentProgress = min(100, ((int) $stats['with_appliances'] / $totalProjects) * 100);
-    $billProgress = min(100, ((int) $stats['with_bills'] / $totalProjects) * 100);
-    $activeFilterCount = collect([
-        $filters['search'] !== '' ? $filters['search'] : null,
-        $filters['status'] !== 'all' ? $filters['status'] : null,
-    ])->filter()->count();
+    $activeFilters = ($filters['search'] !== '' ? 1 : 0) + ($filters['status'] !== 'all' ? 1 : 0);
+    $projectRange = $projects->total() === 0
+        ? 'No current projects'
+        : (($projects->firstItem() ?? 0).'–'.($projects->lastItem() ?? 0).' of '.number_format($projects->total()));
+
+    $formatEnergy = static function ($value): string {
+        if ($value === null) return '—';
+        $value = (float) $value;
+        if (abs($value) >= 1_000_000) return number_format($value / 1_000_000, 2).' GWh';
+        if (abs($value) >= 1_000) return number_format($value / 1_000, 1).' MWh';
+        return number_format($value, 1).' kWh';
+    };
+
+    $formatPower = static function ($value): string {
+        if ($value === null) return '—';
+        $value = (float) $value;
+        if (abs($value) >= 1_000) return number_format($value / 1_000, 2).' MW';
+        return number_format($value, $value >= 100 ? 0 : 1).' kW';
+    };
 @endphp
 
 @push('styles')
-    <link href="{{ asset('css/nexorin-load-analysis.css') }}?v=55a" rel="stylesheet">
+    <link href="{{ asset('css/nexorin-v6-token-contract.css') }}?v=001017.1" rel="stylesheet">
+    <link href="{{ asset('css/nexorin-luxury-system-v2.css') }}?v=2.017" rel="stylesheet">
+    <link href="{{ asset('css/nexorin-load-analysis-index-v6.css') }}?v=017a" rel="stylesheet">
 @endpush
 
 @push('scripts')
-    <script src="{{ asset('js/nexorin-load-analysis.js') }}?v=55a" defer></script>
+    <script src="{{ asset('js/nexorin-load-analysis-index-v6.js') }}?v=017a" defer></script>
 @endpush
 
 @section('content')
-    <div class="nxla-directory">
-        <header class="nxla-directory-hero" data-nxla-reveal>
-            <div class="nxla-directory-heading">
-                <span class="nxla-eyebrow">Electrical demand foundation</span>
-                <h2>Load analysis portfolio</h2>
-                <p>
-                    Review appliance schedules, historical bills, and modeled demand profiles before each project moves into PLTS sizing.
-                    The directory keeps progress readable without turning the workspace into a dense engineering table.
-                </p>
-            </div>
+<main class="nx17" data-nx17-page>
+    <header class="nx17-head" data-nx17-reveal>
+        <div class="nx17-head-copy">
+            <span class="nx17-kicker">Load engineering · project registry</span>
+            <h2>Load Engineering Registry</h2>
+            <p>
+                Review current project load models, recorded equipment and bill inputs, deterministic summary values, and existing downstream timestamp flags. Current appliance modelling remains preliminary unless stronger source evidence exists.
+            </p>
+        </div>
 
-            <div class="nxla-directory-context">
-                <span class="nxla-chip is-live">{{ number_format($stats['started']) }} analyses started</span>
-                <span class="nxla-chip">{{ number_format($stats['with_appliances']) }} with equipment data</span>
-                <a href="{{ route('companies.projects.index', $company) }}" class="nxla-context-link">
-                    Project Directory
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-                        <path d="M5 12h14"/><path d="M13 5l7 7-7 7"/>
-                    </svg>
-                </a>
-            </div>
-        </header>
-
-        <section class="nxla-stat-grid" aria-label="Load analysis statistics">
-            <article class="nxla-stat-card is-dark" style="--progress: 100%;" data-nxla-reveal>
-                <div class="nxla-stat-top">
-                    <span class="nxla-stat-icon nxla-stat-icon--portfolio">
-                        <svg class="nxla-icon-art" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                            <rect class="i-surface" x="4.6" y="5.3" width="14.8" height="13.6" rx="3"/>
-                            <path class="i-main" d="M8.1 9.7h7.8M8.1 13.1h4.1"/>
-                            <path class="i-accent" d="M7.8 16.2h2.1l1.1-2.8 1.5 4 1.2-2.2h2.4"/>
-                            <path class="i-soft" d="M7.6 5.3V4.2h4.6l1.2 1.1"/>
-                        </svg>
-                    </span>
-                    <span class="nxla-chip">Portfolio</span>
-                </div>
-                <strong data-nxla-counter="{{ $stats['projects'] }}">{{ number_format($stats['projects']) }}</strong>
-                <b>Available projects</b>
-                <small>Current projects visible in this workspace</small>
-                <span class="nxla-stat-progress"><span></span></span>
-            </article>
-
-            <a href="{{ route('companies.load-analyses.index', ['company' => $company, 'status' => 'in_progress']) }}" class="nxla-stat-card" style="--progress: {{ $startedProgress }}%;" data-nxla-reveal>
-                <div class="nxla-stat-top">
-                    <span class="nxla-stat-icon nxla-stat-icon--started">
-                        <svg class="nxla-icon-art" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                            <rect class="i-surface" x="4.8" y="5.2" width="14.4" height="13.6" rx="3"/>
-                            <path class="i-main" d="M7 15.9h10"/>
-                            <path class="i-accent" d="M7.2 14.6 9.6 12l2.4 1.9 4.1-4.8 1.7 1.6"/>
-                            <path class="i-soft" d="M16.9 9.2h2v2"/>
-                            <circle class="i-fill" cx="7.2" cy="14.6" r="1.05"/>
-                        </svg>
-                    </span>
-                    <span class="nxla-chip is-live">Started</span>
-                </div>
-                <strong data-nxla-counter="{{ $stats['started'] }}">{{ number_format($stats['started']) }}</strong>
-                <b>Analyses started</b>
-                <small>Projects with an active load-analysis record</small>
-                <span class="nxla-stat-progress"><span></span></span>
+        <div class="nx17-head-actions">
+            <span class="nx17-scope-chip"><i></i>{{ $company->name }}</span>
+            <a href="{{ route('companies.projects.index', $company) }}" class="nx17-link-button">
+                <span>Project Directory</span>
+                <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11m-4-4 4 4-4 4"/></svg>
             </a>
+        </div>
+    </header>
 
-            <article class="nxla-stat-card" style="--progress: {{ $equipmentProgress }}%;" data-nxla-reveal>
-                <div class="nxla-stat-top">
-                    <span class="nxla-stat-icon nxla-stat-icon--equipment">
-                        <svg class="nxla-icon-art" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                            <rect class="i-surface" x="7.2" y="7.2" width="9.6" height="9.6" rx="2.6"/>
-                            <path class="i-main" d="M9.6 10.1h4.8v4H9.6z"/>
-                            <path class="i-soft" d="M7.2 12H5.2M18.8 12h-2M12 7.2V5.2M12 18.8v-2"/>
-                            <path class="i-accent" d="M10.3 14.5h1.2l.8-2 1.1 2.8.8-1.4h1"/>
-                        </svg>
-                    </span>
-                    <span class="nxla-chip">Equipment</span>
-                </div>
-                <strong data-nxla-counter="{{ $stats['with_appliances'] }}">{{ number_format($stats['with_appliances']) }}</strong>
-                <b>With equipment data</b>
-                <small>Projects already producing a modeled demand profile</small>
-                <span class="nxla-stat-progress"><span></span></span>
-            </article>
+    <section class="nx17-command-band" aria-label="Load registry context" data-nx17-surface data-nx17-reveal>
+        <article class="nx17-command-metric">
+            <span>Current projects</span>
+            <strong>{{ number_format($stats['projects']) }}</strong>
+            <small>Non-archived projects visible to this user.</small>
+        </article>
+        <a href="{{ route('companies.load-analyses.index', ['company' => $company, 'status' => 'available']) }}" class="nx17-command-metric is-cyan">
+            <span>Load analyses</span>
+            <strong>{{ number_format($stats['analyses']) }}</strong>
+            <small>Projects with a persisted current Load Analysis.</small>
+        </a>
+        <a href="{{ route('companies.load-analyses.index', ['company' => $company, 'status' => 'equipment_model']) }}" class="nx17-command-metric is-green">
+            <span>Equipment models</span>
+            <strong>{{ number_format($stats['with_appliances']) }}</strong>
+            <small>Projects with one or more equipment load groups.</small>
+        </a>
+        <a href="{{ route('companies.load-analyses.index', ['company' => $company, 'status' => 'no_analysis']) }}" class="nx17-command-metric is-amber">
+            <span>Need load analysis</span>
+            <strong>{{ number_format($stats['needs_analysis']) }}</strong>
+            <small>Current projects without a persisted Load Analysis.</small>
+        </a>
+    </section>
 
-            <article class="nxla-stat-card" style="--progress: {{ $billProgress }}%;" data-nxla-reveal>
-                <div class="nxla-stat-top">
-                    <span class="nxla-stat-icon nxla-stat-icon--bills">
-                        <svg class="nxla-icon-art" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                            <path class="i-surface" d="M7 4.6h8.6l2.2 2.2v12.2l-2-1.2-1.8 1.2-1.8-1.2-1.8 1.2-1.8-1.2-1.8 1.2V4.6Z"/>
-                            <path class="i-main" d="M15.6 4.6v3h3M9 10.2h5.2M9 13.1h3.8"/>
-                            <path class="i-accent" d="m12.2 15.2 1.4 1.4 2.5-2.8"/>
-                        </svg>
-                    </span>
-                    <span class="nxla-chip">Bills</span>
-                </div>
-                <strong data-nxla-counter="{{ $stats['with_bills'] }}">{{ number_format($stats['with_bills']) }}</strong>
-                <b>With bill history</b>
-                <small>Projects that can validate modeled energy against actual use</small>
-                <span class="nxla-stat-progress"><span></span></span>
-            </article>
-        </section>
-
-        <section class="nxla-card nxla-registry" data-nxla-reveal>
-            <header class="nxla-registry-head">
+    <div class="nx17-workspace">
+        <section class="nx17-registry" data-nx17-surface data-nx17-reveal>
+            <header class="nx17-registry-head">
                 <div>
-                    <span class="nxla-eyebrow">Load registry</span>
-                    <h3>Project load analyses</h3>
-                    <p>Open a project to inspect equipment, bills, settings, and validation quality.</p>
+                    <span class="nx17-section-kicker">Project load models</span>
+                    <h3>Current Load Analyses</h3>
+                    <p>Annualized energy and peak demand are shown only where the current stored load model can derive them.</p>
                 </div>
-                <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-                    @if ($activeFilterCount > 0)
-                        <span class="nxla-chip is-warning">{{ $activeFilterCount }} active {{ \Illuminate\Support\Str::plural('filter', $activeFilterCount) }}</span>
+                <div class="nx17-result-meta">
+                    @if ($activeFilters > 0)
+                        <span class="nx17-filter-count">{{ $activeFilters }} active {{
+                            \Illuminate\Support\Str::plural('filter', $activeFilters) }}</span>
                     @endif
-                    <span class="nxla-result-count">
-                        @if ($projects->total() === 0)
-                            No projects
-                        @elseif ($projects->hasPages())
-                            {{ number_format($projects->firstItem()) }}–{{ number_format($projects->lastItem()) }} of {{ number_format($projects->total()) }}
-                        @else
-                            Showing {{ number_format($projects->total()) }} {{ \Illuminate\Support\Str::plural('project', $projects->total()) }}
-                        @endif
-                    </span>
+                    <span>{{ $projectRange }}</span>
                 </div>
             </header>
 
-            <form method="GET" action="{{ route('companies.load-analyses.index', $company) }}" class="nxla-filter-bar" aria-label="Load analysis filters">
-                <div class="ui-field">
-                    <label class="ui-label" for="load-analysis-search">Search projects</label>
-                    <input id="load-analysis-search" class="ui-input" type="search" name="search" value="{{ $filters['search'] }}" placeholder="Project number, name, or customer">
+            <form method="GET" action="{{ route('companies.load-analyses.index', $company) }}" class="nx17-filters" data-nx17-filter-form>
+                <div class="nx17-field nx17-field--search">
+                    <label for="load-analysis-search">Search</label>
+                    <div class="nx17-control-wrap">
+                        <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="4.7"/><path d="m12.1 12.1 4 4"/></svg>
+                        <input id="load-analysis-search" type="search" name="search" value="{{ $filters['search'] }}" placeholder="Project number, project name, or customer">
+                    </div>
                 </div>
-                <div class="ui-field">
-                    <label class="ui-label" for="load-analysis-status">Analysis status</label>
-                    <select id="load-analysis-status" class="ui-select" name="status">
-                        <option value="all" @selected($filters['status'] === 'all')>All projects</option>
-                        <option value="not_started" @selected($filters['status'] === 'not_started')>Not started</option>
-                        <option value="in_progress" @selected($filters['status'] === 'in_progress')>Started</option>
+
+                <div class="nx17-field">
+                    <label for="load-analysis-status">Registry state</label>
+                    <select id="load-analysis-status" name="status">
+                        <option value="all" @selected($filters['status'] === 'all')>All current projects</option>
+                        <option value="no_analysis" @selected($filters['status'] === 'no_analysis')>No Load Analysis</option>
+                        <option value="available" @selected($filters['status'] === 'available')>Load Analysis available</option>
+                        <option value="input_required" @selected($filters['status'] === 'input_required')>Input required</option>
+                        <option value="equipment_model" @selected($filters['status'] === 'equipment_model')>Equipment model recorded</option>
+                        <option value="bill_reference" @selected($filters['status'] === 'bill_reference')>Bill reference recorded</option>
                     </select>
                 </div>
-                <div class="nxla-filter-actions">
-                    <button type="submit" class="ui-button ui-button-primary">Apply filters</button>
-                    @if ($filters['search'] !== '' || $filters['status'] !== 'all')
-                        <a href="{{ route('companies.load-analyses.index', $company) }}" class="ui-button ui-button-secondary">Reset</a>
+
+                <div class="nx17-filter-actions">
+                    <button type="submit" class="nx17-button nx17-button--primary">Apply</button>
+                    @if ($activeFilters > 0)
+                        <a href="{{ route('companies.load-analyses.index', $company) }}" class="nx17-button nx17-button--ghost">Reset</a>
                     @endif
                 </div>
             </form>
 
             @if ($projects->isEmpty())
-                <div class="nxla-empty">
-                    <div>
-                        <h3>No projects match this view</h3>
-                        <p>Create a current project or clear the active filters.</p>
-                    </div>
+                <div class="nx17-empty">
+                    <span class="nx17-empty-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24"><path d="M5 5h14v14H5z"/><path d="M8 9h8M8 13h5"/></svg>
+                    </span>
+                    @if ((int) $stats['projects'] === 0)
+                        <h4>No current projects available</h4>
+                        <p>This company has no non-archived project available to the current Load Analysis registry.</p>
+                        <a href="{{ route('companies.projects.index', $company) }}" class="nx17-inline-link">Open Project Directory</a>
+                    @else
+                        <h4>No projects match these filters</h4>
+                        <p>The registry is server-filtered. Clear the current search or state filter to review the remaining authorized projects.</p>
+                        <a href="{{ route('companies.load-analyses.index', $company) }}" class="nx17-inline-link">Clear filters</a>
+                    @endif
                 </div>
             @else
-                <div class="nxla-registry-grid nxla-registry-header-row" aria-hidden="true">
-                    <span>Project</span>
-                    <span>Customer</span>
-                    <span>Analysis</span>
-                    <span>Equipment</span>
-                    <span>Bills</span>
-                    <span>Updated</span>
-                    <span></span>
+                <div class="nx17-table-shell">
+                    <div class="nx17-table-head nx17-grid" aria-hidden="true">
+                        <span>Project / customer</span>
+                        <span>Load state</span>
+                        <span>Annualized energy</span>
+                        <span>Peak demand</span>
+                        <span>Inputs</span>
+                        <span>Freshness</span>
+                        <span>Action</span>
+                    </div>
+
+                    <div class="nx17-table-body">
+                        @foreach ($projects as $project)
+                            @php
+                                $row = $registryRows->get($project->getKey());
+                                $customerName = $project->customer?->name ?: 'Customer not recorded';
+                                $customerNumber = $project->customer?->customer_number ?: 'Customer reference not recorded';
+                            @endphp
+                            <article class="nx17-row nx17-grid" data-nx17-row>
+                                <div class="nx17-project-cell">
+                                    <span class="nx17-project-glyph" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24"><path d="M4 18.5h16"/><path d="M6 18.5V9.6l5.9-4.1 6.1 4.1v8.9"/><path d="M9 13h6M12 10v6"/></svg>
+                                    </span>
+                                    <div class="nx17-project-copy">
+                                        <strong title="{{ $project->name }}">{{ $project->name }}</strong>
+                                        <span class="nx17-mono">{{ $project->project_number }}</span>
+                                        <small title="{{ $customerName }}">{{ $customerName }} · {{ $customerNumber }}</small>
+                                    </div>
+                                </div>
+
+                                <div class="nx17-state-cell">
+                                    <span class="nx17-state is-{{ $row['state'] }}"><i></i>{{ $row['state_label'] }}</span>
+                                    <strong>{{ $row['basis_label'] }}</strong>
+                                    <small>{{ $project->proposed_system_label }} · {{ $project->building_type_label }}</small>
+                                </div>
+
+                                <div class="nx17-value-cell">
+                                    <strong>{{ $formatEnergy($row['annual_energy_kwh']) }}</strong>
+                                    <small>{{ $row['annual_energy_kwh'] === null ? 'Insufficient load input' : 'Current annualized summary' }}</small>
+                                </div>
+
+                                <div class="nx17-value-cell">
+                                    <strong>{{ $formatPower($row['peak_demand_kw']) }}</strong>
+                                    <small>{{ $row['peak_basis'] }}</small>
+                                </div>
+
+                                <div class="nx17-input-cell">
+                                    <strong>{{ $row['input_label'] }}</strong>
+                                    <small>
+                                        @if ($row['critical_count'] > 0)
+                                            {{ number_format($row['critical_count']) }} marked critical
+                                        @else
+                                            No critical equipment recorded
+                                        @endif
+                                    </small>
+                                </div>
+
+                                <div class="nx17-freshness-cell">
+                                    @if ($row['updated_at'])
+                                        <strong>{{ $row['updated_at']->diffForHumans() }}</strong>
+                                        <small>{{ $row['updated_at']->format('d M Y, H:i') }}</small>
+                                    @else
+                                        <strong>Not recorded</strong>
+                                        <small>No Load Analysis timestamp</small>
+                                    @endif
+                                    <span class="nx17-downstream is-{{ $row['downstream_state'] }}" title="{{ $row['downstream_detail'] }}">
+                                        <i></i>{{ $row['downstream_label'] }}
+                                    </span>
+                                </div>
+
+                                <div class="nx17-action-cell">
+                                    @if (($row['action_method'] ?? 'get') === 'post')
+                                        <form method="POST" action="{{ $row['action_url'] }}" class="nx17-row-action-form">
+                                            @csrf
+                                            <button type="submit" class="nx17-row-action" aria-label="{{ $row['action_label'] }} for {{ $project->name }}">
+                                                <span>{{ $row['action_label'] }}</span>
+                                                <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11m-4-4 4 4-4 4"/></svg>
+                                            </button>
+                                        </form>
+                                    @else
+                                        <a href="{{ $row['action_url'] }}" class="nx17-row-action" aria-label="{{ $row['action_label'] }} for {{ $project->name }}">
+                                            <span>{{ $row['action_label'] }}</span>
+                                            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11m-4-4 4 4-4 4"/></svg>
+                                        </a>
+                                    @endif
+                                </div>
+                            </article>
+                        @endforeach
+                    </div>
                 </div>
 
-                @foreach ($projects as $project)
-                    @php
-                        $buildingType = strtolower((string) ($project->building_type ?? 'residential'));
-                        $systemType = strtolower(str_replace('-', '_', (string) ($project->proposed_system ?? 'undecided')));
-                        $hasAnalysis = (bool) $project->loadAnalysis;
-                        $hasModeledLoad = (int) $project->load_appliances_count > 0;
-
-                        $buildingGlyph = match (true) {
-                            in_array($buildingType, ['commercial', 'office', 'retail'], true) => 'commercial',
-                            in_array($buildingType, ['industrial', 'factory', 'warehouse'], true) => 'industrial',
-                            in_array($buildingType, ['residential', 'house'], true) => 'residential',
-                            default => 'general',
-                        };
-
-                        $systemGlyph = match ($systemType) {
-                            'hybrid' => 'hybrid',
-                            'on_grid', 'ongrid', 'grid_tied' => 'grid',
-                            default => 'undecided',
-                        };
-
-                        $analysisGlyphState = $hasModeledLoad
-                            ? 'is-modeled'
-                            : ($hasAnalysis ? 'is-started' : 'is-idle');
-                    @endphp
-                    <a href="{{ route('companies.load-analyses.show', [$company, $project]) }}" class="nxla-registry-grid nxla-registry-row">
-                        <div class="nxla-row-project">
-                            <span class="nxla-row-icon nxla-row-icon--{{ $buildingGlyph }} {{ $analysisGlyphState }}" aria-hidden="true">
-                                <span class="nxla-row-icon-main">
-                                    @switch($buildingGlyph)
-                                        @case('commercial')
-                                            <svg class="nxla-icon-art" viewBox="0 0 24 24" fill="none">
-                                                <rect class="i-surface" x="6.1" y="4.9" width="10.2" height="14.2" rx="2.6"/>
-                                                <path class="i-main" d="M8.6 8.2h5.2M8.6 11.5h5.2M8.6 14.8h5.2"/>
-                                                <path class="i-accent" d="M16.3 10.2h2.2v6.8M16.3 13.6h2.2"/>
-                                                <path class="i-soft" d="M11.2 19.1v-2.2"/>
-                                            </svg>
-                                            @break
-
-                                        @case('industrial')
-                                            <svg class="nxla-icon-art" viewBox="0 0 24 24" fill="none">
-                                                <path class="i-main" d="M4 19.1h16M5.2 19.1v-7.3l4 2.5v-3.2l3.8 2.4V8.9h5.8v10.2"/>
-                                                <path class="i-accent" d="M7.7 15.7h3.2m2.1 0h2.6m2.1 0h1.3"/>
-                                                <path class="i-soft" d="M15.4 5.1h2.4v2.7"/>
-                                            </svg>
-                                            @break
-
-                                        @case('general')
-                                            <svg class="nxla-icon-art" viewBox="0 0 24 24" fill="none">
-                                                <path class="i-main" d="M4.8 7h6l1.7 2H19v8.6a1.7 1.7 0 0 1-1.7 1.7H6.5a1.7 1.7 0 0 1-1.7-1.7V7Z"/>
-                                                <path class="i-accent" d="M7.8 14.1h7.8"/>
-                                                <path class="i-soft" d="M9.5 11.3h4.5M10.5 16.7h3"/>
-                                            </svg>
-                                            @break
-
-                                        @default
-                                            <svg class="nxla-icon-art" viewBox="0 0 24 24" fill="none">
-                                                <path class="i-main" d="m4.5 10.7 7.5-5.9 7.5 5.9M6.5 10.1v8h11v-8"/>
-                                                <path class="i-accent" d="M9.1 15.6h5.8"/>
-                                                <path class="i-soft" d="M9.3 18.1v-3.7h5.4v3.7"/>
-                                            </svg>
-                                    @endswitch
-                                </span>
-                            </span>
-                            <div>
-                                <div class="nxla-row-primary">{{ $project->name }}</div>
-                                <div class="nxla-row-secondary">{{ $project->project_number }}</div>
-                            </div>
-                        </div>
-                        <div>
-                            <div class="nxla-row-primary">{{ $project->customer->name }}</div>
-                            <div class="nxla-row-secondary">{{ $project->customer->customer_number }}</div>
-                        </div>
-                        <div>
-                            @if ($project->loadAnalysis)
-                                <span class="nxla-chip is-live">Started</span>
-                            @else
-                                <span class="nxla-chip is-muted">Not started</span>
-                            @endif
-                        </div>
-                        <div class="nxla-row-metric">{{ number_format($project->load_appliances_count) }}<small>groups</small></div>
-                        <div class="nxla-row-metric">{{ number_format($project->electricity_bills_count) }}<small>months</small></div>
-                        <div class="nxla-row-metric">
-                            {{ $project->loadAnalysis?->updated_at?->diffForHumans() ?? 'Not started' }}
-                            <small>{{ $project->loadAnalysis?->updated_at?->format('d M Y, H:i') ?? 'No update yet' }}</small>
-                        </div>
-                        <span class="nxla-row-action" aria-label="Open load analysis">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-                                <path d="M5 12h14"/><path d="M13 5l7 7-7 7"/>
-                            </svg>
-                        </span>
-                    </a>
-                @endforeach
-
-                <div class="ui-table-footer">
+                <footer class="nx17-pagination">
                     @include('partials.pagination', ['paginator' => $projects])
-                </div>
+                </footer>
             @endif
         </section>
+
+        <aside class="nx17-rail" aria-label="Load registry interpretation">
+            <section class="nx17-rail-card" data-nx17-surface data-nx17-reveal>
+                <span class="nx17-section-kicker">Registry basis</span>
+                <h3>Current portfolio coverage</h3>
+                <div class="nx17-rail-stats">
+                    <div><span>Analysis available</span><strong>{{ number_format($stats['analyses']) }}</strong></div>
+                    <div><span>Input required</span><strong>{{ number_format($stats['input_required']) }}</strong></div>
+                    <div><span>Bill reference</span><strong>{{ number_format($stats['with_bills']) }}</strong></div>
+                    <div><span>Equipment model</span><strong>{{ number_format($stats['with_appliances']) }}</strong></div>
+                </div>
+            </section>
+
+            <section class="nx17-rail-card" data-nx17-surface data-nx17-reveal>
+                <span class="nx17-section-kicker">Model boundaries</span>
+                <h3>How to read this index</h3>
+                <ul class="nx17-basis-list">
+                    <li><i class="is-cyan"></i><span><strong>Equipment model</strong> uses the current repeated daily operating window and Usage factor.</span></li>
+                    <li><i class="is-blue"></i><span><strong>Annualized energy</strong> is derived from the current stored load model, not a measured interval dataset.</span></li>
+                    <li><i class="is-amber"></i><span><strong>Peak demand</strong> is modeled from the existing 24-hour profile or uses recorded bill peak averages when that is the available basis.</span></li>
+                    <li><i class="is-purple"></i><span><strong>Critical load</strong> is a user classification and does not imply guaranteed backup or life-safety service.</span></li>
+                </ul>
+            </section>
+
+            <section class="nx17-rail-card nx17-rail-card--attention" data-nx17-surface data-nx17-reveal>
+                <span class="nx17-section-kicker">Downstream freshness</span>
+                <h3>Timestamp-based review only</h3>
+                <p>
+                    “Downstream review required” reuses the current Recommendation and Technical Calculation freshness checks. It is a conservative timestamp signal, not a full dependency graph.
+                </p>
+                <a href="{{ route('companies.load-analyses.index', ['company' => $company, 'status' => 'input_required']) }}" class="nx17-rail-link">
+                    Review projects needing inputs
+                    <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11m-4-4 4 4-4 4"/></svg>
+                </a>
+            </section>
+        </aside>
     </div>
+</main>
 @endsection

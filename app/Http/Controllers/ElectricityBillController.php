@@ -11,6 +11,7 @@ use App\Models\Project;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class ElectricityBillController extends Controller
 {
@@ -36,7 +37,7 @@ class ElectricityBillController extends Controller
             return back()->with('error', 'Archived projects cannot be updated.');
         }
 
-        $analysis = $this->analysisFor($request, $company, $project);
+        $analysis = $this->requireAnalysis($company, $project);
         $month = CarbonImmutable::createFromFormat(
             'Y-m-d',
             $request->validated('billing_month').'-01'
@@ -88,6 +89,15 @@ class ElectricityBillController extends Controller
             return back()->with('error', 'Archived projects cannot be updated.');
         }
 
+        $analysis = $this->requireAnalysis($company, $project);
+
+        abort_unless(
+            (int) $electricityBill->company_id === (int) $company->getKey()
+                && (int) $electricityBill->project_id === (int) $project->getKey()
+                && (int) $electricityBill->load_analysis_id === (int) $analysis->getKey(),
+            Response::HTTP_NOT_FOUND
+        );
+
         $electricityBill->delete();
 
         return redirect()
@@ -96,25 +106,19 @@ class ElectricityBillController extends Controller
     }
 
     /**
-     * Get or create the project load analysis.
+     * Resolve the exact persisted Load Analysis for this company/project.
+     * Bill mutations are explicit child actions and must not create the parent
+     * analysis implicitly.
      */
-    private function analysisFor(
-        Request $request,
-        Company $company,
-        Project $project
-    ): LoadAnalysis {
-        return LoadAnalysis::query()->firstOrCreate(
-            ['project_id' => $project->getKey()],
-            [
-                'company_id' => $company->getKey(),
-                'source_mode' => 'combined',
-                'supply_phase' => 'single_phase',
-                'billing_days' => 30,
-                'daytime_start_hour' => 6,
-                'daytime_end_hour' => 18,
-                'created_by' => $request->user()->getKey(),
-                'updated_by' => $request->user()->getKey(),
-            ]
-        );
+    private function requireAnalysis(Company $company, Project $project): LoadAnalysis
+    {
+        $analysis = LoadAnalysis::query()
+            ->where('company_id', $company->getKey())
+            ->where('project_id', $project->getKey())
+            ->first();
+
+        abort_unless($analysis instanceof LoadAnalysis, Response::HTTP_NOT_FOUND);
+
+        return $analysis;
     }
 }

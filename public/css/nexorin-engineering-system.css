@@ -1436,3 +1436,29 @@ html[data-theme="dark"] :is(
     }
 }
 
+
+/* ==========================================================================
+   GLOBAL PERFORMANCE — dormant orchestration overlays must be truly dormant.
+   The overlay markup is mounted globally; without containment, its infinite
+   ambient/orbit/scan animations keep compositor work alive while opacity is 0.
+   ========================================================================== */
+.nxeng-action-overlay:not(.is-visible) {
+    visibility: hidden;
+    content-visibility: hidden;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+
+.nxeng-action-overlay:not(.is-visible),
+.nxeng-action-overlay:not(.is-visible)::before,
+.nxeng-action-overlay:not(.is-visible)::after,
+.nxeng-action-overlay:not(.is-visible) *,
+.nxeng-action-overlay:not(.is-visible) *::before,
+.nxeng-action-overlay:not(.is-visible) *::after {
+    animation: none !important;
+}
+
+.nxeng-action-overlay.is-visible {
+    visibility: visible;
+    content-visibility: visible;
+}

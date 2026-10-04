@@ -34,6 +34,32 @@ class User extends Authenticatable
     use TwoFactorAuthenticatable;
 
     /**
+     * Request-local authorization memoization. These values live only on the
+     * authenticated model instance and prevent the application shell from
+     * repeating the same role and membership queries dozens of times.
+     */
+    protected ?bool $superAdminAuthorizationCache = null;
+
+    /** @var array<string, CompanyMembership|null> */
+    protected array $companyMembershipAuthorizationCache = [];
+
+    /**
+     * Get external authentication identities linked to the user.
+     */
+    public function externalIdentities(): HasMany
+    {
+        return $this->hasMany(ExternalIdentity::class);
+    }
+
+    /**
+     * Get authentication audit events associated with the user.
+     */
+    public function authenticationEvents(): HasMany
+    {
+        return $this->hasMany(AuthenticationEvent::class);
+    }
+
+    /**
      * Get all company memberships associated with the user.
      */
     public function companyMemberships(): HasMany
@@ -188,7 +214,16 @@ class User extends Authenticatable
      */
     public function isSuperAdmin(): bool
     {
-        return $this->hasSystemRole('super_admin');
+        if ($this->superAdminAuthorizationCache !== null) {
+            return $this->superAdminAuthorizationCache;
+        }
+
+        if ($this->relationLoaded('systemRoles')) {
+            return $this->superAdminAuthorizationCache = $this->systemRoles
+                ->contains(fn (Role $role): bool => $role->code === 'super_admin' && $role->is_active);
+        }
+
+        return $this->superAdminAuthorizationCache = $this->hasSystemRole('super_admin');
     }
 
     /**
@@ -200,11 +235,39 @@ class User extends Authenticatable
         $companyId = $company instanceof Company
             ? $company->getKey()
             : $company;
+        $cacheKey = (string) $companyId;
 
-        return $this->companyMemberships()
+        if (array_key_exists($cacheKey, $this->companyMembershipAuthorizationCache)) {
+            return $this->companyMembershipAuthorizationCache[$cacheKey];
+        }
+
+        if ($this->relationLoaded('companyMemberships')) {
+            $membership = $this->companyMemberships
+                ->first(fn (CompanyMembership $candidate): bool =>
+                    (string) $candidate->company_id === $cacheKey && $candidate->status === 'active'
+                );
+
+            return $this->companyMembershipAuthorizationCache[$cacheKey] = $membership;
+        }
+
+        return $this->companyMembershipAuthorizationCache[$cacheKey] = $this->companyMemberships()
             ->where('company_id', $companyId)
             ->where('status', 'active')
+            ->with('roles.permissions')
             ->first();
+    }
+
+    /**
+     * Clear request-local authorization values after an in-request role change.
+     */
+    public function forgetAuthorizationCache(): static
+    {
+        $this->superAdminAuthorizationCache = null;
+        $this->companyMembershipAuthorizationCache = [];
+        $this->unsetRelation('systemRoles');
+        $this->unsetRelation('companyMemberships');
+
+        return $this;
     }
 
     /**

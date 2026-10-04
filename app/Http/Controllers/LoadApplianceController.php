@@ -12,6 +12,7 @@ use App\Models\Project;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\Response;
 
 class LoadApplianceController extends Controller
 {
@@ -33,9 +34,23 @@ class LoadApplianceController extends Controller
                 ->with('error', 'Archived projects cannot be updated.');
         }
 
+        $analysis = LoadAnalysis::query()
+            ->where('company_id', $company->getKey())
+            ->where('project_id', $project->getKey())
+            ->first();
+
+        if (! $analysis) {
+            return redirect()
+                ->route('companies.projects.show', [$company, $project])
+                ->with('info', 'Open Load Analysis from the project and confirm its project assumptions before adding equipment.');
+        }
+
+        $project->loadMissing('customer:id,name,customer_number');
+
         return view('load_analyses.appliances.create', [
             'company' => $company,
             'project' => $project,
+            'analysis' => $analysis,
         ]);
     }
 
@@ -53,7 +68,16 @@ class LoadApplianceController extends Controller
             return back()->with('error', 'Archived projects cannot be updated.');
         }
 
-        $analysis = $this->analysisFor($request, $company, $project);
+        $analysis = LoadAnalysis::query()
+            ->where('company_id', $company->getKey())
+            ->where('project_id', $project->getKey())
+            ->first();
+
+        if (! $analysis) {
+            return redirect()
+                ->route('companies.projects.show', [$company, $project])
+                ->with('error', 'The current Load Analysis is not available. Open Load Analysis from the project before adding equipment.');
+        }
 
         LoadAppliance::query()->create([
             ...$request->validated(),
@@ -86,9 +110,21 @@ class LoadApplianceController extends Controller
                 ->with('error', 'Archived projects cannot be updated.');
         }
 
+        $project->loadMissing([
+            'customer:id,name,customer_number',
+            'loadAnalysis:id,company_id,project_id,source_mode,supply_phase',
+        ]);
+
+        $analysis = $this->requireScopedAppliance(
+            $company,
+            $project,
+            $loadAppliance
+        );
+
         return view('load_analyses.appliances.edit', [
             'company' => $company,
             'project' => $project,
+            'analysis' => $analysis,
             'loadAppliance' => $loadAppliance,
         ]);
     }
@@ -107,6 +143,9 @@ class LoadApplianceController extends Controller
         if ($project->isArchived()) {
             return back()->with('error', 'Archived projects cannot be updated.');
         }
+
+        $project->loadMissing('loadAnalysis:id,company_id,project_id');
+        $this->requireScopedAppliance($company, $project, $loadAppliance);
 
         $loadAppliance->update([
             ...$request->validated(),
@@ -133,6 +172,9 @@ class LoadApplianceController extends Controller
             return back()->with('error', 'Archived projects cannot be updated.');
         }
 
+        $project->loadMissing('loadAnalysis:id,company_id,project_id');
+        $this->requireScopedAppliance($company, $project, $loadAppliance);
+
         $loadAppliance->delete();
 
         return redirect()
@@ -158,25 +200,26 @@ class LoadApplianceController extends Controller
     }
 
     /**
-     * Get or create the project load analysis.
+     * Confirm that the appliance belongs to the exact routed project and its
+     * current Load Analysis. Nested URLs alone are not treated as authority.
      */
-    private function analysisFor(
-        Request $request,
+    private function requireScopedAppliance(
         Company $company,
-        Project $project
+        Project $project,
+        LoadAppliance $loadAppliance
     ): LoadAnalysis {
-        return LoadAnalysis::query()->firstOrCreate(
-            ['project_id' => $project->getKey()],
-            [
-                'company_id' => $company->getKey(),
-                'source_mode' => 'combined',
-                'supply_phase' => 'single_phase',
-                'billing_days' => 30,
-                'daytime_start_hour' => 6,
-                'daytime_end_hour' => 18,
-                'created_by' => $request->user()->getKey(),
-                'updated_by' => $request->user()->getKey(),
-            ]
+        $analysis = $project->loadAnalysis;
+
+        abort_unless(
+            $analysis instanceof LoadAnalysis
+                && (int) $analysis->company_id === (int) $company->getKey()
+                && (int) $analysis->project_id === (int) $project->getKey()
+                && (int) $loadAppliance->company_id === (int) $company->getKey()
+                && (int) $loadAppliance->project_id === (int) $project->getKey()
+                && (int) $loadAppliance->load_analysis_id === (int) $analysis->getKey(),
+            Response::HTTP_NOT_FOUND
         );
+
+        return $analysis;
     }
 }

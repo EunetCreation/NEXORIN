@@ -201,9 +201,9 @@ class ProjectReportPdfRenderer
         $solarSummary = $solar ? $solar->calculateSummary($project) : [];
         $this->miniTitle('Location and Solar Profile');
         $this->twoColumnRows([
-            ['Data source', $this->label($solar?->data_source)],
+            ['Data source', $solar?->data_source_label ?? 'Not recorded'],
             ['Source name', $solar?->source_name],
-            ['Quality status', $this->label($solar?->quality_status)],
+            ['Dataset state', $solarSummary['state_label'] ?? 'Not available'],
             ['Elevation', $this->nullableNumber($solar?->elevation_m, 2, ' m')],
             ['Average PSH', $this->nullableNumber($solarSummary['average_psh'] ?? null, 2, ' h/day')],
             ['Average GHI', $this->nullableNumber($solarSummary['average_ghi'] ?? null, 2, ' kWh/m2/day')],

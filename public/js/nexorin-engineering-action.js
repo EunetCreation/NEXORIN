@@ -193,10 +193,20 @@
 
     const navigate = (event, anchor, config = {}) => {
         if (!isPlainLeftClick(event, anchor)) return false;
+
+        // Routine GET navigation must remain native and immediate. Earlier builds
+        // blocked every page transition for 0.8-1.3 seconds only to display a
+        // decorative orchestration overlay, which made the entire application
+        // feel slow even when the destination response was already fast.
+        if (config.blockingNavigation !== true) {
+            remove();
+            return true;
+        }
+
         event.preventDefault();
         const href = anchor.href;
         const { duration } = show(config);
-        window.setTimeout(() => { window.location.href = href; }, duration);
+        window.setTimeout(() => { window.location.assign(href); }, duration);
         return true;
     };
 

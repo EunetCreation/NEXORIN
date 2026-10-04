@@ -25,9 +25,7 @@ class FinancialAnalysisEngine
         $bomSummary = $bom->summary ?? [];
 
         $annualEnergyKwh = $this->positiveFloat(
-            $technicalResults['annual_energy_kwh']
-                ?? $bomSummary['annual_energy_kwh']
-                ?? 0
+            $technicalResults['annual_energy_kwh'] ?? 0
         );
 
         $installedPvKw = $this->positiveFloat(
@@ -69,11 +67,17 @@ class FinancialAnalysisEngine
         }
 
         if ($calculation->result_status !== 'verified') {
-            $warnings[] = 'The technical calculation is not engineer verified. Treat financial analysis as a preliminary estimate.';
+            $technicalState = match ((string) $calculation->result_status) {
+                'calculated' => 'Calculated',
+                'preliminary' => 'Preliminary',
+                'detailed' => 'Detailed',
+                default => 'Stored',
+            };
+            $warnings[] = "The technical calculation is stored as {$technicalState}. Financial analysis does not upgrade or approve the engineering result.";
         }
 
         if ($normalized['export_credit_percent'] > 0) {
-            $warnings[] = 'Export credit is treated as a configurable commercial assumption. Verify it against the active regulation and utility approval.';
+            $warnings[] = 'Export credit is a model assumption. Confirm the project-specific commercial or utility basis before relying on export revenue.';
         }
 
         $cashflows = $this->cashflows(

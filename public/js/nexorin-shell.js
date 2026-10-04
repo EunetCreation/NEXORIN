@@ -153,8 +153,8 @@
             'The NEXORIN command center is ready.',
         ];
         const stageLabels = ['AUTHENTICATING', 'RESOLVING ACCESS', 'LOADING SIGNALS', 'READY'];
-        const totalDuration = reduceMotion ? 180 : 1180;
-        const animationDuration = reduceMotion ? 80 : 900;
+        const totalDuration = reduceMotion ? 0 : 180;
+        const animationDuration = reduceMotion ? 1 : 150;
         const startTime = performance.now();
 
         const renderEntry = (now) => {
@@ -201,7 +201,7 @@
                 } catch (error) {
                     // Storage access is optional.
                 }
-            }, reduceMotion ? 20 : 380);
+            }, reduceMotion ? 20 : 120);
         }, totalDuration);
     }
 
@@ -231,6 +231,7 @@
     const themeToggle = document.getElementById('themeToggle');
 
     themeToggle?.addEventListener('click', () => {
+        if (root.dataset.themeLocked === 'true') return;
         const nextTheme = root.dataset.theme === 'dark' ? 'light' : 'dark';
         root.dataset.theme = nextTheme;
         localStorage.setItem('nexorin-theme', nextTheme);
@@ -1108,13 +1109,37 @@
     /**
      * Shared alerts and controlled-action confirmation.
      */
+    const dismissAlert = (alert) => {
+        if (!alert || alert.classList.contains('is-leaving')) return;
+        alert.classList.add('is-leaving');
+        window.setTimeout(() => alert.remove(), reduceMotion ? 0 : 190);
+    };
+
     document.querySelectorAll('[data-alert-close]').forEach((button) => {
-        button.addEventListener('click', () => {
-            const alert = button.closest('[data-alert]');
-            if (!alert) return;
-            alert.classList.add('is-leaving');
-            window.setTimeout(() => alert.remove(), reduceMotion ? 0 : 190);
+        button.addEventListener('click', () => dismissAlert(button.closest('[data-alert]')));
+    });
+
+    document.querySelectorAll('[data-alert-autodismiss]').forEach((alert) => {
+        const duration = Number(alert.dataset.alertAutodismiss || 0);
+        if (!Number.isFinite(duration) || duration <= 0) return;
+
+        let timer = null;
+        const stop = () => {
+            if (timer !== null) window.clearTimeout(timer);
+            timer = null;
+        };
+        const start = () => {
+            stop();
+            timer = window.setTimeout(() => dismissAlert(alert), duration);
+        };
+
+        alert.addEventListener('pointerenter', stop);
+        alert.addEventListener('pointerleave', start);
+        alert.addEventListener('focusin', stop);
+        alert.addEventListener('focusout', (event) => {
+            if (!alert.contains(event.relatedTarget)) start();
         });
+        start();
     });
 
     const confirmOptionsFrom = (element) => ({

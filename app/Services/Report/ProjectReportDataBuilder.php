@@ -196,8 +196,8 @@ class ProjectReportDataBuilder
                 'night_share' => $this->number($loadSummary['night_share_percent'] ?? null, 2, '%'),
             ],
             'site' => [
-                'solar_source' => $solar?->source_name ?: $this->label($solar?->data_source),
-                'solar_quality' => $this->label($solar?->quality_status),
+                'solar_source' => $solar?->source_name ?: ($solar?->data_source_label ?? 'Not recorded'),
+                'solar_quality' => $solarSummary['state_label'] ?? 'Not available',
                 'annual_irradiation' => $this->number($solarSummary['annual_irradiation_kwh_m2'] ?? null, 0, ' kWh/m²/year'),
                 'average_psh' => $this->number($solarSummary['average_psh'] ?? null, 2, ' h/day'),
                 'average_temperature' => $this->number($solarSummary['average_temperature_c'] ?? null, 2, ' °C'),

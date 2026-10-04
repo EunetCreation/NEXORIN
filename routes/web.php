@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Auth\GoogleAuthController;
+use App\Http\Controllers\WorkspaceController;
 use App\Http\Controllers\BillOfMaterialController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\CustomerController;
@@ -38,6 +40,13 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
+Route::middleware('guest')->group(function (): void {
+    Route::get('/auth/google/redirect', [GoogleAuthController::class, 'redirect'])
+        ->name('auth.google.redirect');
+    Route::get('/auth/google/callback', [GoogleAuthController::class, 'callback'])
+        ->name('auth.google.callback');
+});
+
 Route::get('/', function () {
     if (auth()->check()) {
         return redirect()->route('dashboard');
@@ -53,6 +62,11 @@ Route::get('/', function () {
 */
 
 Route::middleware(['auth', 'user.active'])->group(function () {
+    Route::get('/workspace/select', [WorkspaceController::class, 'index'])
+        ->name('workspace.select');
+    Route::post('/workspace/select', [WorkspaceController::class, 'store'])
+        ->name('workspace.activate');
+
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
 
     Route::middleware('system.super_admin')->group(function () {
@@ -60,6 +74,14 @@ Route::middleware(['auth', 'user.active'])->group(function () {
             '/companies/{company}/status',
             [CompanyController::class, 'updateStatus']
         )->name('companies.status');
+
+        Route::post('/companies/{company}/draft', [CompanyController::class, 'storeDraft'])
+            ->name('companies.draft.store');
+
+        Route::get('/companies/export', [CompanyController::class, 'export'])
+            ->name('companies.export');
+        Route::post('/companies/directory-views', [CompanyController::class, 'storeDirectoryView'])
+            ->name('companies.directory-views.store');
 
         Route::resource('companies', CompanyController::class);
 
@@ -91,6 +113,10 @@ Route::middleware(['auth', 'user.active'])->group(function () {
                 ->middleware('company.permission:customer.create')
                 ->name('customers.create');
 
+            Route::post('/customers/create/draft', [CustomerController::class, 'storeCreateDraft'])
+                ->middleware('company.permission:customer.create')
+                ->name('customers.create-draft.store');
+
             Route::post('/customers', [CustomerController::class, 'store'])
                 ->middleware('company.permission:customer.create')
                 ->name('customers.store');
@@ -118,6 +144,10 @@ Route::middleware(['auth', 'user.active'])->group(function () {
             Route::get('/projects/{project}/load-analysis', [LoadAnalysisController::class, 'show'])
                 ->middleware('company.permission:load_analysis.view,load_analysis.manage,load_analysis.view_own,load_analysis.manage_own')
                 ->name('load-analyses.show');
+
+            Route::post('/projects/{project}/load-analysis/start', [LoadAnalysisController::class, 'start'])
+                ->middleware('company.permission:load_analysis.manage,load_analysis.manage_own')
+                ->name('load-analyses.start');
 
             Route::put('/projects/{project}/load-analysis', [LoadAnalysisController::class, 'update'])
                 ->middleware('company.permission:load_analysis.manage,load_analysis.manage_own')
@@ -158,6 +188,10 @@ Route::middleware(['auth', 'user.active'])->group(function () {
             Route::get('/projects/{project}/location-solar-data', [LocationSolarController::class, 'show'])
                 ->middleware('company.permission:location_solar.view,location_solar.manage,location_solar.view_own,location_solar.manage_own')
                 ->name('location-solar.show');
+
+            Route::post('/projects/{project}/location-solar-data/start', [LocationSolarController::class, 'start'])
+                ->middleware('company.permission:location_solar.manage,location_solar.manage_own')
+                ->name('location-solar.start');
 
             Route::put('/projects/{project}/location-solar-data', [LocationSolarController::class, 'update'])
                 ->middleware('company.permission:location_solar.manage,location_solar.manage_own')

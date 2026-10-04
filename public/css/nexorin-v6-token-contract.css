@@ -1,0 +1,869 @@
+/*
+ * NEXORIN V6 Token Contract — Pages 001–010
+ * Shared visual foundation only. No domain, route, state, or authorization logic.
+ * Loaded after page-local CSS so page refinements cannot silently fork the shell.
+ */
+:root {
+    --nx-v6-font-ui: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+    --nx-v6-font-data: "JetBrains Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    --nx-v6-shell-sidebar: 216px;
+    --nx-v6-shell-topbar: 72px;
+    --nx-v6-page-pad-top: 20px;
+    --nx-v6-page-pad-inline: 22px;
+    --nx-v6-page-pad-bottom: 34px;
+    --nx-v6-inner-pad-top: 16px;
+    --nx-v6-inner-pad-inline: 22px;
+    --nx-v6-inner-pad-bottom: 36px;
+    --nx-v6-space-1: 4px;
+    --nx-v6-space-2: 6px;
+    --nx-v6-space-3: 8px;
+    --nx-v6-space-4: 10px;
+    --nx-v6-space-5: 12px;
+    --nx-v6-space-6: 14px;
+    --nx-v6-radius-control: 6px;
+    --nx-v6-radius-card: 7px;
+    --nx-v6-control-compact: 36px;
+    --nx-v6-control-form: 40px;
+    --nx-v6-font-kicker: 8.5px;
+    --nx-v6-font-label: 9px;
+    --nx-v6-font-meta: 8px;
+    --nx-v6-font-body: 10.5px;
+    --nx-v6-font-control: 11px;
+    --nx-v6-font-section: 13px;
+    --nx-v6-title-editor: 23px;
+    --nx-v6-title-profile: 24px;
+    --nx-v6-title-index: clamp(28px, 2vw, 34px);
+}
+
+/* Page 001 uses the same type family but intentionally keeps its auth-specific scale. */
+.page-auth-login-v6 {
+    --font: var(--nx-v6-font-ui);
+    font-family: var(--nx-v6-font-ui);
+}
+.page-auth-login-v6 :is(button, input, select, textarea) { font-family: inherit; }
+
+/* Workspace family: 002–011. */
+:is(
+    .page-bom-library-v6,
+    .page-bom-workspace-v6,
+    .page-company-create-v6,
+    .page-company-edit-v6,
+    .page-companies-index-v6,
+    .page-company-show-v6,
+    .page-customer-create-v6,
+    .page-customer-edit-v6,
+    .page-customers-index-v6,
+    .page-customer-show-v6
+) {
+    --nx-font-display: var(--nx-v6-font-ui);
+    --nx-font-body: var(--nx-v6-font-ui);
+    --nx-font-data: var(--nx-v6-font-data);
+    font-family: var(--nx-v6-font-ui);
+}
+
+:is(
+    .page-bom-library-v6,
+    .page-bom-workspace-v6,
+    .page-company-create-v6,
+    .page-company-edit-v6,
+    .page-companies-index-v6,
+    .page-company-show-v6,
+    .page-customer-create-v6,
+    .page-customer-edit-v6,
+    .page-customers-index-v6,
+    .page-customer-show-v6
+) :is(button, input, select, textarea) {
+    font-family: var(--nx-v6-font-ui);
+}
+
+:is(
+    .page-bom-library-v6,
+    .page-bom-workspace-v6,
+    .page-company-create-v6,
+    .page-company-edit-v6,
+    .page-companies-index-v6,
+    .page-company-show-v6,
+    .page-customer-create-v6,
+    .page-customer-edit-v6,
+    .page-customers-index-v6,
+    .page-customer-show-v6
+) .page-heading h1 {
+    font-family: var(--nx-v6-font-ui) !important;
+}
+
+/* -------------------------------------------------------------------------
+   One desktop shell rhythm. Page-local colors/states are preserved.
+   ------------------------------------------------------------------------- */
+@media (min-width: 981px) {
+    :is(
+        .page-bom-library-v6,
+        .page-bom-workspace-v6,
+        .page-company-create-v6,
+        .page-company-edit-v6,
+        .page-companies-index-v6,
+        .page-company-show-v6,
+        .page-customer-create-v6,
+        .page-customer-edit-v6,
+        .page-customers-index-v6,
+        .page-customer-show-v6
+    ) {
+        --sidebar-width: var(--nx-v6-shell-sidebar) !important;
+        --topbar-height: var(--nx-v6-shell-topbar) !important;
+    }
+
+    :is(
+        .page-bom-library-v6,
+        .page-bom-workspace-v6,
+        .page-company-create-v6,
+        .page-company-edit-v6,
+        .page-companies-index-v6,
+        .page-company-show-v6,
+        .page-customer-create-v6,
+        .page-customer-edit-v6,
+        .page-customers-index-v6,
+        .page-customer-show-v6
+    ) .app-main {
+        margin-left: var(--nx-v6-shell-sidebar) !important;
+    }
+
+    :is(
+        .page-bom-library-v6,
+        .page-bom-workspace-v6,
+        .page-company-create-v6,
+        .page-company-edit-v6,
+        .page-companies-index-v6,
+        .page-company-show-v6,
+        .page-customer-create-v6,
+        .page-customer-edit-v6,
+        .page-customers-index-v6,
+        .page-customer-show-v6
+    ) .sidebar {
+        width: var(--nx-v6-shell-sidebar) !important;
+    }
+
+    :is(
+        .page-bom-library-v6,
+        .page-bom-workspace-v6,
+        .page-company-create-v6,
+        .page-company-edit-v6,
+        .page-companies-index-v6,
+        .page-company-show-v6,
+        .page-customer-create-v6,
+        .page-customer-edit-v6,
+        .page-customers-index-v6,
+        .page-customer-show-v6
+    ) :is(.topbar, .topbar-container) {
+        height: var(--nx-v6-shell-topbar) !important;
+        min-height: var(--nx-v6-shell-topbar) !important;
+    }
+
+    :is(
+        .page-bom-library-v6,
+        .page-bom-workspace-v6,
+        .page-company-create-v6,
+        .page-company-edit-v6,
+        .page-companies-index-v6,
+        .page-company-show-v6,
+        .page-customer-create-v6,
+        .page-customer-edit-v6,
+        .page-customers-index-v6,
+        .page-customer-show-v6
+    ) .topbar-container {
+        padding: 10px 22px !important;
+    }
+
+    :is(
+        .page-bom-library-v6,
+        .page-bom-workspace-v6,
+        .page-company-create-v6,
+        .page-company-edit-v6,
+        .page-companies-index-v6,
+        .page-company-show-v6,
+        .page-customer-create-v6,
+        .page-customer-edit-v6,
+        .page-customers-index-v6,
+        .page-customer-show-v6
+    ) .sidebar-header {
+        height: var(--nx-v6-shell-topbar) !important;
+        min-height: var(--nx-v6-shell-topbar) !important;
+        padding: 12px 14px 10px !important;
+    }
+
+    :is(
+        .page-bom-library-v6,
+        .page-bom-workspace-v6,
+        .page-company-create-v6,
+        .page-company-edit-v6,
+        .page-companies-index-v6,
+        .page-company-show-v6,
+        .page-customer-create-v6,
+        .page-customer-edit-v6,
+        .page-customers-index-v6,
+        .page-customer-show-v6
+    ) .sidebar-brand { gap: 9px !important; }
+
+    :is(
+        .page-bom-library-v6,
+        .page-bom-workspace-v6,
+        .page-company-create-v6,
+        .page-company-edit-v6,
+        .page-companies-index-v6,
+        .page-company-show-v6,
+        .page-customer-create-v6,
+        .page-customer-edit-v6,
+        .page-customers-index-v6,
+        .page-customer-show-v6
+    ) .sidebar-brand-mark {
+        width: 42px !important;
+        height: 42px !important;
+    }
+
+    :is(
+        .page-bom-library-v6,
+        .page-bom-workspace-v6,
+        .page-company-create-v6,
+        .page-company-edit-v6,
+        .page-companies-index-v6,
+        .page-company-show-v6,
+        .page-customer-create-v6,
+        .page-customer-edit-v6,
+        .page-customers-index-v6,
+        .page-customer-show-v6
+    ) .sidebar-brand-copy strong {
+        font-family: var(--nx-v6-font-ui) !important;
+        font-size: 18px !important;
+        line-height: 1 !important;
+        letter-spacing: .045em !important;
+    }
+
+    :is(
+        .page-bom-library-v6,
+        .page-bom-workspace-v6,
+        .page-company-create-v6,
+        .page-company-edit-v6,
+        .page-companies-index-v6,
+        .page-company-show-v6,
+        .page-customer-create-v6,
+        .page-customer-edit-v6,
+        .page-customers-index-v6,
+        .page-customer-show-v6
+    ) .sidebar-brand-copy span {
+        font-size: 9px !important;
+        line-height: 1.2 !important;
+        letter-spacing: .16em !important;
+    }
+
+    :is(
+        .page-bom-library-v6,
+        .page-bom-workspace-v6,
+        .page-company-create-v6,
+        .page-company-edit-v6,
+        .page-companies-index-v6,
+        .page-company-show-v6,
+        .page-customer-create-v6,
+        .page-customer-edit-v6,
+        .page-customers-index-v6,
+        .page-customer-show-v6
+    ) .workspace-switcher {
+        min-height: 58px !important;
+        margin: 4px 10px 10px !important;
+        padding: 9px 10px !important;
+        gap: 9px !important;
+        border-radius: 16px !important;
+    }
+
+    :is(
+        .page-bom-library-v6,
+        .page-bom-workspace-v6,
+        .page-company-create-v6,
+        .page-company-edit-v6,
+        .page-companies-index-v6,
+        .page-company-show-v6,
+        .page-customer-create-v6,
+        .page-customer-edit-v6,
+        .page-customers-index-v6,
+        .page-customer-show-v6
+    ) .workspace-avatar {
+        width: 38px !important;
+        height: 38px !important;
+        border-radius: 13px !important;
+    }
+
+    :is(
+        .page-bom-library-v6,
+        .page-bom-workspace-v6,
+        .page-company-create-v6,
+        .page-company-edit-v6,
+        .page-companies-index-v6,
+        .page-company-show-v6,
+        .page-customer-create-v6,
+        .page-customer-edit-v6,
+        .page-customers-index-v6,
+        .page-customer-show-v6
+    ) .workspace-copy strong { font-size: 12.5px !important; line-height: 1.25 !important; }
+
+    :is(
+        .page-bom-library-v6,
+        .page-bom-workspace-v6,
+        .page-company-create-v6,
+        .page-company-edit-v6,
+        .page-companies-index-v6,
+        .page-company-show-v6,
+        .page-customer-create-v6,
+        .page-customer-edit-v6,
+        .page-customers-index-v6,
+        .page-customer-show-v6
+    ) .workspace-copy span { font-size: 10px !important; line-height: 1.25 !important; }
+
+    :is(
+        .page-bom-library-v6,
+        .page-bom-workspace-v6,
+        .page-company-create-v6,
+        .page-company-edit-v6,
+        .page-companies-index-v6,
+        .page-company-show-v6,
+        .page-customer-create-v6,
+        .page-customer-edit-v6,
+        .page-customers-index-v6,
+        .page-customer-show-v6
+    ) .sidebar-navigation { padding: 8px 10px 10px !important; }
+
+    :is(
+        .page-bom-library-v6,
+        .page-bom-workspace-v6,
+        .page-company-create-v6,
+        .page-company-edit-v6,
+        .page-companies-index-v6,
+        .page-company-show-v6,
+        .page-customer-create-v6,
+        .page-customer-edit-v6,
+        .page-customers-index-v6,
+        .page-customer-show-v6
+    ) .nav-section { gap: 4px !important; margin-bottom: 12px !important; }
+
+    :is(
+        .page-bom-library-v6,
+        .page-bom-workspace-v6,
+        .page-company-create-v6,
+        .page-company-edit-v6,
+        .page-companies-index-v6,
+        .page-company-show-v6,
+        .page-customer-create-v6,
+        .page-customer-edit-v6,
+        .page-customers-index-v6,
+        .page-customer-show-v6
+    ) .nav-section-label {
+        padding: 0 11px !important;
+        margin-bottom: 4px !important;
+        font-size: 9px !important;
+        line-height: 1.2 !important;
+        letter-spacing: .18em !important;
+    }
+
+    :is(
+        .page-bom-library-v6,
+        .page-bom-workspace-v6,
+        .page-company-create-v6,
+        .page-company-edit-v6,
+        .page-companies-index-v6,
+        .page-company-show-v6,
+        .page-customer-create-v6,
+        .page-customer-edit-v6,
+        .page-customers-index-v6,
+        .page-customer-show-v6
+    ) :is(.nav-link, .nav-cluster-summary) {
+        min-height: 43px !important;
+        gap: 9px !important;
+        padding: 7px 9px !important;
+        border-radius: 13px !important;
+        font-size: 12.5px !important;
+        line-height: 1.2 !important;
+    }
+
+    :is(
+        .page-bom-library-v6,
+        .page-bom-workspace-v6,
+        .page-company-create-v6,
+        .page-company-edit-v6,
+        .page-companies-index-v6,
+        .page-company-show-v6,
+        .page-customer-create-v6,
+        .page-customer-edit-v6,
+        .page-customers-index-v6,
+        .page-customer-show-v6
+    ) .nav-sub-link {
+        min-height: 38px !important;
+        font-size: 11.5px !important;
+        line-height: 1.2 !important;
+    }
+
+    :is(
+        .page-bom-library-v6,
+        .page-bom-workspace-v6,
+        .page-company-create-v6,
+        .page-company-edit-v6,
+        .page-companies-index-v6,
+        .page-company-show-v6,
+        .page-customer-create-v6,
+        .page-customer-edit-v6,
+        .page-customers-index-v6,
+        .page-customer-show-v6
+    ) .nav-icon {
+        width: 32px !important;
+        height: 32px !important;
+        border-radius: 11px !important;
+    }
+
+    :is(
+        .page-bom-library-v6,
+        .page-bom-workspace-v6,
+        .page-company-create-v6,
+        .page-company-edit-v6,
+        .page-companies-index-v6,
+        .page-company-show-v6,
+        .page-customer-create-v6,
+        .page-customer-edit-v6,
+        .page-customers-index-v6,
+        .page-customer-show-v6
+    ) .sidebar-footer { padding: 10px !important; }
+
+    :is(
+        .page-bom-library-v6,
+        .page-bom-workspace-v6,
+        .page-company-create-v6,
+        .page-company-edit-v6,
+        .page-companies-index-v6,
+        .page-company-show-v6,
+        .page-customer-create-v6,
+        .page-customer-edit-v6,
+        .page-customers-index-v6,
+        .page-customer-show-v6
+    ) .sidebar-account {
+        min-height: 54px !important;
+        gap: 9px !important;
+        padding: 8px !important;
+        border-radius: 15px !important;
+    }
+
+    :is(
+        .page-bom-library-v6,
+        .page-bom-workspace-v6,
+        .page-company-create-v6,
+        .page-company-edit-v6,
+        .page-companies-index-v6,
+        .page-company-show-v6,
+        .page-customer-create-v6,
+        .page-customer-edit-v6,
+        .page-customers-index-v6,
+        .page-customer-show-v6
+    ) .account-copy strong { font-size: 11.5px !important; }
+
+    :is(
+        .page-bom-library-v6,
+        .page-bom-workspace-v6,
+        .page-company-create-v6,
+        .page-company-edit-v6,
+        .page-companies-index-v6,
+        .page-company-show-v6,
+        .page-customer-create-v6,
+        .page-customer-edit-v6,
+        .page-customers-index-v6,
+        .page-customer-show-v6
+    ) .account-copy span { font-size: 9.5px !important; }
+
+    :is(
+        .page-bom-library-v6,
+        .page-bom-workspace-v6,
+        .page-company-create-v6,
+        .page-company-edit-v6,
+        .page-companies-index-v6,
+        .page-company-show-v6,
+        .page-customer-create-v6,
+        .page-customer-edit-v6,
+        .page-customers-index-v6,
+        .page-customer-show-v6
+    ) .topbar-search {
+        width: min(480px, 42vw) !important;
+        min-height: 48px !important;
+        height: 48px !important;
+        border-radius: 16px !important;
+    }
+
+    :is(
+        .page-bom-library-v6,
+        .page-bom-workspace-v6,
+        .page-company-create-v6,
+        .page-company-edit-v6,
+        .page-companies-index-v6,
+        .page-company-show-v6,
+        .page-customer-create-v6,
+        .page-customer-edit-v6,
+        .page-customers-index-v6,
+        .page-customer-show-v6
+    ) .topbar-search input { font-size: 13px !important; line-height: 1.2 !important; }
+
+    :is(
+        .page-bom-library-v6,
+        .page-bom-workspace-v6,
+        .page-company-create-v6,
+        .page-company-edit-v6,
+        .page-companies-index-v6,
+        .page-company-show-v6,
+        .page-customer-create-v6,
+        .page-customer-edit-v6,
+        .page-customers-index-v6,
+        .page-customer-show-v6
+    ) .topbar-icon-button {
+        width: 48px !important;
+        height: 48px !important;
+        border-radius: 15px !important;
+    }
+
+    :is(
+        .page-bom-library-v6,
+        .page-bom-workspace-v6,
+        .page-company-create-v6,
+        .page-company-edit-v6,
+        .page-companies-index-v6,
+        .page-company-show-v6,
+        .page-customer-create-v6,
+        .page-customer-edit-v6,
+        .page-customers-index-v6,
+        .page-customer-show-v6
+    ) .topbar-primary-action {
+        min-height: 48px !important;
+        padding-inline: 17px !important;
+        border-radius: 15px !important;
+        font-size: 12px !important;
+    }
+
+    :is(
+        .page-bom-library-v6,
+        .page-bom-workspace-v6,
+        .page-company-create-v6,
+        .page-company-edit-v6,
+        .page-companies-index-v6,
+        .page-company-show-v6,
+        .page-customer-create-v6,
+        .page-customer-edit-v6,
+        .page-customers-index-v6,
+        .page-customer-show-v6
+    ) .profile-menu-trigger {
+        min-height: 48px !important;
+        padding: 5px 9px !important;
+        border-radius: 15px !important;
+    }
+
+    :is(
+        .page-bom-library-v6,
+        .page-bom-workspace-v6,
+        .page-company-create-v6,
+        .page-company-edit-v6,
+        .page-companies-index-v6,
+        .page-company-show-v6,
+        .page-customer-create-v6,
+        .page-customer-edit-v6,
+        .page-customers-index-v6,
+        .page-customer-show-v6
+    ) .profile-copy strong { font-size: 11.5px !important; }
+
+    :is(
+        .page-bom-library-v6,
+        .page-bom-workspace-v6,
+        .page-company-create-v6,
+        .page-company-edit-v6,
+        .page-companies-index-v6,
+        .page-company-show-v6,
+        .page-customer-create-v6,
+        .page-customer-edit-v6,
+        .page-customers-index-v6,
+        .page-customer-show-v6
+    ) .profile-copy span { font-size: 9.5px !important; }
+
+    /* Page 006 owns a dedicated directory search in the topbar slot. */
+    .page-companies-index-v6 .nx6-top-search {
+        left: calc(var(--nx-v6-shell-sidebar) + 22px) !important;
+        top: 12px !important;
+        width: min(480px, 42vw) !important;
+        height: 48px !important;
+        padding: 0 14px !important;
+        border-radius: 16px !important;
+    }
+    .page-companies-index-v6 .nx6-top-search input { font-size: 13px !important; }
+}
+
+/* -------------------------------------------------------------------------
+   Consistent page inset. V6/BOM uses an outer shell gutter + inner work area.
+   ------------------------------------------------------------------------- */
+@media (min-width: 981px) {
+    :is(
+        .page-bom-library-v6,
+        .page-bom-workspace-v6,
+        .page-company-create-v6,
+        .page-company-edit-v6,
+        .page-companies-index-v6,
+        .page-company-show-v6,
+        .page-customer-create-v6,
+        .page-customer-edit-v6,
+        .page-customers-index-v6,
+        .page-customer-show-v6
+    ) .app-content {
+        padding: var(--nx-v6-page-pad-top) var(--nx-v6-page-pad-inline) var(--nx-v6-page-pad-bottom) !important;
+    }
+
+    :is(
+        .page-bom-library-v6,
+        .page-bom-workspace-v6,
+        .page-company-create-v6,
+        .page-company-edit-v6,
+        .page-companies-index-v6,
+        .page-company-show-v6,
+        .page-customer-create-v6,
+        .page-customer-edit-v6,
+        .page-customers-index-v6,
+        .page-customer-show-v6
+    ) .content-container {
+        width: 100% !important;
+        max-width: none !important;
+        padding: var(--nx-v6-inner-pad-top) var(--nx-v6-inner-pad-inline) var(--nx-v6-inner-pad-bottom) !important;
+    }
+}
+
+/* Semantic title roles — same tokens, different information roles. */
+.nxbomlib-hero h2,
+.nx6-header h1,
+.nx10-title-line h1 {
+    font-family: var(--nx-v6-font-ui) !important;
+    font-size: var(--nx-v6-title-index) !important;
+    font-weight: 650 !important;
+    line-height: 1.05 !important;
+    letter-spacing: -.04em !important;
+}
+
+.nxbom3-title-line h2,
+.nxcg-create-title-row h2,
+.nx5-title-row h2,
+.nxcus8-title-line h2,
+.nxce9-title-line h2 {
+    font-family: var(--nx-v6-font-ui) !important;
+    font-size: var(--nx-v6-title-editor) !important;
+    font-weight: 620 !important;
+    line-height: 1.08 !important;
+    letter-spacing: -.035em !important;
+}
+
+.nx7-title-line h2,
+.nx11-title-line h1 {
+    font-family: var(--nx-v6-font-ui) !important;
+    font-size: var(--nx-v6-title-profile) !important;
+    font-weight: 650 !important;
+    line-height: 1.06 !important;
+    letter-spacing: -.035em !important;
+}
+
+/* Shared card geometry. */
+:is(
+    .nxbomlib-table-card, .nxbomlib-intelligence, .nxbomlib-chart-card, .nxbomlib-health-card,
+    .nxbom3-table-card, .nxbom3-side-card, .nxbom3-analytics > article, .nxbom3-commercial, .nxbom3-pricing-panel,
+    .nxcg-create-panel, .nxcg-create-preview-card, .nxcg-create-readiness-card, .nxcg-create-summary,
+    .nx5-card, .nx5-rail-card,
+    .nx6-kpi, .nx6-filter-rail, .nx6-registry, .nx6-intel-rail, .nx6-chart-card,
+    .nx7-card, .nx7-rail-card, .nx7-hero, .nx7-tabs,
+    .nxcus8-card, .nxcus8-timeline, .nxcus8-review-submit, .nxcus8-rail-card,
+    .nxce9-card, .nxce9-rail-card, .nxce9-review,
+    .nx10-card, .nx10-kpi,
+    .nx11-card, .nx11-rail-card
+) {
+    border-radius: var(--nx-v6-radius-card) !important;
+}
+
+/* Form control contract. */
+.nxbomlib-search,
+.nxbomlib-filters select,
+.nxbomlib-filter-button,
+.nxcg-field input,
+.nx5-field input,
+.nx5-field select,
+.nx5-token-add input,
+.nx5-parent-compact input,
+.nx5-financial-head label input,
+.nx5-stat-box input,
+.nx6-search input,
+.nx6-filter-group select,
+.nx6-table-search input,
+.nx6-toolbar-form select,
+.nxcus8-field :is(input, select),
+.nxce9-field :is(input, select),
+.nxce9-doc-upload select,
+.nx10-filter :is(input, select) {
+    min-height: var(--nx-v6-control-form) !important;
+    height: var(--nx-v6-control-form) !important;
+    border-radius: var(--nx-v6-radius-control) !important;
+    font-size: var(--nx-v6-font-control) !important;
+    line-height: 1.25 !important;
+}
+
+.nxcg-field textarea,
+.nx5-field textarea,
+.nxcus8-field textarea,
+.nxce9-field textarea {
+    border-radius: var(--nx-v6-radius-control) !important;
+    font-size: var(--nx-v6-font-control) !important;
+    line-height: 1.45 !important;
+}
+
+.nxbom3-toolbar :is(input, select),
+.nxbom3-columns,
+.nx5-repeat-row .nx5-field :is(input, select),
+.nx5-checkbox-field,
+.nx6-pagination select {
+    min-height: var(--nx-v6-control-compact) !important;
+    height: var(--nx-v6-control-compact) !important;
+    border-radius: var(--nx-v6-radius-control) !important;
+    font-size: 10.5px !important;
+}
+
+/* Labels/helper text used around editable controls. */
+.nxcg-field > span,
+.nx5-field > span,
+.nxcus8-field > span,
+.nxce9-field > span,
+.nxce9-assessment legend,
+.nx10-filter-field > span {
+    font-size: var(--nx-v6-font-label) !important;
+    line-height: 1.25 !important;
+}
+
+.nxcg-field > small,
+.nxcg-field > em,
+.nx5-field > small,
+.nxcus8-field small,
+.nxce9-field small,
+.nx10-filter-field small {
+    font-size: var(--nx-v6-font-meta) !important;
+    line-height: 1.35 !important;
+}
+
+/* Compact buttons share one hit target and readable copy. */
+:is(
+    .nxbomlib-filter-button,
+    .nxbomlib-more-button,
+    .nxbom3-head-actions button,
+    .nxbom3-head-actions summary,
+    .nxcg-button,
+    .nx5-btn,
+    .nx6-btn,
+    .nx6-apply,
+    .nx6-save-view,
+    .nx6-more-filters,
+    .nx7-btn,
+    .nxcus8-btn,
+    .nxce9-btn,
+    .nx10-btn,
+    .nx11-btn
+) {
+    min-height: var(--nx-v6-control-compact) !important;
+    border-radius: var(--nx-v6-radius-control) !important;
+    font-size: 10px !important;
+    line-height: 1.1 !important;
+}
+
+/* Page 005 had historical microscopic rules. Explicitly protect its live UI. */
+@media (min-width: 981px) {
+    .nx5 { gap: var(--nx-v6-space-4) !important; }
+    .nx5-card-grid, .nx5-rail, .nx5-fields { gap: var(--nx-v6-space-4) !important; }
+    .nx5-card, .nx5-rail-card { padding: 12px !important; }
+    .nx5-card-head { gap: var(--nx-v6-space-3) !important; margin-bottom: var(--nx-v6-space-3) !important; }
+    .nx5-card-head h3 { font-size: 12px !important; line-height: 1.25 !important; }
+    .nx5-card-head p { font-size: 8.5px !important; line-height: 1.4 !important; }
+    .nx5-breadcrumb, .nx5-subline { font-size: 8.5px !important; }
+    .nx5-autosave, .nx5-unsaved, .nx5-restore-draft { font-size: 8px !important; }
+    .nx5-repeat-row .nx5-field span { font-size: 8.5px !important; }
+    .nx5-table th { font-size: 8px !important; }
+    .nx5-table td { font-size: 9.5px !important; }
+    .nx5-table td strong { font-size: 10px !important; }
+    .nx5-table td small { font-size: 8px !important; }
+    .nx5-token, .nx5-token-add button, .nx5-row-remove { font-size: 8.5px !important; }
+    .nx5-record-coverage span, .nx5-workspace-nav small { font-size: 8px !important; }
+    .nx5-workspace-nav span { font-size: 9px !important; }
+}
+
+/* Page 006 directory / chart copy floor. */
+@media (min-width: 981px) {
+    .nx6-header { min-height: 82px !important; padding-block: 12px !important; }
+    .nx6-header p { font-size: 10px !important; line-height: 1.45 !important; }
+    .nx6-kpis, .nx6-workspace { gap: var(--nx-v6-space-4) !important; }
+    .nx6-intelligence-grid { gap: var(--nx-v6-space-4) !important; }
+    .nx6-kpi > span:first-child { font-size: 8px !important; }
+    .nx6-kpi small { font-size: 8.5px !important; line-height: 1.35 !important; }
+    .nx6-chart-card > header span { font-size: 8.5px !important; }
+    .nx6-chart-card > header small, .nx6-card-foot, .nx6-chart-empty p { font-size: 8px !important; }
+    .nx6-chart-empty strong { font-size: 9px !important; }
+    .nx6-table th { font-size: 8.5px !important; }
+    .nx6-table td { font-size: 10px !important; }
+    .nx6-table td small { font-size: 8px !important; }
+    .nx6-filter-group > span, .nx6-rail-title b { font-size: 8.5px !important; }
+    .nx6-filter-group label, .nx6-filter-group select { font-size: 9px !important; }
+}
+
+/* Page 007 profile detail copy floor. */
+@media (min-width: 981px) {
+    .nx7-layout, .nx7-primary, .nx7-grid { gap: var(--nx-v6-space-4) !important; }
+    .nx7-card, .nx7-rail-card { padding: 12px !important; }
+    .nx7-card-head { gap: var(--nx-v6-space-3) !important; margin-bottom: var(--nx-v6-space-3) !important; }
+    .nx7-card-head span { font-size: 8px !important; }
+    .nx7-card-head h4 { font-size: 11px !important; }
+    .nx7-card-head > a { font-size: 8px !important; }
+    .nx7-state-tag { min-height: 22px !important; font-size: 8px !important; }
+    .nx7-card > footer { font-size: 8px !important; line-height: 1.35 !important; }
+    .nx7-breadcrumb { font-size: 8.5px !important; }
+    .nx7-page-head p { font-size: 9.5px !important; }
+    .nx7-factor-list span, .nx7-factor-list b { font-size: 8px !important; }
+    .nx7-activity-mini :is(strong, small, time),
+    .nx7-check-list span,
+    .nx7-rail-card :is(dt, dd),
+    .nx7-rail-card--governance > p { font-size: 8px !important; }
+}
+
+/* Page 008–011 share the same working-surface spacing. */
+@media (min-width: 981px) {
+    .nxcus8-workspace, .nxcus8-card-grid,
+    .nxce9-top-zone, .nxce9-main, .nxce9-rail, .nxce9-lower-flow,
+    .nx10-intelligence-grid, .nx10-main-stack, .nx10-right-rail, .nx10-chart-grid, .nx10-lower-grid,
+    .nx11-hero-grid, .nx11-kpis, .nx11-layout, .nx11-main-stack, .nx11-right-rail {
+        gap: var(--nx-v6-space-4) !important;
+    }
+    .nxcus8-card, .nxcus8-rail-card, .nxce9-card, .nxce9-rail-card, .nx10-card, .nx11-card, .nx11-rail-card { border-radius: var(--nx-v6-radius-card) !important; }
+}
+
+@media (max-width: 980px) {
+    :is(
+        .page-bom-library-v6,
+        .page-bom-workspace-v6,
+        .page-company-create-v6,
+        .page-company-edit-v6,
+        .page-companies-index-v6,
+        .page-company-show-v6,
+        .page-customer-create-v6,
+        .page-customer-edit-v6,
+        .page-customers-index-v6,
+        .page-customer-show-v6
+    ) .app-content {
+        padding-inline: 12px !important;
+    }
+
+    :is(
+        .page-bom-library-v6,
+        .page-bom-workspace-v6,
+        .page-company-create-v6,
+        .page-company-edit-v6,
+        .page-companies-index-v6,
+        .page-company-show-v6,
+        .page-customer-create-v6,
+        .page-customer-edit-v6,
+        .page-customers-index-v6,
+        .page-customer-show-v6
+    ) .content-container {
+        padding-inline: 0 !important;
+    }
+}

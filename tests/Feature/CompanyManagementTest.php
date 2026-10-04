@@ -3,6 +3,10 @@
 namespace Tests\Feature;
 
 use App\Models\Company;
+use App\Models\CompanyDirectorySavedView;
+use App\Models\CompanyProfile;
+use App\Models\CompanyRegion;
+use App\Models\CompanyRelationship;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -68,13 +72,140 @@ class CompanyManagementTest extends TestCase
             ->assertForbidden();
     }
 
+
+    public function test_company_directory_uses_truthful_empty_intelligence_states(): void
+    {
+        Company::query()->create([
+            'name' => 'Evidence Pending Energy',
+            'slug' => 'evidence-pending-energy',
+            'code' => 'EPE',
+            'email' => 'private@example.test',
+            'status' => 'active',
+            'created_by' => $this->superAdmin->getKey(),
+        ]);
+
+        $this->actingAs($this->superAdmin)
+            ->get(route('companies.index'))
+            ->assertOk()
+            ->assertSee('Evidence Pending Energy')
+            ->assertSee('Not assessed')
+            ->assertSee('Not available')
+            ->assertSee('No accepted quotation');
+    }
+
+    public function test_company_directory_filters_use_persisted_profile_region_and_relationship_data(): void
+    {
+        $strategic = Company::query()->create([
+            'name' => 'Strategic EPC',
+            'slug' => 'strategic-epc',
+            'code' => 'SEP',
+            'status' => 'active',
+            'created_by' => $this->superAdmin->getKey(),
+        ]);
+        CompanyProfile::query()->create([
+            'company_id' => $strategic->id,
+            'company_type' => 'EPC Contractor',
+            'categories_served' => ['Commercial & Industrial'],
+        ]);
+        CompanyRegion::query()->create([
+            'company_id' => $strategic->id,
+            'country_name' => 'Indonesia',
+            'country_code' => 'IDN',
+            'region_name' => 'West Java',
+            'latitude' => -6.9,
+            'longitude' => 107.6,
+            'is_headquarters' => true,
+        ]);
+        CompanyRelationship::query()->create([
+            'company_id' => $strategic->id,
+            'tier' => 'strategic',
+            'qualification_state' => 'qualified',
+            'reviewed_by' => $this->superAdmin->id,
+            'reviewed_at' => now(),
+        ]);
+
+        Company::query()->create([
+            'name' => 'Unclassified Supplier',
+            'slug' => 'unclassified-supplier',
+            'code' => 'UNS',
+            'status' => 'active',
+            'created_by' => $this->superAdmin->getKey(),
+        ]);
+
+        $this->actingAs($this->superAdmin)
+            ->get(route('companies.index', [
+                'type' => 'EPC Contractor',
+                'region' => 'West Java',
+                'tier' => 'strategic',
+                'specialization' => 'Commercial & Industrial',
+            ]))
+            ->assertOk()
+            ->assertSee('Strategic EPC')
+            ->assertDontSee('Unclassified Supplier');
+    }
+
+    public function test_super_admin_can_export_only_the_filtered_directory_columns(): void
+    {
+        Company::query()->create([
+            'name' => 'Export Target',
+            'slug' => 'export-target',
+            'code' => 'EXT',
+            'email' => 'sensitive-contact@example.test',
+            'status' => 'active',
+            'created_by' => $this->superAdmin->getKey(),
+        ]);
+        Company::query()->create([
+            'name' => 'Excluded Company',
+            'slug' => 'excluded-company',
+            'code' => 'EXC',
+            'status' => 'inactive',
+            'created_by' => $this->superAdmin->getKey(),
+        ]);
+
+        $response = $this->actingAs($this->superAdmin)
+            ->get(route('companies.export', ['status' => 'active']));
+
+        $response->assertOk();
+        $content = $response->streamedContent();
+        $this->assertStringContainsString('Export Target', $content);
+        $this->assertStringNotContainsString('Excluded Company', $content);
+        $this->assertStringNotContainsString('sensitive-contact@example.test', $content);
+    }
+
+    public function test_saved_company_directory_views_are_owned_by_the_current_user(): void
+    {
+        $this->actingAs($this->superAdmin)
+            ->post(route('companies.directory-views.store'), [
+                'name' => 'Strategic review',
+                'filters' => [
+                    'tier' => 'strategic',
+                    'status' => 'active',
+                    'sort' => 'name',
+                    'direction' => 'asc',
+                    'per_page' => 25,
+                ],
+                'is_default' => true,
+            ])
+            ->assertSessionHas('success');
+
+        $this->assertDatabaseHas('company_directory_saved_views', [
+            'user_id' => $this->superAdmin->id,
+            'name' => 'Strategic review',
+            'is_default' => true,
+        ]);
+
+        $saved = CompanyDirectorySavedView::query()->firstOrFail();
+        $this->assertSame('strategic', $saved->filters['tier']);
+        $this->assertSame('active', $saved->filters['status']);
+    }
+
     public function test_super_admin_can_create_update_and_archive_company(): void
     {
         $createResponse = $this
             ->actingAs($this->superAdmin)
             ->post(route('companies.store'), [
                 'name' => 'Solar Lab Indonesia',
-                'code' => 'sli',
+                'code' => 'SLI',
                 'registration_number' => 'REG-2026-001',
                 'email' => 'hello@solarlab.test',
                 'phone' => '+62 761 555 0101',
@@ -82,13 +213,15 @@ class CompanyManagementTest extends TestCase
                 'status' => 'active',
             ]);
 
+        $createResponse
+            ->assertSessionHasNoErrors()
+            ->assertSessionHas('success');
+
         $company = Company::query()
-            ->where('code', 'SLI')
+            ->where('registration_number', 'REG-2026-001')
             ->firstOrFail();
 
-        $createResponse
-            ->assertRedirect(route('companies.show', $company))
-            ->assertSessionHas('success');
+        $createResponse->assertRedirect(route('companies.show', $company));
 
         $this->assertDatabaseHas('companies', [
             'id' => $company->getKey(),
@@ -102,7 +235,7 @@ class CompanyManagementTest extends TestCase
             ->actingAs($this->superAdmin)
             ->put(route('companies.update', $company), [
                 'name' => 'Solar Lab Nusantara',
-                'code' => 'sln',
+                'code' => 'SLN',
                 'registration_number' => 'REG-2026-001',
                 'email' => 'hello@solarlab.test',
                 'phone' => '+62 761 555 0101',
@@ -111,7 +244,8 @@ class CompanyManagementTest extends TestCase
             ]);
 
         $updateResponse
-            ->assertRedirect(route('companies.show', $company))
+            ->assertSessionHasNoErrors()
+            ->assertRedirect(route('companies.edit', $company))
             ->assertSessionHas('success');
 
         $this->assertDatabaseHas('companies', [

@@ -1,0 +1,48 @@
+NEXORIN PAGE 002 VALIDATION LOG
+Date: 2026-08-02
+
+== PHP source lint ==
+No syntax errors detected in app/Http/Controllers/BillOfMaterialController.php
+No syntax errors detected in app/Models/CompanyMembership.php
+No syntax errors detected in app/Models/User.php
+No syntax errors detected in resources/views/boms/index.blade.php
+No syntax errors detected in resources/views/layouts/app.blade.php
+No syntax errors detected in resources/views/partials/sidebar.blade.php
+No syntax errors detected in resources/views/partials/topbar.blade.php
+No syntax errors detected in scripts/validate-page002-performance-patch.php
+No syntax errors detected in scripts/test-page002-authorization-cache.php
+
+== Blade compilation and compiled PHP lint ==
+resources/views/layouts/app.blade.php compiled 11855 bytes
+resources/views/partials/topbar.blade.php compiled 18033 bytes
+resources/views/partials/sidebar.blade.php compiled 15951 bytes
+resources/views/boms/index.blade.php compiled 29759 bytes
+No syntax errors detected in /tmp/nexorin-blade-cache/resources_views_boms_index.php
+No syntax errors detected in /tmp/nexorin-blade-cache/resources_views_layouts_app.php
+No syntax errors detected in /tmp/nexorin-blade-cache/resources_views_partials_sidebar.php
+No syntax errors detected in /tmp/nexorin-blade-cache/resources_views_partials_topbar.php
+
+== JavaScript syntax ==
+nexorin-bom-library-v6.js: PASS
+nexorin-engineering-action.js: PASS
+nexorin-shell.js: PASS
+
+== Contract tests ==
+PAGE-001 PATCH VALIDATION: PASS
+PAGE-002 PERFORMANCE PATCH VALIDATION: PASS
+Page CSS bytes: 31855
+Page JS bytes: 9901
+PAGE-002 AUTHORIZATION CACHE TEST: PASS
+
+== CSS structural check ==
+open braces: 228
+close braces: 228
+CSS brace balance: PASS
+
+== Build probe ==
+BLOCKED: bundled node_modules lacks @rolldown/binding-linux-x64-gnu in this Linux container.
+This is an environment/platform dependency limitation, not a source syntax failure.
+
+== Laravel runtime probe ==
+BLOCKED: PHP container lacks DOM, PDO SQLite/PostgreSQL, mbstring, and XML extensions.
+Authenticated Page 002 runtime render must be completed on the target Windows environment.

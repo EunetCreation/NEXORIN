@@ -3,6 +3,7 @@
 namespace App\Services\Catalog\Datasheet;
 
 use App\Models\Material;
+use App\Support\EngineeringProductMasterDictionary;
 use App\Support\ProfessionalCatalogProfile;
 
 class DatasheetCategoryDetector
@@ -187,6 +188,13 @@ class DatasheetCategoryDetector
         $material->loadMissing('category.parent');
         $code = strtoupper((string) $material->category?->code);
 
+        // Section 55 classes intentionally use root-level parser confirmation until
+        // an exact-class detector signature is explicitly implemented and tested.
+        // This prevents a legacy subtype detector from falsely blocking a canonical class.
+        if (EngineeringProductMasterDictionary::has($code)) {
+            return null;
+        }
+
         return $code !== '' && $code !== $root ? $code : null;
     }
 
@@ -199,6 +207,10 @@ class DatasheetCategoryDetector
     {
         if ($exact === null) {
             return null;
+        }
+
+        if ($master = EngineeringProductMasterDictionary::for($exact)) {
+            return (string) $master['title'];
         }
 
         return (string) data_get(

@@ -1,0 +1,108 @@
+/* ========================================================================== 
+   NEXORIN Premium Interaction Layer v1
+   Scoped to Pages 002-007 only. Motion is intentionally restrained and
+   disabled when the OS requests reduced motion.
+   ========================================================================== */
+:is(.page-bom-library-v6,.page-bom-workspace-v6,.page-company-create-v6,.page-company-edit-v6,.page-companies-index-v6,.page-company-show-v6){
+  --nxp-ease:cubic-bezier(.22,.78,.26,1);
+  --nxp-fast:160ms;
+  --nxp-med:280ms;
+  --nxp-glow:rgba(38,205,215,.12);
+}
+
+/* Content is never hidden while waiting for JavaScript/IntersectionObserver.
+   The observer only adds a restrained arrival animation when a card first
+   enters view, avoiding empty flashes on long engineering workspaces. */
+@keyframes nxp-card-arrive{
+  from{opacity:.88;transform:translateY(5px)}
+  to{opacity:1;transform:none}
+}
+:is(.page-bom-library-v6,.page-bom-workspace-v6,.page-company-create-v6,.page-company-edit-v6,.page-companies-index-v6,.page-company-show-v6) .nxp-reveal{
+  opacity:1;
+  transform:none;
+}
+:is(.page-bom-library-v6,.page-bom-workspace-v6,.page-company-create-v6,.page-company-edit-v6,.page-companies-index-v6,.page-company-show-v6) .nxp-reveal.is-visible{
+  animation:nxp-card-arrive 340ms var(--nxp-ease) both;
+}
+
+/* Premium cards: no large movement, only optical depth. */
+@media (hover:hover) and (pointer:fine){
+  .page-bom-library-v6 :is(.nxbomlib-kpi,.nxbomlib-chart-card,.nxbomlib-readiness-card,.nxbomlib-issues-card,.nxbomlib-health-card,.nxbomlib-intelligence>section),
+  .page-bom-workspace-v6 :is(.nxbom3-kpi,.nxbom3-card,.nxbom3-rail-card),
+  .page-company-create-v6 :is(.nxcg-create-card,.nxcg-card),
+  .page-company-edit-v6 :is(.nx5-card,.nx5-rail-card),
+  .page-companies-index-v6 :is(.nx6-kpi,.nx6-chart-card,.nx6-intel-rail>section,.nx6-intel-callout),
+  .page-company-show-v6 :is(.nx7-card,.nx7-rail-card,.nx7-summary-tile){
+    transition:border-color var(--nxp-fast) ease,box-shadow var(--nxp-med) var(--nxp-ease),background-color var(--nxp-fast) ease,transform var(--nxp-fast) ease;
+  }
+  .page-bom-library-v6 :is(.nxbomlib-kpi,.nxbomlib-chart-card,.nxbomlib-readiness-card,.nxbomlib-issues-card,.nxbomlib-health-card):hover,
+  .page-company-edit-v6 :is(.nx5-card,.nx5-rail-card):hover,
+  .page-companies-index-v6 :is(.nx6-kpi,.nx6-chart-card):hover,
+  .page-company-show-v6 :is(.nx7-card,.nx7-rail-card,.nx7-summary-tile):hover{
+    border-color:rgba(62,174,194,.30);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.025),0 16px 34px rgba(0,0,0,.14),0 0 0 1px rgba(25,191,204,.025);
+  }
+}
+
+/* Tactile controls. */
+:is(.page-bom-library-v6,.page-bom-workspace-v6,.page-company-create-v6,.page-company-edit-v6,.page-companies-index-v6,.page-company-show-v6)
+:is(button,a[class*="btn"],a[class*="button"],[role="button"]){
+  -webkit-tap-highlight-color:transparent;
+}
+@media (hover:hover) and (pointer:fine){
+  :is(.page-bom-library-v6,.page-bom-workspace-v6,.page-company-create-v6,.page-company-edit-v6,.page-companies-index-v6,.page-company-show-v6)
+  :is(button,a[class*="btn"],a[class*="button"],[role="button"]):not(:disabled){
+    transition:transform var(--nxp-fast) var(--nxp-ease),border-color var(--nxp-fast) ease,background-color var(--nxp-fast) ease,box-shadow var(--nxp-fast) ease,color var(--nxp-fast) ease;
+  }
+  :is(.page-bom-library-v6,.page-bom-workspace-v6,.page-company-create-v6,.page-company-edit-v6,.page-companies-index-v6,.page-company-show-v6)
+  :is(button,a[class*="btn"],a[class*="button"],[role="button"]):not(:disabled):active{
+    transform:translateY(1px) scale(.992);
+  }
+}
+
+/* Focus should read as engineered control, not browser default. */
+:is(.page-bom-library-v6,.page-bom-workspace-v6,.page-company-create-v6,.page-company-edit-v6,.page-companies-index-v6,.page-company-show-v6)
+:is(input,select,textarea,button,a):focus-visible{
+  outline:2px solid rgba(59,215,226,.34);
+  outline-offset:2px;
+}
+
+/* Table row polish without moving columns. */
+@media (hover:hover) and (pointer:fine){
+  .page-bom-library-v6 .nxbomlib-row,
+  .page-bom-workspace-v6 tbody tr,
+  .page-companies-index-v6 .nx6-table tbody tr{
+    transition:background-color var(--nxp-fast) ease,box-shadow var(--nxp-fast) ease;
+  }
+  .page-bom-library-v6 .nxbomlib-row:hover,
+  .page-bom-workspace-v6 tbody tr:hover,
+  .page-companies-index-v6 .nx6-table tbody tr:hover{
+    background-color:rgba(14,69,83,.26);
+    box-shadow:inset 2px 0 0 rgba(34,207,211,.38);
+  }
+}
+
+/* Animated progress bars are applied by JS only after the section enters view. */
+.nxp-progress{
+  transform-origin:left center;
+}
+.nxp-progress.nxp-progress-pending{
+  transform:scaleX(0);
+}
+.nxp-progress.nxp-progress-run{
+  transform:scaleX(1);
+  transition:transform 620ms var(--nxp-ease);
+}
+
+@media (prefers-reduced-motion:reduce){
+  :is(.page-bom-library-v6,.page-bom-workspace-v6,.page-company-create-v6,.page-company-edit-v6,.page-companies-index-v6,.page-company-show-v6) *,
+  :is(.page-bom-library-v6,.page-bom-workspace-v6,.page-company-create-v6,.page-company-edit-v6,.page-companies-index-v6,.page-company-show-v6) *::before,
+  :is(.page-bom-library-v6,.page-bom-workspace-v6,.page-company-create-v6,.page-company-edit-v6,.page-companies-index-v6,.page-company-show-v6) *::after{
+    animation-duration:.001ms!important;
+    animation-iteration-count:1!important;
+    scroll-behavior:auto!important;
+    transition-duration:.001ms!important;
+  }
+  .nxp-reveal{opacity:1!important;transform:none!important}
+  .nxp-progress{transform:none!important}
+}

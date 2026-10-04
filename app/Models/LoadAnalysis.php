@@ -139,7 +139,9 @@ class LoadAnalysis extends Model
             : $averageBillKwh / $billingDays;
 
         $dailyEnergyKwh = match ($this->source_mode) {
-            'bill' => $billDailyEnergyKwh ?? $equipmentDailyEnergyKwh,
+            // A bill-only analysis must never silently fall back to a synthetic
+            // equipment schedule when its selected source has no bill history.
+            'bill' => $billDailyEnergyKwh ?? 0,
             'equipment' => $equipmentDailyEnergyKwh,
             default => $equipmentDailyEnergyKwh > 0
                 ? $equipmentDailyEnergyKwh
@@ -147,11 +149,24 @@ class LoadAnalysis extends Model
         };
 
         $monthlyEnergyKwh = $dailyEnergyKwh * $billingDays;
-        $peakDemandKw = $profilePeakDemandKw > 0
-            ? $profilePeakDemandKw
-            : ($averageBillPeakKw ?? 0);
-        $effectiveRate = $averageBillKwh && $averageBillAmount
-            ? $averageBillAmount / $averageBillKwh
+        $peakDemandKw = match ($this->source_mode) {
+            'bill' => $averageBillPeakKw ?? 0,
+            'equipment' => $profilePeakDemandKw,
+            default => $profilePeakDemandKw > 0
+                ? $profilePeakDemandKw
+                : ($averageBillPeakKw ?? 0),
+        };
+
+        // Effective tariff must be reconstructed only from bill records that
+        // contain both energy and amount. Mixing average energy across all bills
+        // with amount from a smaller subset would create a false rate.
+        $pricedBills = $bills->filter(
+            fn (ElectricityBill $bill): bool => $bill->bill_amount !== null
+                && (float) $bill->energy_kwh > 0
+        );
+        $pricedBillEnergy = (float) $pricedBills->sum('energy_kwh');
+        $effectiveRate = $pricedBillEnergy > 0
+            ? (float) $pricedBills->sum('bill_amount') / $pricedBillEnergy
             : null;
         $loadFactorPercent = $peakDemandKw > 0
             ? min(($dailyEnergyKwh / ($peakDemandKw * 24)) * 100, 100)
@@ -165,7 +180,11 @@ class LoadAnalysis extends Model
             'appliance_count' => $appliances->count(),
             'bill_count' => $bills->count(),
             'connected_load_kw' => round($connectedLoadKw, 3),
+            // Kept for backward compatibility only. This is the sum of each
+            // equipment-level preliminary starting assumption; it is not a
+            // simultaneous or sequential system-start study.
             'starting_load_kw' => round($startingLoadKw, 3),
+            'profile_peak_demand_kw' => round($profilePeakDemandKw, 3),
             'daily_energy_kwh' => round($dailyEnergyKwh, 3),
             'monthly_energy_kwh' => round($monthlyEnergyKwh, 3),
             'annual_energy_kwh' => round($monthlyEnergyKwh * 12, 3),

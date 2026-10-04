@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use App\Support\EngineeringProductMasterDictionary;
 use App\Support\ProfessionalCatalogProfile;
 use App\Support\ProfessionalSpecificationSchema;
 use Tests\TestCase;
@@ -27,6 +28,77 @@ class ProfessionalSpecificationSchemaTest extends TestCase
                 array_merge($payload[$code]['required_specs'] ?? [], $payload[$code]['optional_specs'] ?? []),
                 "Schema {$code} has no technical fields."
             );
+        }
+    }
+
+    public function test_master_section_55_dictionary_covers_all_89_canonical_engineering_classes(): void
+    {
+        $this->assertCount(89, EngineeringProductMasterDictionary::classes());
+
+        foreach (EngineeringProductMasterDictionary::classes() as $code => $definition) {
+            $schema = ProfessionalSpecificationSchema::for($code);
+            $fields = collect($schema['groups'])->flatMap(fn (array $group): array => $group['fields']);
+
+            $this->assertSame($definition['root_code'], $schema['root_code']);
+            $this->assertSame($definition['master_code'], $schema['master_reference']);
+            $this->assertSame($definition['title'], $schema['title']);
+            $this->assertSame($definition['required'], $schema['required_specs']);
+            $this->assertNotEmpty($fields, "Canonical schema {$code} has no fields.");
+            $this->assertNotContains('general', $fields->pluck('group')->all(), "Canonical schema {$code} contains uncategorized fields.");
+
+            $labels = $fields->pluck('label')->all();
+            $this->assertSame(count($labels), count(array_unique($labels)), "Canonical schema {$code} contains duplicate visible labels.");
+        }
+    }
+
+    public function test_canonical_component_schema_copy_and_labels_are_human_readable(): void
+    {
+        $forbiddenCopy = [
+            'MASTER Section',
+            'MaterialSpec',
+            'ProductRevision',
+            'canonical engineering class',
+            'backward compatibility',
+        ];
+        $machineLikeLabels = [
+            'Cpu Type', 'Fiber Sfp Support', 'Vlan Support', 'Stp Rstp Support',
+            'Wan Support', 'Dual Sim Support', 'Emc Support', 'Cable Od Range',
+            'Ansi Functions', 'Dcir', 'Ucpv Voltage', 'Iimp Current Ka Optional',
+        ];
+
+        foreach (EngineeringProductMasterDictionary::classes() as $code => $definition) {
+            $schema = ProfessionalSpecificationSchema::for($code);
+            $copy = implode(' ', array_filter([
+                $schema['title'] ?? null,
+                $schema['description'] ?? null,
+                ...collect($schema['groups'] ?? [])->pluck('description')->filter()->all(),
+            ]));
+
+            foreach ($forbiddenCopy as $phrase) {
+                $this->assertStringNotContainsString($phrase, $copy, "Internal phrase leaked in {$code}: {$phrase}");
+            }
+
+            $labels = collect($schema['groups'] ?? [])->flatMap(fn (array $group): array => $group['fields'] ?? [])->pluck('label')->all();
+            foreach ($machineLikeLabels as $label) {
+                $this->assertNotContains($label, $labels, "Machine-like label remains in {$code}: {$label}");
+            }
+        }
+
+        $expectedLabels = [
+            'cpu_type' => 'Controller CPU',
+            'fiber_sfp_support' => 'Fiber / SFP Support',
+            'vlan_support' => 'VLAN Support',
+            'stp_rstp_support' => 'STP / RSTP Support',
+            'dual_sim_support' => 'Dual-SIM Support',
+            'cable_od_range_mm' => 'Cable Outside Diameter Range',
+            'ansi_functions' => 'Protection Functions (ANSI)',
+            'dcir_mohm' => 'DC Internal Resistance (DCIR)',
+            'ucpv_voltage_v' => 'Maximum Continuous PV Voltage (Ucpv)',
+            'pf_q_capability' => 'Power Factor / Reactive Power Capability',
+        ];
+
+        foreach ($expectedLabels as $key => $label) {
+            $this->assertSame($label, ProfessionalSpecificationSchema::definition($key)['label']);
         }
     }
 

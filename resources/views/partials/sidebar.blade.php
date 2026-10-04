@@ -7,11 +7,7 @@
         : $sidebarUser->activeCompanies()->first();
 
     $membership = $sidebarCompany
-        ? $sidebarUser->companyMemberships()
-            ->where('company_id', $sidebarCompany->getKey())
-            ->where('status', 'active')
-            ->with('roles')
-            ->first()
+        ? $sidebarUser->membershipForCompany($sidebarCompany)
         : null;
 
     $roleLabel = $sidebarUser->isSuperAdmin()

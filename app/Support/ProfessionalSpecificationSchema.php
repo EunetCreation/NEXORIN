@@ -17,22 +17,45 @@ class ProfessionalSpecificationSchema
         $categoryCode = self::categoryCode($subject);
         $rootCode = ProfessionalCatalogProfile::rootCodeFor($subject);
         $profile = ProfessionalCatalogProfile::for($subject);
-        $specific = self::subcategorySchemas()[$categoryCode] ?? null;
+        $masterProduct = EngineeringProductMasterDictionary::for($categoryCode);
+        $specific = $masterProduct ? [
+            'title' => $masterProduct['title'],
+            'description' => self::masterDisplayDescription($masterProduct),
+            'required' => $masterProduct['required'] ?? [],
+            'optional' => $masterProduct['optional'] ?? [],
+            'conditional' => $masterProduct['conditional'] ?? [],
+        ] : (self::subcategorySchemas()[$categoryCode] ?? null);
+        $masterAlignment = $masterProduct ? [] : (self::masterAlignment()[$categoryCode] ?? []);
 
-        $required = array_values(array_unique($specific['required'] ?? ($profile['specs'] ?? [])));
+        $required = array_values(array_unique(array_merge(
+            $specific['required'] ?? ($profile['specs'] ?? []),
+            $masterAlignment['required'] ?? []
+        )));
         $conditional = array_values(array_diff(
-            array_unique($specific['conditional'] ?? []),
+            array_unique(array_merge(
+                $specific['conditional'] ?? [],
+                $masterAlignment['conditional'] ?? []
+            )),
             $required
         ));
         $optional = array_values(array_diff(
-            array_unique(array_merge($specific['optional'] ?? [], $specific['recommended'] ?? [], $conditional)),
+            array_unique(array_merge(
+                $specific['optional'] ?? [],
+                $specific['recommended'] ?? [],
+                $masterAlignment['optional'] ?? [],
+                $conditional
+            )),
             $required
         ));
 
         $fields = collect(array_merge($required, $optional))
-            ->map(function (string $key) use ($required, $conditional, $categoryCode): array {
+            ->map(function (string $key) use ($required, $conditional, $categoryCode, $rootCode, $masterProduct): array {
                 $categoryGroup = self::categoryFieldGroupOverrides()[$categoryCode][$key] ?? null;
                 $definition = self::definition($key, $categoryGroup);
+                if ($masterProduct && ($definition['group'] ?? 'general') === 'general') {
+                    $definition['group'] = self::masterGroupFor($rootCode, $key);
+                    $definition['description'] = self::descriptionFor($key, $definition['group'], (string) $definition['label']);
+                }
                 $categoryDefinition = self::categoryFieldDefinitionOverrides()[$categoryCode][$key] ?? [];
                 if ($categoryDefinition !== []) {
                     $definition = array_merge($definition, $categoryDefinition);
@@ -74,6 +97,8 @@ class ProfessionalSpecificationSchema
             'required_count' => count($required),
             'optional_count' => count(array_diff($optional, $conditional)),
             'conditional_count' => count($conditional),
+            'master_reference' => $masterProduct['master_code'] ?? null,
+            'product_authority' => $masterProduct ? 'material_spec_foundation' : null,
         ];
     }
 
@@ -84,6 +109,7 @@ class ProfessionalSpecificationSchema
             ->flatMap(function (array $profile, string $root): array {
                 return [$root => $root] + collect($profile['subcategories'] ?? [])->mapWithKeys(fn ($name, $code): array => [$code => $code])->all();
             })
+            ->merge(EngineeringProductMasterDictionary::codes())
             ->values()
             ->unique()
             ->all();
@@ -96,6 +122,56 @@ class ProfessionalSpecificationSchema
         $payload['DEFAULT'] = self::defaultSchema();
 
         return $payload;
+    }
+
+    /**
+     * Build a schema payload for an explicit set of category codes.
+     *
+     * @param array<int, string> $codes
+     * @return array<string, array<string, mixed>>
+     */
+    public static function payloadForCodes(array $codes, bool $includeDefault = true): array
+    {
+        $payload = [];
+        foreach (array_values(array_unique($codes)) as $code) {
+            $payload[$code] = self::for($code);
+        }
+
+        if ($includeDefault) {
+            $payload['DEFAULT'] = self::defaultSchema();
+        }
+
+        return $payload;
+    }
+
+    /** @return array<string, array<string, mixed>> */
+    public static function engineeringProductPayload(): array
+    {
+        $payload = self::payloadForCodes(EngineeringProductMasterDictionary::codes(), false);
+        $payload['DEFAULT'] = self::createIntakeEmptySchema();
+
+        return $payload;
+    }
+
+    /** @return array<string, mixed> */
+    private static function createIntakeEmptySchema(): array
+    {
+        return [
+            'code' => 'DEFAULT',
+            'root_code' => 'DEFAULT',
+            'title' => 'Select a component class',
+            'description' => 'Technical fields and units load only after an exact engineering component class is selected. No engineering values are assumed.',
+            'required_specs' => [],
+            'optional_specs' => [],
+            'conditional_specs' => [],
+            'required_certificates' => [],
+            'required_documents' => [],
+            'groups' => [],
+            'field_count' => 0,
+            'required_count' => 0,
+            'optional_count' => 0,
+            'conditional_count' => 0,
+        ];
     }
 
     /** @return array<int, string> */
@@ -287,6 +363,7 @@ class ProfessionalSpecificationSchema
             'options' => $options,
             'placeholder' => self::placeholderFor($key, $unit),
             'filterable' => self::isFilterable($key),
+            'show_helper' => self::shouldShowFieldHelper($key, $inputType),
         ], $overrides);
 
         // A category-specific ownership decision must override the reusable field default.
@@ -294,6 +371,220 @@ class ProfessionalSpecificationSchema
         $definition['description'] = self::descriptionFor($key, $group, (string) $definition['label']);
 
         return $definition;
+    }
+
+    /**
+     * Current Material-schema coverage aligned to the canonical engineering product dictionary.
+     *
+     * This intentionally strengthens the mutable Material/MaterialSpec foundation only. It does
+     * not create ProductRevision, ProductCompatibility, project selection locking, or immutable
+     * engineering snapshots. Combined legacy subcategories use conditional fields where an exact
+     * subtype cannot yet be represented safely by the current taxonomy.
+     *
+     * @return array<string, array{required?:array<int,string>,conditional?:array<int,string>,optional?:array<int,string>}>
+     */
+    private static function masterAlignment(): array
+    {
+        $pvModule = [
+            'temp_coeff_isc', 'nmot_noct_c', 'max_series_fuse_rating_a', 'module_area_m2',
+            'connector_model', 'lead_length_mm', 'cable_size_mm2', 'fire_class',
+            'front_static_load_pa', 'rear_static_load_pa', 'first_year_degradation_percent',
+            'annual_degradation_percent', 'performance_warranty_curve',
+        ];
+        $stringInverter = [
+            'nominal_dc_voltage_v', 'max_ac_apparent_power_kva', 'max_efficiency_percent',
+            'weighted_efficiency_percent', 'rated_frequency_hz', 'power_factor_range',
+            'reactive_power_modes', 'thd_percent', 'dc_switch', 'dc_spd', 'ac_spd', 'afci',
+            'communication_ports', 'logger_controller_compatibility', 'temperature_derating_curve',
+            'altitude_derating_curve', 'cooling_method', 'noise_level_db',
+        ];
+        $batteryModule = [
+            'voltage_min_v', 'voltage_max_v', 'continuous_charge_kw', 'continuous_discharge_kw',
+            'peak_power_kw', 'peak_power_duration_s', 'soc_range', 'module_bms', 'dimensions_mm',
+            'weight_kg', 'charge_temperature_range', 'discharge_temperature_range',
+            'cycle_life_curve', 'calendar_life_model',
+        ];
+
+        return [
+            'PV_MONO_PERC' => ['required' => $pvModule],
+            'PV_TOPCON' => ['required' => $pvModule],
+            'PV_HJT' => ['required' => $pvModule],
+            'PV_HIGH_POWER' => ['required' => $pvModule],
+            'PV_BIFACIAL' => ['required' => array_merge($pvModule, [
+                'rear_irradiance_response', 'transparent_backsheet_or_glass', 'bifacial_test_data',
+            ])],
+
+            'INV_STRING_1P' => ['required' => $stringInverter],
+            'INV_STRING_3P' => ['required' => $stringInverter],
+            'INV_CENTRAL' => ['required' => array_merge($stringInverter, [
+                'dc_combiner_interface', 'station_transformer_compatibility', 'auxiliary_load_kw',
+                'skid_container_data', 'mv_interface',
+            ])],
+            'INV_MICRO' => ['required' => [
+                'mppt_per_input', 'dc_voltage_range_v', 'max_isc_a', 'grid_profile',
+            ]],
+            'INV_OPTIMIZER' => ['required' => [
+                'input_voltage_range_v', 'max_isc_a', 'max_output_voltage_v', 'max_output_current_a',
+                'efficiency_curve', 'supported_module_rules', 'supported_inverter_models',
+                'rapid_shutdown_behavior', 'connector_models', 'max_units_per_string',
+            ]],
+            'INV_HYBRID' => ['required' => [
+                'battery_voltage_min_v', 'battery_voltage_max_v', 'battery_charge_power_kw',
+                'battery_discharge_power_kw', 'supported_battery_models', 'bms_protocol_profiles',
+                'surge_duration_s', 'generator_input', 'black_start', 'parallel_operation',
+                'eps_output', 'grid_modes',
+            ]],
+            'INV_OFFGRID' => ['required' => [
+                'battery_voltage_min_v', 'battery_voltage_max_v', 'battery_charge_power_kw',
+                'battery_discharge_power_kw', 'supported_battery_models', 'bms_protocol_profiles',
+                'surge_duration_s', 'generator_input', 'black_start', 'parallel_operation',
+                'eps_output', 'grid_modes',
+            ]],
+            'INV_PCS' => ['required' => [
+                'rated_charge_kw', 'rated_discharge_kw', 'max_dc_current_a', 'overload_curve',
+                'charge_efficiency_map', 'discharge_efficiency_map', 'pf_q_capability', 'islanding',
+                'black_start', 'grid_forming', 'grid_following', 'bms_ems_protocols',
+                'transformer_interface',
+            ]],
+
+            'BAT_WALL' => ['required' => $batteryModule],
+            'BAT_RACK' => ['required' => $batteryModule],
+            'BAT_CABINET' => ['required' => [
+                'rack_count', 'total_nominal_kwh', 'continuous_power_kw', 'hvac_capacity_kw',
+                'fire_detection', 'ventilation', 'equipment_clearance_mm', 'auxiliary_power_kw',
+            ]],
+            'BAT_BMS' => ['required' => [
+                'supported_chemistry', 'cell_channels', 'temperature_channels', 'pack_voltage_range',
+                'current_sensor_interface', 'contactor_control', 'precharge_control', 'balancing_method',
+                'soc_algorithm', 'soh_algorithm', 'alarm_functions', 'modbus_profiles', 'firmware_revision',
+                'pcs_compatibility',
+            ]],
+            'BAT_ESS_PACKAGE' => ['required' => [
+                'rack_count', 'energy_mwh', 'power_interface', 'auxiliary_load_kw', 'hvac_system',
+                'fire_gas_detection', 'suppression_system', 'venting_strategy', 'egress_requirement',
+                'service_access', 'foundation_reactions',
+            ]],
+
+            'DC_CABLE_CONNECTOR' => ['conditional' => [
+                'strand_class', 'sheath', 'conductor_resistance_20c_ohm_km', 'ampacity_table_reference',
+                'ozone_resistance', 'wet_rating', 'connector_manufacturer', 'connector_series',
+                'connector_gender', 'min_cross_section_mm2', 'max_cross_section_mm2', 'cable_od_range_mm',
+                'contact_resistance_mohm', 'mating_cycles', 'crimp_tool', 'mating_compatibility_list',
+            ]],
+            'DC_COMBINER' => ['required' => [
+                'output_count', 'output_busbar_rating_a', 'fuse_slot_count', 'spd_included',
+                'isolator_included', 'string_monitoring', 'enclosure_ip_ik', 'gland_range_mm',
+            ]],
+            'DC_PROTECTION' => ['conditional' => [
+                'time_current_curve', 'device_dimensions_mm', 'holder_compatibility', 'touch_safety',
+                'temperature_derating_curve', 'polarity', 'dc_wiring_configuration', 'isolation_rating',
+                'switching_configuration', 'lockable',
+            ]],
+            'DC_SPD' => ['required' => [
+                'protection_level_up_kv', 'iimp_current_ka', 'protection_modes',
+                'backup_protection', 'remote_contact',
+            ]],
+
+            'AC_CABLE' => ['required' => [
+                'conductor_material', 'conductor_size_mm2', 'core_count', 'insulation', 'sheath', 'armour',
+                'resistance_ohm_km', 'reactance_ohm_km', 'ampacity_table_reference', 'short_circuit_k',
+                'installation_method', 'temperature_rating',
+            ]],
+            'AC_PROTECTION' => ['conditional' => [
+                'frame_rating_a', 'rated_insulation_voltage_v', 'impulse_withstand_kv', 'ics_ka',
+                'icw_ka_s', 'making_capacity_ka', 'trip_unit_lsig', 'drawout_fixed', 'interlocks',
+                'motor_operator', 'rcd_type', 'residual_current_ma', 'time_delay_ms',
+            ]],
+            'AC_TRANSFER_SYNC' => ['conditional' => [
+                'source_sync_limits', 'overload_curve', 'bypass_mode', 'neutral_switching',
+            ]],
+            'AC_METERING_CONTROL' => ['conditional' => [
+                'ct_primary_a', 'ct_secondary_a', 'burden_va', 'protection_class', 'knee_point_v',
+                'import_export_measurement', 'sampling_rate_hz', 'supported_inverters', 'supported_meters',
+                'fail_safe_mode', 'setpoint_resolution_kw',
+            ]],
+            'AC_TRANSFORMER_MV' => ['conditional' => [
+                'rated_transformer_kva', 'hv_voltage_kv', 'lv_voltage_kv', 'vector_group', 'impedance_percent',
+                'tap_range_percent', 'tap_step_percent',
+                'transformer_efficiency_percent', 'temperature_rise_c', 'insulation_level',
+                'oil_or_dry_type', 'neutral_earthing', 'mv_cable_cross_section_mm2', 'mv_cable_screen',
+                'mv_cable_capacitance_uf_km', 'short_time_withstand_ka_s', 'peak_withstand_ka',
+                'internal_arc_class', 'vcb_rating_a', 'earthing_switch', 'relay_functions',
+            ]],
+
+            'MOUNT_ROOF' => ['required' => [
+                'alloy_or_grade', 'section_properties', 'max_span_table', 'moment_capacity', 'shear_capacity',
+                'deflection_limit', 'finish', 'frame_height_range_mm', 'installation_torque_nm',
+                'slip_pull_capacity_kn', 'module_compatibility',
+            ]],
+            'MOUNT_BALLAST' => ['required' => [
+                'system_geometry', 'allowable_tilt_range', 'aerodynamic_coefficient_data',
+                'max_block_mass_kg', 'friction_assumptions', 'roof_mat',
+            ]],
+            'MOUNT_GROUND' => ['required' => [
+                'post_section', 'steel_grade', 'coating_system', 'pile_type', 'pile_diameter_mm',
+                'pile_wall_thickness_mm', 'geotechnical_capacity', 'connection_details',
+            ]],
+            'MOUNT_CARPORT' => ['required' => [
+                'steel_grade', 'coating_system', 'section_properties', 'connection_details',
+                'foundation_reactions', 'drainage_interface',
+            ]],
+
+            'MON_DATA_LOGGER' => ['required' => [
+                'supported_devices', 'rs485_port_count', 'ethernet_port_count', 'cellular_support',
+                'local_storage_capacity', 'sampling_interval_s', 'api_support', 'time_sync_method',
+            ]],
+            'MON_METER' => ['required' => [
+                'meter_phase', 'voltage_input_range', 'direct_or_ct', 'ct_secondary_a',
+                'active_energy_class', 'reactive_energy_class', 'import_export_measurement',
+                'demand_measurement', 'pulse_output', 'auxiliary_supply',
+            ]],
+            'MON_NETWORK' => ['conditional' => [
+                'ethernet_port_count', 'network_speed_mbps', 'poe_support', 'fiber_sfp_support', 'vlan_support',
+                'rstp_support', 'network_redundancy', 'managed_switch', 'security_features', 'wan_support',
+                'cellular_support', 'vpn_support', 'firewall_support', 'dual_sim_support',
+            ]],
+            'MON_WEATHER' => ['required' => [
+                'sensor_type', 'calibration_uncertainty_percent', 'temperature_response_percent',
+                'tilt_error_percent', 'signal_output', 'sampling_interval_s', 'time_sync_method',
+            ]],
+            'MON_SENSOR' => ['required' => [
+                'sensor_type', 'sensor_range', 'sensor_accuracy', 'sensor_response_time_s',
+                'sensor_mounting', 'signal_output',
+            ]],
+
+            'GROUNDING_SYSTEM' => ['conditional' => [
+                'conductor_material', 'conductor_size_mm2', 'conductor_insulation', 'temperature_rating',
+                'conductor_resistance_ohm_km', 'rod_length_m', 'rod_diameter_mm', 'rod_coating',
+                'rod_coupling', 'earth_clamp_type',
+            ]],
+            'LIGHTNING_PROTECTION' => ['required' => [
+                'air_terminal_material', 'air_terminal_length_m', 'lps_system_type', 'air_terminal_mounting',
+                'down_conductor_material', 'down_conductor_size_mm2', 'down_conductor_route',
+                'down_conductor_supports',
+            ]],
+
+            'PANEL_DCDB' => ['required' => [
+                'busbar_rating_a', 'neutral_bar', 'earth_bar', 'ventilation_method', 'dimensions_mm',
+                'tested_assembly_evidence',
+            ]],
+            'PANEL_ACDB' => ['required' => [
+                'busbar_rating_a', 'neutral_bar', 'earth_bar', 'ventilation_method', 'dimensions_mm',
+                'tested_assembly_evidence',
+            ]],
+            'PANEL_BACKUP' => ['required' => [
+                'busbar_rating_a', 'neutral_bar', 'earth_bar', 'ventilation_method', 'dimensions_mm',
+                'tested_assembly_evidence',
+            ]],
+            'PANEL_LVMDP' => ['required' => [
+                'busbar_rating_a', 'neutral_bar', 'earth_bar', 'ventilation_method', 'dimensions_mm',
+                'tested_assembly_evidence',
+            ]],
+            'PANEL_SYNC' => ['required' => [
+                'busbar_rating_a', 'neutral_bar', 'earth_bar', 'ventilation_method', 'dimensions_mm',
+                'tested_assembly_evidence',
+            ]],
+        ];
     }
 
     /** @return array<string, array<string, mixed>> */
@@ -744,6 +1035,25 @@ class ProfessionalSpecificationSchema
         $yesNo = ['1' => 'Yes', '0' => 'No'];
 
         return [
+            'temp_coeff_isc' => ['label' => 'Temperature Coefficient Isc', 'input_type' => 'number', 'group' => 'thermal', 'unit' => '%/°C', 'step' => '0.001', 'min' => -10, 'max' => 10],
+            'nmot_noct_c' => ['label' => 'NMOT / NOCT', 'input_type' => 'number', 'group' => 'thermal', 'unit' => '°C', 'step' => '0.1'],
+            'performance_warranty_curve' => ['label' => 'Performance Warranty Curve', 'input_type' => 'textarea', 'group' => 'warranty', 'unit' => null, 'placeholder' => 'Record the manufacturer warranty profile or referenced curve basis.'],
+            'reactive_power_modes' => ['label' => 'Reactive Power Modes', 'input_type' => 'textarea', 'group' => 'control', 'unit' => null],
+            'communication_ports' => ['label' => 'Communication Ports', 'input_type' => 'textarea', 'group' => 'communication', 'unit' => null],
+            'logger_controller_compatibility' => ['label' => 'Declared Logger / Controller Compatibility', 'input_type' => 'textarea', 'group' => 'compatibility', 'unit' => null],
+            'temperature_derating_curve' => ['label' => 'Temperature Derating Curve', 'input_type' => 'textarea', 'group' => 'thermal', 'unit' => null],
+            'altitude_derating_curve' => ['label' => 'Altitude Derating Curve', 'input_type' => 'textarea', 'group' => 'environmental', 'unit' => null],
+            'charge_efficiency_map' => ['label' => 'Charge Efficiency Map', 'input_type' => 'textarea', 'group' => 'performance', 'unit' => null],
+            'discharge_efficiency_map' => ['label' => 'Discharge Efficiency Map', 'input_type' => 'textarea', 'group' => 'performance', 'unit' => null],
+            'bms_ems_protocols' => ['label' => 'BMS / EMS Protocols', 'input_type' => 'textarea', 'group' => 'communication', 'unit' => null],
+            'cycle_life_curve' => ['label' => 'Cycle Life Curve', 'input_type' => 'textarea', 'group' => 'performance', 'unit' => null],
+            'calendar_life_model' => ['label' => 'Calendar Life Model', 'input_type' => 'textarea', 'group' => 'performance', 'unit' => null],
+            'source_sync_limits' => ['label' => 'Source Synchronization Limits', 'input_type' => 'textarea', 'group' => 'control', 'unit' => null],
+            'time_current_curve' => ['label' => 'Time-current Curve', 'input_type' => 'textarea', 'group' => 'protection', 'unit' => null],
+            'ampacity_table_reference' => ['label' => 'Ampacity Table / Manufacturer Reference', 'input_type' => 'textarea', 'group' => 'electrical', 'unit' => null],
+            'mating_compatibility_list' => ['label' => 'Declared Mating Compatibility List', 'input_type' => 'textarea', 'group' => 'compatibility', 'unit' => null],
+            'tested_assembly_evidence' => ['label' => 'Tested Assembly Evidence Reference', 'input_type' => 'textarea', 'group' => 'compliance', 'unit' => null],
+            'foundation_reactions' => ['label' => 'Foundation Reactions / Load Basis', 'input_type' => 'textarea', 'group' => 'mechanical', 'unit' => null],
             'temp_coeff_voc' => ['label' => 'Temperature Coefficient Voc', 'input_type' => 'number', 'group' => 'thermal', 'unit' => '%/°C', 'step' => '0.001', 'min' => -10, 'max' => 10],
             'temp_coeff_pmax' => ['label' => 'Temperature Coefficient Pmax', 'input_type' => 'number', 'group' => 'thermal', 'unit' => '%/°C', 'step' => '0.001', 'min' => -10, 'max' => 10],
             'module_technology' => ['label' => 'Module Technology Family', 'group' => 'architecture', 'placeholder' => 'Example: N-type TOPCon, HJT, PERC'],
@@ -906,17 +1216,52 @@ class ProfessionalSpecificationSchema
         return strtoupper((string) $subject);
     }
 
+    private static function masterGroupFor(string $rootCode, string $key): string
+    {
+        if (preg_match('/certif|standard|program_revision/', $key)) return 'compliance';
+        if (preg_match('/environment|noise|humidity|rain|corrosion|hazardous|operating_temperature/', $key)) return 'environmental';
+        if (preg_match('/alarm|dispatch|peak_shaving|self_consumption|tou_|generator_control|reserve_soc|optimization_horizon|forecast|initiation|controller|interlock|bypass|reset|latching|backtracking|drive|stow|balancing|precharge|contactor|prime_standby|operating_sequence/', $key)) return 'control';
+        if (preg_match('/icu|icn|ics|icw|ipk|breaking|withstand|overload|isolation|trip|fuse|breaker|i_delta|internal_arc|protection|short_time|making|polarity|lockability|remote_trip|touch_safety|mode$/', $key)) return 'protection';
+        if (preg_match('/ratio_|ct_|vt_|burden|ith_|idyn_|excitation|accuracy|sampling|range$|threshold|irradiance_channels/', $key)) return 'measurement';
+        if (preg_match('/event_record|disturbance|waveform|demand$|pulse$|logger$|isolation_monitoring/', $key)) return 'monitoring';
+        if (preg_match('/protocol|communications?|serial_ports|ethernet|ports$|speed$|wan_|vpn_|firewall|dual_sim|poe_|fiber_|vlan_|stp_|api_|signal$|output$|aux_supply/', $key)) return 'communication';
+        if (preg_match('/access$|embedment|fastener|seal$|cover$|mounting|support_details|route_description|anchor_pattern|installation|crimp|clearances/', $key)) return 'installation';
+        if (preg_match('/width|height|thickness|area_mm2|spacing|bolt$|tension|shear|slip|capacity$|design_capacities|wall_thickness|rotation_range|row_length|slope_limits|section_|profile$|mass_|weight|diameter|dimensions|mechanical_/', $key)) return 'mechanical';
+        if (preg_match('/material|plating|barrel|coating|reinforcement|cable_screen|armour|cores$|incomer|outgoing_count|form_of_separation|ip_ik|enclosure|accessories|trunk_cable_family/', $key)) return 'construction';
+        if (preg_match('/compatible|compatibility|family$|cable_range|supported_|interface$|direct_or_ct|lbs_vcb_fuse_options/', $key)) return 'compatibility';
+        if (preg_match('/thermal|temp_|temperature|heating|cooling|airflow|ventilation|cop$/', $key)) return 'thermal';
+        if (preg_match('/efficiency|cycle|performance|response|thd|unbalance|fuel_curve|minimum_loading|transient|start_time|discharge_time/', $key)) return 'performance';
+        if (preg_match('/warranty|degradation/', $key)) return 'warranty';
+
+        return match ($rootCode) {
+            'PV_MODULE' => 'architecture',
+            'BATTERY_ESS' => 'battery',
+            'MOUNTING_STRUCTURE', 'CIVIL_SITE_WORK' => 'mechanical',
+            'MONITORING_METERING' => 'monitoring',
+            'FIRE_HSE' => 'safety',
+            'GROUNDING_LIGHTNING_SAFETY' => 'safety',
+            default => 'electrical',
+        };
+    }
+
     private static function inferInputType(string $key): string
     {
-        if (str_ends_with($key, '_required') || str_ends_with($key, '_support') || str_ends_with($key, '_included')) {
+        if (str_ends_with($key, '_required')
+            || str_ends_with($key, '_support')
+            || str_ends_with($key, '_included')
+            || in_array($key, ['dc_switch', 'dc_spd', 'ac_spd', 'afci', 'generator_input', 'black_start', 'parallel_operation', 'islanding', 'grid_forming', 'grid_following', 'spd_included', 'isolator_included', 'string_monitoring', 'lockable', 'earthing_switch', 'neutral_bar', 'earth_bar', 'pulse_output', 'managed_switch', 'wan_support', 'vpn_support', 'firewall_support', 'dual_sim_support', 'poe_support', 'fiber_sfp_support', 'vlan_support', 'rstp_support', 'cellular_support', 'import_export_measurement', 'demand_measurement'], true)) {
             return 'select';
+        }
+
+        if (preg_match('/curve|compatibility|supported_|_modes$|_profiles$|_interface$|_data$|_settings$|_functions$|_range$|_requirements?$|_reactions$|_strategy$|_details$|_features$/', $key)) {
+            return 'textarea';
         }
 
         if (preg_match('/(_days|_count|_months|_years|_hours|_minutes|_ms|_ns)$/', $key)) {
             return 'number';
         }
 
-        if (preg_match('/(_kw|_kwp|_kva|_kwh|_wp|_v|_a|_ka|_mm|_m|_m2|_m3|_kg|_kg_m|_kg_m2|_pa|_kpa|_bar|_hz|_db|_ohm|_percent|_mbps|_nm|_s)$/', $key)) {
+        if (preg_match('/(_kw|_kwp|_kva|_kwh|_wh|_mwh|_wp|_w|_v|_a|_ka|_ka_s|_mm|_m|_m2|_m3|_m3_h|_kg|_kg_m|_kg_m2|_pa|_kpa|_bar|_hz|_db|_ohm|_mohm|_ohm_km|_uf_km|_percent|_mbps|_nm|_c|_s)$/', $key)) {
             return 'number';
         }
 
@@ -931,24 +1276,24 @@ class ProfessionalSpecificationSchema
     {
         return match (true) {
             preg_match('/warranty|degradation|cycle_life|validity/', $key) === 1 => 'warranty',
-            preg_match('/certificate|standard|grid_code|authority|permit|compliance/', $key) === 1 => 'compliance',
+            preg_match('/certificate|standard|grid_code|authority|permit|compliance|tested_assembly/', $key) === 1 => 'compliance',
             preg_match('/price|cost|currency|payment|delivery|moq|minimum_order|availability|valid_until|effective|discount|tax|supplier/', $key) === 1 => 'commercial',
-            preg_match('/service|work_|manpower|working_days|processing|responsible|survey|inspection|assessment|deliverable/', $key) === 1 => 'service',
-            preg_match('/accuracy|measurement|measured|sensor|calibration|ct_ratio|spectral_range/', $key) === 1 => 'measurement',
-            preg_match('/communication|protocol|modbus|can_|mqtt|ethernet|wifi|sim_|vpn|cloud|logging|data_|_port|port_count|network|rs485/', $key) === 1 => 'communication',
-            preg_match('/transfer|controller|synchron|interlock|load_sharing|load_shedding|export_control|grid_support/', $key) === 1 => 'control',
-            preg_match('/fire|safety|anti_islanding|rapid_shutdown|short_circuit|breaking|protection|trip|spd|fuse|loto|ppe|earth_leakage/', $key) === 1 => 'protection',
-            preg_match('/temperature|temp_coeff|thermal|cooling|ventilation/', $key) === 1 => 'thermal',
-            preg_match('/efficiency|bifaciality|degradation|performance|cycle_life|discharge_time/', $key) === 1 => 'performance',
-            preg_match('/battery_|bms|capacity_ah|capacity_kwh|gross_capacity|usable_capacity|dod|charge_current|discharge_current|c_rate|parallel_limit|nominal_battery/', $key) === 1 => 'battery',
-            preg_match('/length|width|weight|dimension|rail|foundation|roof|tilt|orientation|corrosion|load_|span|height|clearance|diameter|size|wind|snow|ballast|walkway/', $key) === 1 => 'mechanical',
-            preg_match('/mounting|installation|route|trench|duct|penetration|support_spacing|cable_entry/', $key) === 1 => 'installation',
-            preg_match('/material|conductor|insulation|enclosure|frame|glass|busbar|concrete|reinforcement|armour|finish/', $key) === 1 => 'construction',
-            preg_match('/compatible|compatibility|genset|transformer_required|terrain|substrate/', $key) === 1 => 'compatibility',
-            preg_match('/coverage|application_area/', $key) === 1 => 'application',
-            preg_match('/voltage|current|power|mppt|phase|frequency|voc|vmp|isc|imp|transformer|impedance/', $key) === 1 => 'electrical',
+            preg_match('/service|work_|manpower|working_days|processing|responsible|survey|inspection|assessment|deliverable|egress|service_access/', $key) === 1 => 'service',
+            preg_match('/accuracy|measurement|measured|sensor|calibration|ct_ratio|spectral_range|burden|knee_point|sampling_rate/', $key) === 1 => 'measurement',
+            preg_match('/communication|protocol|modbus|can_|mqtt|ethernet|wifi|sim_|vpn|cloud|logging|data_|_port|port_count|network|rs485|api_|time_sync|cellular|fiber_sfp|vlan|rstp|security_features|wan_support|signal_output|sampling_interval|string_monitoring/', $key) === 1 => 'communication',
+            preg_match('/transfer|controller|synchron|interlock|load_sharing|load_shedding|export_control|grid_support|dc_switch|black_start|grid_forming|grid_following|generator_input|parallel_operation|eps_output|grid_modes|fail_safe|setpoint|bypass|neutral_switching|earthing_switch|relay_functions|contactor_control|precharge_control|soc_algorithm|soh_algorithm|alarm_functions|pf_q_capability|islanding/', $key) === 1 => 'control',
+            preg_match('/fire|safety|anti_islanding|rapid_shutdown|short_circuit|breaking|protection|trip|spd|fuse|loto|ppe|earth_leakage|afci|isolation_rating|polarity|dc_wiring|touch|lockable|making_capacity|icw|ics|residual|rcd|time_delay|short_time_withstand|peak_withstand|internal_arc|vcb|suppression|isolator_included|switching_configuration/', $key) === 1 => 'protection',
+            preg_match('/temperature|temp_coeff|thermal|cooling|ventilation|hvac|venting/', $key) === 1 => 'thermal',
+            preg_match('/battery_|bms|capacity_ah|capacity_kwh|gross_capacity|usable_capacity|dod|charge_current|discharge_current|c_rate|parallel_limit|nominal_battery|supported_chemistry|cell_channels|temperature_channels|pack_voltage|rack_count|energy_mwh|total_nominal|continuous_charge|continuous_discharge|peak_power|soc_range|module_bms|balancing_method/', $key) === 1 => 'battery',
+            preg_match('/efficiency|bifaciality|degradation|performance|cycle_life|discharge_time|thd|response|power_factor|bifacial_test_data|surge_duration/', $key) === 1 => 'performance',
+            preg_match('/length|width|weight|dimension|module_area|rail|foundation|roof|tilt|orientation|load_|span|height|clearance|diameter|size|wind|snow|ballast|walkway|section_properties|moment_capacity|shear_capacity|deflection_limit|slip_pull|system_geometry|post_section|pile_wall|geotechnical|reactions|aerodynamic_coefficient|friction_assumptions|max_block_mass/', $key) === 1 => 'mechanical',
+            preg_match('/mounting|installation|route|trench|duct|penetration|support_spacing|cable_entry|crimp_tool|connection_details|drainage_interface|air_terminal_mounting|down_conductor_route|down_conductor_supports/', $key) === 1 => 'installation',
+            preg_match('/material|conductor|insulation|enclosure|frame|glass|busbar|concrete|reinforcement|armour|finish|sheath|alloy|steel_grade|coating|strand_class|connector_manufacturer|connector_series|connector_gender|rod_coating|rod_coupling|wet_rating/', $key) === 1 => 'construction',
+            preg_match('/compatible|compatibility|genset|transformer_required|terrain|substrate|supported_|mating_|connector_model|connector_models|station_transformer|dc_combiner_interface|mv_interface|power_interface|direct_or_ct/', $key) === 1 => 'compatibility',
+            preg_match('/coverage|application_area|grid_profile/', $key) === 1 => 'application',
+            preg_match('/voltage|current|power|mppt|phase|frequency|voc|vmp|isc|imp|transformer|impedance|area_m2|resistance|reactance|ampacity|cross_section|cable_od|mating_cycles|output_count|gland_range|frame_rating|impulse_withstand|tap_step|mv_cable|rated_charge|rated_discharge|auxiliary_load|auxiliary_power|meter_phase|voltage_input|ct_primary|ct_secondary|max_units_per_string|neutral_earthing/', $key) === 1 => 'electrical',
             preg_match('/maintenance|inspection_interval|replaceable|service_life|firmware|spare_part/', $key) === 1 => 'maintenance',
-            preg_match('/type|technology|cell_count|module_count|source_count|input_count/', $key) === 1 => 'architecture',
+            preg_match('/type|technology|cell_count|module_count|source_count|input_count|skid_container|drawout_fixed|motor_operator|lps_system|air_terminal|down_conductor|neutral_bar|earth_bar|managed_switch|local_storage|active_energy_class|reactive_energy_class|auxiliary_supply/', $key) === 1 => 'architecture',
             default => 'general',
         };
     }
@@ -988,31 +1333,62 @@ class ProfessionalSpecificationSchema
         $group = $resolvedGroup ?? self::fieldGroupOverrides()[$key] ?? self::inferGroup($key);
 
         return match ($group) {
-            'architecture' => $label.' defines the component technology, construction, or functional architecture.',
-            'construction' => $label.' records the material, enclosure, conductor, or construction configuration.',
-            'electrical' => $label.' used for electrical compatibility, sizing, and project design checks.',
-            'battery' => $label.' used for storage sizing, BMS integration, and operating-limit checks.',
-            'performance' => $label.' records conversion, energy, response, degradation, or lifecycle performance.',
-            'thermal' => $label.' records temperature behavior, cooling, and thermal operating limits.',
-            'mechanical' => $label.' used for layout, structure, installation, and physical compatibility.',
-            'environmental' => $label.' used for site suitability, ingress protection, weather, and operating-condition review.',
-            'measurement' => $label.' records measurement range, accuracy, calibration, or sensor response.',
-            'monitoring' => $label.' records telemetry, status, metering, logging, and operational visibility.',
-            'control' => $label.' records transfer, synchronization, automation, export, or load-control behavior.',
-            'communication' => $label.' used for protocol, networking, remote integration, and data exchange.',
-            'installation' => $label.' records installation method, routing, location, access, or termination needs.',
-            'protection' => $label.' used for protective-device duty, surge, trip, isolation, and coordination checks.',
-            'safety' => $label.' used for fire, personnel, site, and hazard-control governance.',
-            'compatibility' => $label.' records approved equipment, site, voltage, protocol, or architecture compatibility.',
-            'application' => $label.' defines the intended site, coverage, or use-case boundary.',
-            'commercial' => $label.' used for supplier, pricing, validity, and procurement governance.',
-            'service' => $label.' used for scope, service level, responsibility, and deliverable planning.',
-            'execution' => $label.' records manpower, equipment, and execution resource requirements.',
-            'maintenance' => $label.' records inspection, replacement, firmware, and maintainability requirements.',
-            'compliance' => $label.' used for applicable standard, authority, and evidence traceability.',
-            'warranty' => $label.' records warranty, validity, and lifecycle commitments.',
-            default => $label.' recorded as a governed category-specific technical attribute.',
+            'architecture' => 'Record the manufacturer-declared technology, topology, or component configuration.',
+            'construction' => 'Record the manufacturer-declared material, enclosure, conductor, or construction detail.',
+            'electrical' => 'Record the manufacturer-declared electrical rating for later engineering selection and review.',
+            'battery' => 'Record the manufacturer-declared storage parameter for later sizing and integration review.',
+            'performance' => 'Record the declared efficiency, response, degradation, or lifecycle performance data.',
+            'thermal' => 'Record the declared temperature behavior, cooling method, or thermal operating limit.',
+            'mechanical' => 'Record the declared physical or structural parameter for later layout and engineering review.',
+            'environmental' => 'Record the declared environmental limit or protection rating for site suitability review.',
+            'measurement' => 'Record the declared measurement range, accuracy, response, or calibration requirement.',
+            'monitoring' => 'Record the declared monitoring, metering, logging, or status capability.',
+            'control' => 'Record the declared control, transfer, synchronization, or operating behavior.',
+            'communication' => 'Record the declared port, protocol, networking, or data-interface capability.',
+            'installation' => 'Record the declared installation, routing, access, or termination requirement.',
+            'protection' => 'Record the manufacturer-declared protective rating, function, or switching duty.',
+            'safety' => 'Record the declared fire, personnel, emergency, or hazard-control requirement.',
+            'compatibility' => 'Record only manufacturer-declared supported equipment or interface information. Final engineering compatibility is assessed separately.',
+            'application' => 'Record the intended site, coverage, or application boundary.',
+            'commercial' => 'Record the supplier, pricing, validity, delivery, or purchasing condition.',
+            'service' => 'Record the service scope, responsibility, response target, or deliverable.',
+            'execution' => 'Record the manpower, equipment, or execution resource requirement.',
+            'maintenance' => 'Record the inspection, replacement, firmware, or maintainability requirement.',
+            'compliance' => 'Record the declared standard, certification, authority, or evidence reference.',
+            'warranty' => 'Record the declared warranty, degradation, validity, or lifecycle commitment.',
+            default => 'Record the manufacturer- or supplier-declared technical value.',
         };
+    }
+
+    /**
+     * Field helper text is intentionally selective on Page 021. Group context carries the common meaning,
+     * while complex list/curve/reference fields retain concise guidance.
+     */
+    private static function shouldShowFieldHelper(string $key, string $inputType): bool
+    {
+        if ($inputType === 'textarea') {
+            return true;
+        }
+
+        return in_array($key, [
+            'declared_certifications', 'declared_certification', 'declared_fire_transport_certificates',
+            'applicable_standard', 'standard', 'grid_code_profiles', 'grid_profile', 'program_revision',
+            'receiver_transmitter_compatibility', 'pcs_compatibility', 'supported_inverters', 'supported_meters',
+            'mating_compatibility_list', 'seam_profile_compatibility', 'module_compatibility', 'rail_compatibility',
+            'roof_compatibility', 'module_frame_compatibility', 'supported_devices', 'supported_battery_models',
+            'logger_controller_compatibility', 'temperature_derating_curve', 'altitude_derating_curve',
+            'performance_warranty_curve', 'cycle_life_curve', 'calendar_life_model', 'efficiency_curve',
+            'efficiency_map_charge', 'efficiency_map_discharge', 'time_current_curve', 'excitation_curve',
+            'foundation_reactions', 'aerodynamic_coefficient_data', 'alternator_fault_data',
+        ], true);
+    }
+
+    /** @param array<string,mixed> $masterProduct */
+    private static function masterDisplayDescription(array $masterProduct): string
+    {
+        $title = (string) ($masterProduct['title'] ?? 'engineering component');
+
+        return 'Manufacturer-backed technical data for '.$title.'. Complete only values supported by product documentation; missing values remain visible for review.';
     }
 
     private static function placeholderFor(string $key, ?string $unit): string
@@ -1046,7 +1422,7 @@ class ProfessionalSpecificationSchema
             'installation' => 'Installation Requirements',
             'protection' => 'Protection Ratings',
             'safety' => 'Safety & Hazard Controls',
-            'compatibility' => 'Compatibility',
+            'compatibility' => 'Declared Compatibility & Interfaces',
             'application' => 'Application Scope',
             'service' => 'Service & Deliverables',
             'execution' => 'Execution Resources',
@@ -1064,20 +1440,20 @@ class ProfessionalSpecificationSchema
             'general' => 'Core technical identity used to distinguish this component from neighboring catalog types.',
             'architecture' => 'Technology family, internal architecture, topology, and component configuration.',
             'construction' => 'Material, conductor, enclosure, insulation, coating, and construction details.',
-            'electrical' => 'Ratings used for sizing, compatibility, cable, and design decisions.',
+            'electrical' => 'Manufacturer ratings for voltage, current, power, frequency, and electrical operating limits.',
             'battery' => 'Energy, current, chemistry, BMS, and operating limits for storage integration.',
             'performance' => 'Efficiency, degradation, response, lifecycle, and functional performance values.',
             'thermal' => 'Temperature coefficients, cooling method, and thermal operating limits.',
-            'mechanical' => 'Physical dimensions, loads, and structural or mounting compatibility.',
+            'mechanical' => 'Physical dimensions, loads, capacities, and mounting-related limits.',
             'measurement' => 'Range, accuracy, response, and calibration data for monitoring or instruments.',
-            'communication' => 'Protocols, ports, data logging, networking, and remote integration.',
+            'communication' => 'Ports, protocols, networking, data exchange, and remote communication interfaces.',
             'monitoring' => 'Metering, sensing, status, telemetry, and operational visibility.',
             'control' => 'Automation, export control, synchronization, and control-system behavior.',
             'environmental' => 'Ingress protection, temperature, weather, corrosion, and site conditions.',
             'installation' => 'Installation method, routing, penetration, foundation, and commissioning needs.',
             'protection' => 'Protection class, discharge capability, breaking duty, and coordination limits.',
             'safety' => 'Fire protection, personnel safety, hazard controls, and emergency-response requirements.',
-            'compatibility' => 'Approved equipment, protocol, voltage, or architecture compatibility.',
+            'compatibility' => 'Manufacturer-declared supported equipment, interfaces, mating families, or operating combinations. Final compatibility is reviewed separately.',
             'application' => 'Intended project, site, coverage, or use-case boundaries.',
             'service' => 'Service scope, execution duration, deliverables, and responsible party.',
             'execution' => 'Resources, manpower, equipment, and site-execution requirements.',

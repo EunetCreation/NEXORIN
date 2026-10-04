@@ -17,6 +17,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 ])]
 class CompanyMembership extends Model
 {
+    /** @var array{roles: array<int, string>, permissions: array<int, string>}|null */
+    protected ?array $authorizationContextCache = null;
+
     /**
      * Get the company associated with the membership.
      */
@@ -89,11 +92,7 @@ class CompanyMembership extends Model
      */
     public function hasRole(string $roleCode): bool
     {
-        return $this->roles()
-            ->where('roles.code', $roleCode)
-            ->where('roles.scope', 'company')
-            ->where('roles.is_active', true)
-            ->exists();
+        return in_array($roleCode, $this->authorizationContext()['roles'], true);
     }
 
     /**
@@ -101,18 +100,7 @@ class CompanyMembership extends Model
      */
     public function hasPermission(string $permissionCode): bool
     {
-        return $this->roles()
-            ->where('roles.scope', 'company')
-            ->where('roles.is_active', true)
-            ->whereHas(
-                'permissions',
-                function (Builder $query) use ($permissionCode): void {
-                    $query
-                        ->where('permissions.code', $permissionCode)
-                        ->where('permissions.is_active', true);
-                }
-            )
-            ->exists();
+        return in_array($permissionCode, $this->authorizationContext()['permissions'], true);
     }
 
     /**
@@ -122,27 +110,13 @@ class CompanyMembership extends Model
      */
     public function hasAnyPermission(array $permissionCodes): bool
     {
-        $permissionCodes = array_values(array_unique(array_filter(
-            $permissionCodes,
-            fn (mixed $code): bool => is_string($code) && trim($code) !== ''
-        )));
+        $permissionCodes = $this->normalizeAuthorizationCodes($permissionCodes);
 
         if ($permissionCodes === []) {
             return false;
         }
 
-        return $this->roles()
-            ->where('roles.scope', 'company')
-            ->where('roles.is_active', true)
-            ->whereHas(
-                'permissions',
-                function (Builder $query) use ($permissionCodes): void {
-                    $query
-                        ->whereIn('permissions.code', $permissionCodes)
-                        ->where('permissions.is_active', true);
-                }
-            )
-            ->exists();
+        return array_intersect($permissionCodes, $this->authorizationContext()['permissions']) !== [];
     }
 
     /**
@@ -152,22 +126,75 @@ class CompanyMembership extends Model
      */
     public function hasAllPermissions(array $permissionCodes): bool
     {
-        $permissionCodes = array_values(array_unique(array_filter(
-            $permissionCodes,
-            fn (mixed $code): bool => is_string($code) && trim($code) !== ''
-        )));
+        $permissionCodes = $this->normalizeAuthorizationCodes($permissionCodes);
 
         if ($permissionCodes === []) {
             return false;
         }
 
-        foreach ($permissionCodes as $permissionCode) {
-            if (! $this->hasPermission($permissionCode)) {
-                return false;
-            }
+        return array_diff($permissionCodes, $this->authorizationContext()['permissions']) === [];
+    }
+
+    /**
+     * Build the active company-role permission set once for this model instance.
+     *
+     * @return array{roles: array<int, string>, permissions: array<int, string>}
+     */
+    protected function authorizationContext(): array
+    {
+        if ($this->authorizationContextCache !== null) {
+            return $this->authorizationContextCache;
         }
 
-        return true;
+        $authorizationRelationsLoaded = $this->relationLoaded('roles')
+            && $this->roles->every(fn (Role $role): bool => $role->relationLoaded('permissions'));
+
+        if (! $authorizationRelationsLoaded) {
+            $this->loadMissing('roles.permissions');
+        }
+
+        $activeRoles = $this->roles
+            ->filter(fn (Role $role): bool => $role->scope === 'company' && $role->is_active);
+
+        return $this->authorizationContextCache = [
+            'roles' => $activeRoles
+                ->pluck('code')
+                ->filter(fn (mixed $code): bool => is_string($code) && $code !== '')
+                ->unique()
+                ->values()
+                ->all(),
+            'permissions' => $activeRoles
+                ->flatMap(fn (Role $role) => $role->permissions
+                    ->filter(fn (Permission $permission): bool => $permission->is_active)
+                    ->pluck('code'))
+                ->filter(fn (mixed $code): bool => is_string($code) && $code !== '')
+                ->unique()
+                ->values()
+                ->all(),
+        ];
+    }
+
+    /**
+     * @param array<int, string> $codes
+     * @return array<int, string>
+     */
+    protected function normalizeAuthorizationCodes(array $codes): array
+    {
+        return array_values(array_unique(array_filter(
+            array_map(fn (mixed $code): string => is_string($code) ? trim($code) : '', $codes),
+            fn (string $code): bool => $code !== ''
+        )));
+    }
+
+    /**
+     * Clear memoized role and permission values after an in-request assignment.
+     */
+    public function forgetAuthorizationCache(): static
+    {
+        $this->authorizationContextCache = null;
+        $this->unsetRelation('roles');
+
+        return $this;
     }
 
     /**

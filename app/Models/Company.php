@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable([
@@ -36,6 +37,20 @@ class Company extends Model
             User::class,
             'created_by'
         );
+    }
+
+    /**
+     * Get the extended company profile.
+     */
+    public function profile(): HasOne
+    {
+        return $this->hasOne(CompanyProfile::class);
+    }
+
+    /** Get the explicit platform relationship / qualification state. */
+    public function relationship(): HasOne
+    {
+        return $this->hasOne(CompanyRelationship::class);
     }
 
     /**
@@ -77,7 +92,6 @@ class Company extends Model
             ])
             ->withTimestamps();
     }
-
 
     /**
      * Get the customers owned by the company.
@@ -133,6 +147,64 @@ class Company extends Model
     public function priceBooks(): HasMany
     {
         return $this->hasMany(PriceBook::class);
+    }
+
+    /**
+     * Get company contacts.
+     */
+
+    public function editDrafts(): HasMany
+    {
+        return $this->hasMany(CompanyEditDraft::class);
+    }
+
+    public function contacts(): HasMany
+    {
+        return $this->hasMany(CompanyContact::class)
+            ->orderBy('sort_order')
+            ->orderBy('id');
+    }
+
+    /**
+     * Get served regions.
+     */
+    public function regions(): HasMany
+    {
+        return $this->hasMany(CompanyRegion::class)
+            ->orderByDesc('is_headquarters')
+            ->orderBy('sort_order')
+            ->orderBy('id');
+    }
+
+    /**
+     * Get company documents.
+     */
+    public function documents(): HasMany
+    {
+        return $this->hasMany(CompanyDocument::class)
+            ->orderBy('sort_order')
+            ->orderBy('id');
+    }
+
+    /**
+     * Get financial history snapshots used for profile trend analysis.
+     */
+    public function financialSnapshots(): HasMany
+    {
+        return $this->hasMany(CompanyFinancialSnapshot::class)
+            ->orderByDesc('period_end')
+            ->orderByDesc('id');
+    }
+
+    /**
+     * Get company credentials.
+     */
+    public function credentials(): HasMany
+    {
+        return $this->hasMany(CompanyCredential::class)
+            ->orderBy('kind')
+            ->orderBy('sort_order')
+            ->orderBy('id');
     }
 
     /**

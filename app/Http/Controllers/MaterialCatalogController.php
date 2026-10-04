@@ -8,6 +8,7 @@ use App\Models\MaterialCategory;
 use App\Services\Catalog\DatasheetUploadPolicy;
 use App\Services\Catalog\MaterialCatalogCompletenessEvaluator;
 use App\Services\Catalog\MaterialSpecificationSynchronizer;
+use App\Support\EngineeringProductMasterDictionary;
 use App\Support\ProfessionalCatalogProfile;
 use App\Support\ProfessionalSpecificationSchema;
 use Illuminate\Database\Eloquent\Builder;
@@ -217,7 +218,7 @@ class MaterialCatalogController extends Controller
 
         return redirect()
             ->route('companies.materials.show', [$company, $material->getKey()])
-            ->with('success', 'Material catalog item and category-specific technical profile created successfully.');
+            ->with('success', 'Draft material created. Add supporting evidence and complete the catalog review before approval.');
     }
 
     /**
@@ -422,7 +423,7 @@ class MaterialCatalogController extends Controller
             ->active()
             ->with('parent:id,name,code')
             ->orderByRaw('CASE WHEN parent_id IS NULL THEN id ELSE parent_id END')
-            ->orderByRaw('CASE WHEN parent_id IS NULL THEN 0 ELSE 1 END')
+            ->orderByRaw("CASE WHEN parent_id IS NULL THEN 0 WHEN code LIKE 'EPM_%' THEN 1 ELSE 2 END")
             ->orderBy('sort_order')
             ->orderBy('name')
             ->get(['id', 'parent_id', 'name', 'code', 'company_id']);
@@ -457,7 +458,7 @@ class MaterialCatalogController extends Controller
 
         $rules = [
             'material_category_id' => [
-                'nullable',
+                $material ? 'nullable' : 'required',
                 'integer',
                 Rule::exists('material_categories', 'id')->where(function ($query) use ($company) {
                     $query->where('is_active', true)->where(function ($scopeQuery) use ($company): void {
@@ -503,6 +504,13 @@ class MaterialCatalogController extends Controller
             $editingSameLegacyDomain = $material
                 && (int) $material->material_category_id === (int) $category?->getKey();
 
+            if (! $material && $category && ! EngineeringProductMasterDictionary::has((string) $category->code)) {
+                $validator->errors()->add(
+                    'material_category_id',
+                    'Select one of the exact engineering component classes available in the catalog intake.'
+                );
+            }
+
             if ($isProfessionalDomain && ! $editingSameLegacyDomain) {
                 $validator->errors()->add(
                     'material_category_id',
@@ -513,7 +521,7 @@ class MaterialCatalogController extends Controller
             $submittedKeys = array_keys((array) $request->input('technical_specs', []));
             $unknown = array_values(array_diff($submittedKeys, $technicalFields->keys()->all()));
             if ($unknown !== []) {
-                $validator->errors()->add('technical_specs', 'Unsupported technical fields were submitted for the selected subcategory: '.implode(', ', $unknown).'.');
+                $validator->errors()->add('technical_specs', 'Some technical values no longer match the selected component class. Review the technical section and submit again.');
             }
         });
 
@@ -587,7 +595,9 @@ class MaterialCatalogController extends Controller
             'roofTypes' => $this->roofTypes(),
             'scopeModes' => $this->scopeModes(),
             'catalogProfiles' => ProfessionalCatalogProfile::profilePayload(),
-            'specificationSchemas' => ProfessionalSpecificationSchema::payload(),
+            'specificationSchemas' => $material->exists
+                ? ProfessionalSpecificationSchema::payload()
+                : ProfessionalSpecificationSchema::engineeringProductPayload(),
             'initialSpecificationSchema' => $schema,
             'technicalSpecValues' => array_replace(
                 ProfessionalSpecificationSchema::legacySpecValues($material),

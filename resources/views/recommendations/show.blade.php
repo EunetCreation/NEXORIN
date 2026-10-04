@@ -18,12 +18,12 @@
             : ($recommendation->result_status === 'review_required' ? 'review' : 'ready'));
 
     $loadReady = $sources['load']['available'] && (float) $sources['load']['daily_energy_kwh'] > 0;
-    $solarComplete = (int) ($sources['solar']['complete_months'] ?? 0) === 12 && (float) ($sources['solar']['average_psh'] ?? 0) > 0;
-    $solarVerified = $solarComplete && ($sources['solar']['quality_status'] ?? null) === 'verified';
+    $solarState = $sources['solar']['dataset_state'] ?? 'no_dataset';
+    $solarComplete = in_array($solarState, ['complete', 'reviewed'], true) && (float) ($sources['solar']['average_psh'] ?? 0) > 0;
+    $solarReviewed = $solarState === 'reviewed';
     $roofComplete = (float) ($sources['roof']['usable_area_m2'] ?? 0) > 0;
     $roofVerified = $roofComplete && ($sources['roof']['quality_status'] ?? null) === 'verified';
     $readySourceCount = collect([$loadReady, $solarComplete, $roofComplete])->filter()->count();
-    $verifiedSourceCount = collect([$loadReady, $solarVerified, $roofVerified])->filter()->count();
     $readinessPercent = round(($readySourceCount / 3) * 100);
 
     $onGridScore = $recommendation->on_grid_score !== null ? (float) $recommendation->on_grid_score : null;
@@ -113,7 +113,7 @@
 
                 <div class="nxrec-decision-foot">
                     <span><small>Decision quality</small><b>{{ $decisivenessBand }}</b></span>
-                    <span><small>Verified sources</small><b>{{ $verifiedSourceCount }}/3</b></span>
+                    <span><small>Source gate</small><b>{{ $readySourceCount }}/3 complete</b></span>
                     <span><small>Model</small><b>{{ $recommendation->engine_version }}</b></span>
                 </div>
             </div>
@@ -187,11 +187,11 @@
                 <div>
                     <span class="nxrec-section-kicker">Controlled source gate</span>
                     <h3>Source Data Readiness</h3>
-                    <p>Completion unlocks scoring. Verification strengthens the engineering basis.</p>
+                    <p>Completion unlocks scoring. Separate source-review evidence is shown where the current workflow records it.</p>
                 </div>
                 <div class="nxrec-readiness-meter">
                     <span><b>{{ $readySourceCount }}/3</b> complete</span>
-                    <span><b>{{ $verifiedSourceCount }}/3</b> verified</span>
+                    <span><b>{{ $solarReviewed ? 'Solar reviewed' : 'Solar review pending' }}</b></span>
                     <i><b style="width: {{ $readinessPercent }}%"></b></i>
                 </div>
             </header>
@@ -216,7 +216,7 @@
                     <svg class="nxrec-source-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 12h14M14 7l5 5-5 5"/></svg>
                 </a>
 
-                <a href="{{ route('companies.location-solar.show', [$company, $project]) }}" class="nxrec-source-card {{ !$solarComplete ? 'is-blocked' : ($solarVerified ? 'is-ready' : 'is-review') }}" data-nxrec-source>
+                <a href="{{ route('companies.location-solar.show', [$company, $project]) }}" class="nxrec-source-card {{ !$solarComplete ? 'is-blocked' : ($solarReviewed ? 'is-ready' : 'is-review') }}" data-nxrec-source>
                     <span class="nxrec-source-icon">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
                     </span>
@@ -225,13 +225,13 @@
                         <strong>{{ $solarComplete ? number_format((float) $sources['solar']['average_psh'], 2).' PSH' : 'Awaiting 12-month profile' }}</strong>
                         <span>
                             @if ($solarComplete)
-                                {{ $sources['solar']['complete_months'] }}/12 months · {{ ucfirst((string) ($sources['solar']['quality_status'] ?? 'not started')) }}
+                                {{ $sources['solar']['complete_months'] }}/12 months · {{ $sources['solar']['dataset_state_label'] ?? 'No Dataset' }}
                             @else
                                 {{ (int) ($sources['solar']['complete_months'] ?? 0) }}/12 months complete
                             @endif
                         </span>
                     </span>
-                    <span class="nxrec-source-state"><i></i>{{ !$solarComplete ? 'Required' : ($solarVerified ? 'Verified' : 'Review') }}</span>
+                    <span class="nxrec-source-state"><i></i>{{ !$solarComplete ? 'Required' : ($solarReviewed ? 'Reviewed' : 'Review') }}</span>
                     <svg class="nxrec-source-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 12h14M14 7l5 5-5 5"/></svg>
                 </a>
 

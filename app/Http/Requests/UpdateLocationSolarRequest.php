@@ -2,28 +2,59 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Company;
+use App\Models\Project;
 use App\Models\ProjectSolarProfile;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Symfony\Component\HttpFoundation\Response;
 
 class UpdateLocationSolarRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        $user = $this->user();
+        $company = $this->route('company');
+        $project = $this->route('project');
+
+        if (! $user || ! $company instanceof Company || ! $project instanceof Project) {
+            return false;
+        }
+
+        if ((int) $project->company_id !== (int) $company->getKey()) {
+            abort(Response::HTTP_NOT_FOUND);
+        }
+
+        if ($project->isArchived()) {
+            return false;
+        }
+
+        if ($user->hasAnyCompanyPermission($company, ['location_solar.manage'])) {
+            return true;
+        }
+
+        if ($user->hasAnyCompanyPermission($company, ['location_solar.manage_own'])) {
+            if ($project->isOwnedBy($user)) {
+                return true;
+            }
+
+            abort(Response::HTTP_NOT_FOUND);
+        }
+
+        return false;
     }
 
     public function rules(): array
     {
         return [
-            'site_address' => ['required', 'string', 'max:255'],
-            'city' => ['required', 'string', 'max:100'],
-            'province' => ['required', 'string', 'max:100'],
+            'site_address' => ['required', 'string', 'max:2000'],
+            'city' => ['nullable', 'string', 'max:100'],
+            'province' => ['nullable', 'string', 'max:100'],
             'postal_code' => ['nullable', 'string', 'max:20'],
             'latitude' => ['nullable', 'numeric', 'between:-90,90'],
             'longitude' => ['nullable', 'numeric', 'between:-180,180'],
             'elevation_m' => ['nullable', 'numeric', 'between:-500,9000'],
-            'timezone' => ['required', 'string', 'max:64'],
+            'timezone' => ['nullable', 'timezone', 'max:64'],
             'data_source' => ['required', Rule::in(ProjectSolarProfile::DATA_SOURCES)],
             'source_name' => ['nullable', 'string', 'max:150'],
             'source_reference' => ['nullable', 'string', 'max:255'],

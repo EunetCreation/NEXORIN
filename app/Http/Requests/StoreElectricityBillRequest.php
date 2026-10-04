@@ -2,7 +2,10 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Company;
+use App\Models\Project;
 use Illuminate\Foundation\Http\FormRequest;
+use Symfony\Component\HttpFoundation\Response;
 
 class StoreElectricityBillRequest extends FormRequest
 {
@@ -11,7 +14,31 @@ class StoreElectricityBillRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        $user = $this->user();
+        $company = $this->route('company');
+        $project = $this->route('project');
+
+        if (! $user || ! $company instanceof Company || ! $project instanceof Project) {
+            return false;
+        }
+
+        if ((int) $project->company_id !== (int) $company->getKey()) {
+            abort(Response::HTTP_NOT_FOUND);
+        }
+
+        if ($user->hasAnyCompanyPermission($company, ['load_analysis.manage'])) {
+            return true;
+        }
+
+        if ($user->hasAnyCompanyPermission($company, ['load_analysis.manage_own'])) {
+            if ($project->isOwnedBy($user)) {
+                return true;
+            }
+
+            abort(Response::HTTP_NOT_FOUND);
+        }
+
+        return false;
     }
 
     /**

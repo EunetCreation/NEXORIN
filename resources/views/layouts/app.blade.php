@@ -1,5 +1,9 @@
+@php
+    $forcedTheme = trim($__env->yieldContent('force-theme'));
+    $disableRemoteFonts = trim($__env->yieldContent('disable-remote-fonts')) !== '';
+@endphp
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="{{ $forcedTheme !== '' ? $forcedTheme : 'light' }}" @if ($forcedTheme !== '') data-theme-locked="true" @endif>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,18 +11,29 @@
 
     <title>@yield('title', 'Dashboard') | NEXORIN</title>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,600;1,9..144,700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap"
-        rel="stylesheet"
-    >
+    @unless ($disableRemoteFonts)
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link
+            rel="preload"
+            as="style"
+            href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,600;1,9..144,700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap"
+            onload="this.onload=null;this.rel='stylesheet'"
+        >
+        <noscript>
+            <link
+                href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,600;1,9..144,700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap"
+                rel="stylesheet"
+            >
+        </noscript>
+    @endunless
 
     <script>
         (() => {
+            const forcedTheme = @json($forcedTheme !== '' ? $forcedTheme : null);
             const savedTheme = localStorage.getItem('nexorin-theme');
             const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            document.documentElement.dataset.theme = savedTheme || (prefersDark ? 'dark' : 'light');
+            document.documentElement.dataset.theme = forcedTheme || savedTheme || (prefersDark ? 'dark' : 'light');
 
             try {
                 const transitionStartedAt = Number(sessionStorage.getItem('nexorin-auth-transition'));
@@ -41,7 +56,7 @@
     @stack('styles')
     <link href="{{ asset('css/nexorin-feedback-system.css') }}?v=55a" rel="stylesheet">
 </head>
-<body>
+<body @if (View::hasSection('body-class')) class="@yield('body-class')" @endif>
     <div id="workspaceEntryOverlay" class="nxeng-action-overlay workspace-entry-overlay is-auth" aria-hidden="true">
         <div class="nxeng-action-ambient" aria-hidden="true"><span></span><span></span><span></span></div>
         <section class="nxeng-action-deck" role="status" aria-live="polite" aria-label="Opening engineering workspace">
@@ -106,7 +121,7 @@
                 <div class="content-container page-enter">
                     @unless (View::hasSection('suppress-global-feedback'))
                         @if (session('success'))
-                            <div class="nx-feedback nx-feedback--success" role="status" data-alert>
+                            <div class="nx-feedback nx-feedback--success" role="status" data-alert data-alert-autodismiss="4000">
                                 <span class="nx-feedback-icon" aria-hidden="true">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                                         <path d="M20 7 9 18l-5-5"/>

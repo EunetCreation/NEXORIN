@@ -1,43 +1,97 @@
 @extends('layouts.app')
 
-@section('title', 'Add Customer')
-@section('page-eyebrow', 'Company workspace')
-@section('page-heading', 'Add Customer')
+@section('title', 'Create Customer')
+@section('page-eyebrow', 'Customer / CRM handoff')
+@section('page-heading', 'Create Customer')
+@section('force-theme', 'dark')
+@section('body-class', 'page-customer-create-v6')
+@section('disable-remote-fonts', '1')
 
 @push('styles')
-    <link href="{{ asset('css/nexorin-customer-governance.css') }}?v=55a" rel="stylesheet">
+    <link href="{{ asset('css/nexorin-customer-create-v6.css') }}?v=008b" rel="stylesheet">
+    <link href="{{ asset('css/nexorin-v6-token-contract.css') }}?v=001010.1" rel="stylesheet">
+    <link href="{{ asset('css/nexorin-luxury-system-v2.css') }}?v=2.0" rel="stylesheet">
+@endpush
+
+@push('scripts')
+    <script src="{{ asset('js/nexorin-customer-create-v6.js') }}?v=008b" defer></script>
+    <script src="{{ asset('js/nexorin-luxury-system-v2.js') }}?v=2.0" defer></script>
 @endpush
 
 @section('content')
-    <div class="nxcus-editor" data-nxcus-editor data-nxcus-mode="create" data-company-name="{{ $company->name }}">
-        <section class="nxcus-editor-hero" data-nxcus-reveal>
-            <div>
-                <span class="nxcus-kicker"><i></i>Controlled customer intake</span>
-                <h2>Create Customer Relationship</h2>
-                <p>Establish identity, classification, contact, location, and optional portal ownership inside {{ $company->name }}.</p>
-                <div class="nxcus-editor-hero-meta">
-                    <span><small>Customer number</small><strong>AUTO-GENERATED</strong></span>
-                    <span><small>Company scope</small><strong>{{ $company->code }}</strong></span>
-                    <span><small>Record lifecycle</small><strong>Active on creation</strong></span>
+    @php
+        $draftData = is_array($customerDraftData ?? null) ? $customerDraftData : [];
+        $value = static fn (string $key, mixed $default = '') => old($key, data_get($draftData, $key, $default));
+        $draftSavedAt = $customerDraft?->saved_at ?? $customerDraft?->updated_at;
+    @endphp
+
+    <div
+        class="nxcus8"
+        data-nxcus8
+        data-draft-url="{{ route('companies.customers.create-draft.store', $company) }}"
+        data-crm-ready="{{ $customerCrmReady ? 'true' : 'false' }}"
+        data-company-name="{{ $company->name }}"
+    >
+        <header class="nxcus8-page-head">
+            <div class="nxcus8-title-wrap">
+                <div class="nxcus8-title-line">
+                    <h2>Create Customer</h2>
+                    <span class="nxcus8-autosave" data-draft-status>
+                        <i aria-hidden="true"></i>
+                        <span data-draft-status-copy>{{ $draftSavedAt ? 'Draft saved '.$draftSavedAt->diffForHumans() : 'Draft not saved yet' }}</span>
+                    </span>
                 </div>
             </div>
-            <aside class="nxcus-editor-preview" data-nxcus-editor-preview>
-                <span class="nxcus-editor-preview-icon" aria-hidden="true"><svg class="icon-residential" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 23 24 9l17 14v19H7z"/><circle cx="24" cy="24" r="5"/><path d="M14 41c1.2-7 4.5-10.5 10-10.5S32.8 34 34 41"/></svg><svg class="icon-commercial" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 42V11l15-5 15 5v31"/><path d="M16 16h4M28 16h4M16 23h4M28 23h4M16 30h4M28 30h4M20 42V35h8v7"/></svg></span>
-                <div class="nxcus-editor-preview-copy"><small>RELATIONSHIP PREVIEW</small><strong data-nxcus-preview-name>New customer relationship</strong><span data-nxcus-preview-contact>Contact not assigned</span></div>
-                <div class="nxcus-editor-preview-grid"><span><small>Type</small><strong data-nxcus-preview-type>Residential</strong></span><span><small>Portal</small><strong data-nxcus-preview-portal>Not linked</strong></span><span><small>Location</small><strong data-nxcus-preview-location>Not established</strong></span><span><small>Readiness</small><strong data-nxcus-preview-readiness>25%</strong></span></div>
-                <span class="nxcus-dirty-state" data-nxcus-preview-dirty>NEW DRAFT</span>
-            </aside>
-        </section>
+            <div class="nxcus8-head-actions">
+                <button type="button" class="nxcus8-btn nxcus8-btn--ghost" data-save-draft @disabled(! $customerCrmReady)>Save Draft</button>
+                <button type="submit" form="customerCreateForm" name="submit_intent" value="save_exit" class="nxcus8-btn nxcus8-btn--ghost">Save &amp; Exit</button>
+                <button type="button" class="nxcus8-btn nxcus8-btn--primary" data-next-section="industry-segment">
+                    Next: Industry Segment
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M14 7l5 5-5 5"/></svg>
+                </button>
+            </div>
+        </header>
 
-        <nav class="nxcus-editor-nav" data-nxcus-section-nav aria-label="Customer intake sections"><a href="#customer-identity" class="is-active">Identity</a><a href="#contact-location">Contact &amp; Location</a><a href="#portal-access">Portal Access</a><a href="#relationship-notes">Internal Notes</a></nav>
+        @unless ($customerCrmReady)
+            <section class="nxcus8-system-warning" role="status">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2.5 20h19z"/><path d="M12 9v5M12 17h.01"/></svg>
+                <div>
+                    <strong>Customer intake migration required</strong>
+                    <p>Core customer creation remains available. Advanced CRM handoff fields stay disabled until the Page 008 migrations are applied.</p>
+                </div>
+            </section>
+        @endunless
 
-        <form method="POST" action="{{ route('companies.customers.store', $company) }}" class="nxcus-editor-form" data-nxcus-customer-form>
+        @if ($errors->any())
+            <section class="nxcus8-validation" role="alert">
+                <div>
+                    <span>Customer intake validation</span>
+                    <strong>Review {{ $errors->count() }} {{ $errors->count() === 1 ? 'field' : 'fields' }} before saving.</strong>
+                </div>
+                <ul>@foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>
+            </section>
+        @endif
+
+        <nav class="nxcus8-stepper" aria-label="Customer onboarding sections" data-stepper>
+            @foreach ([
+                ['basic-information', 'Basic Information'],
+                ['industry-segment', 'Industry Segment'],
+                ['parent-company', 'Parent Company'],
+                ['geography', 'Geography'],
+                ['contacts', 'Contacts'],
+                ['account-owner', 'Account Owner'],
+                ['opportunity', 'Opportunity'],
+                ['review-submit', 'Review & Submit'],
+            ] as $index => [$anchor, $label])
+                <button type="button" data-step-anchor="{{ $anchor }}" class="{{ $index === 0 ? 'is-active' : '' }}" aria-current="{{ $index === 0 ? 'step' : 'false' }}">
+                    <span>{{ $index + 1 }}</span><b>{{ $label }}</b>
+                </button>
+            @endforeach
+        </nav>
+
+        <form id="customerCreateForm" method="POST" action="{{ route('companies.customers.store', $company) }}" enctype="multipart/form-data" data-customer-form novalidate>
             @csrf
-            @include('customers.partials.form')
+            @include('customers.partials.create-v6-form', ['value' => $value, 'draftData' => $draftData])
         </form>
     </div>
 @endsection
-
-@push('scripts')
-    <script src="{{ asset('js/nexorin-customer-governance.js') }}?v=55a" defer></script>
-@endpush

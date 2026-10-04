@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
+use App\Services\Solar\SolarDatasetAssessment;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -68,63 +68,36 @@ class ProjectSolarProfile extends Model
         return $this->belongsTo(User::class, 'updated_by');
     }
 
+    /**
+     * Backward-compatible summary wrapper around the shared solar dataset
+     * assessment authority. Legacy keys remain available for current
+     * consumers while their semantics are kept truthful.
+     *
+     * @return array<string, mixed>
+     */
     public function calculateSummary(Project $project): array
     {
-        /** @var Collection<int, MonthlySolarDatum> $rows */
-        $rows = $this->relationLoaded('monthlyData')
-            ? $this->monthlyData
-            : $this->monthlyData()->get();
-
-        $completeRows = $rows->filter(fn (MonthlySolarDatum $row): bool => $row->isComplete());
-        $completeMonths = $completeRows->count();
-        $totalDays = $completeRows->sum(fn (MonthlySolarDatum $row): int => $row->days_in_month);
-
-        $annualIrradiation = $completeRows->sum(
-            fn (MonthlySolarDatum $row): float => (float) $row->ghi_daily_kwh_m2 * $row->days_in_month
-        );
-
-        $weightedPsh = $totalDays > 0
-            ? $completeRows->sum(fn (MonthlySolarDatum $row): float => (float) $row->peak_sun_hours * $row->days_in_month) / $totalDays
-            : 0.0;
-
-        $weightedTemperature = $totalDays > 0
-            ? $completeRows->sum(fn (MonthlySolarDatum $row): float => (float) $row->ambient_temperature_c * $row->days_in_month) / $totalDays
-            : 0.0;
-
-        $readinessPoints = 0;
-        $readinessPoints += $project->latitude !== null ? 1 : 0;
-        $readinessPoints += $project->longitude !== null ? 1 : 0;
-        $readinessPoints += filled($this->source_name) ? 1 : 0;
-        $readinessPoints += $completeMonths;
-        $readinessPercent = ($readinessPoints / 15) * 100;
+        $assessment = app(SolarDatasetAssessment::class)->assess($project, $this);
 
         return [
-            'complete_months' => $completeMonths,
-            'annual_irradiation_kwh_m2' => round($annualIrradiation, 1),
-            'average_psh' => round($weightedPsh, 2),
-            'average_temperature_c' => round($weightedTemperature, 1),
-            'readiness_percent' => round($readinessPercent, 1),
-            'is_ready_for_verification' => $completeMonths === 12
-                && $project->latitude !== null
-                && $project->longitude !== null
-                && filled($this->source_name),
-            'potential_label' => match (true) {
-                $weightedPsh >= 4.5 => 'Strong',
-                $weightedPsh >= 3.5 => 'Moderate',
-                $weightedPsh > 0 => 'Limited',
-                default => 'Not Available',
-            },
+            ...$assessment,
+            'annual_irradiation_kwh_m2' => $assessment['derived_annual_ghi_kwh_m2'],
+            'readiness_percent' => $assessment['recorded_data_completeness_percent'],
+            'is_ready_for_verification' => $assessment['is_dataset_complete'],
+            'potential_label' => 'Not Assessed',
         ];
     }
 
     public function derivedQualityStatus(Project $project): string
     {
-        $summary = $this->calculateSummary($project);
+        $assessment = app(SolarDatasetAssessment::class)->assess($project, $this);
 
-        if (! $summary['is_ready_for_verification']) {
+        if (! $assessment['is_dataset_complete']) {
             return 'incomplete';
         }
 
+        // Preserve the legacy persistence enum for compatibility. The UI must
+        // not interpret "imported" as proof that NEXORIN performed ingestion.
         return $this->data_source === 'api'
             ? 'imported'
             : 'estimated';
@@ -132,16 +105,16 @@ class ProjectSolarProfile extends Model
 
     public function getDataSourceLabelAttribute(): string
     {
-        return match ($this->data_source) {
-            'api' => 'API Import',
-            'reference' => 'Reference Dataset',
-            default => 'Manual Input',
-        };
+        return app(SolarDatasetAssessment::class)->sourceTypeLabel((string) $this->data_source);
     }
 
     public function getQualityStatusLabelAttribute(): string
     {
-        return ucfirst($this->quality_status);
+        return match ($this->quality_status) {
+            'verified' => 'Dataset Reviewed',
+            'estimated', 'imported' => 'Dataset Complete',
+            default => 'Input Required',
+        };
     }
 
     protected function casts(): array

@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Material;
 use App\Models\MaterialCategory;
+use App\Support\EngineeringProductMasterDictionary;
 use App\Support\ProfessionalCatalogProfile;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -43,10 +44,29 @@ class ProfessionalCatalogTaxonomySeeder extends Seeder
                 }
             }
 
+            foreach (EngineeringProductMasterDictionary::classes() as $childCode => $definition) {
+                $root = MaterialCategory::query()->where('code', $definition['root_code'])->first();
+                if (! $root) {
+                    continue;
+                }
+
+                MaterialCategory::query()->updateOrCreate(
+                    ['code' => $childCode],
+                    [
+                        'company_id' => null,
+                        'parent_id' => $root->getKey(),
+                        'name' => $definition['title'],
+                        'description' => $definition['description'],
+                        'sort_order' => 1000 + array_search($childCode, EngineeringProductMasterDictionary::codes(), true) * 10,
+                        'is_active' => true,
+                    ]
+                );
+            }
+
             $this->migrateLegacyTaxonomy();
         });
 
-        $this->command?->info('Professional NEXORIN material taxonomy is ready: 15 master catalogs with governed subcategories.');
+        $this->command?->info('Professional NEXORIN material taxonomy is ready: 15 catalog domains plus 89 canonical engineering product classes.');
     }
 
 

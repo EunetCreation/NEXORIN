@@ -20,6 +20,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class ElectricityBill extends Model
 {
     /**
+     * Bill mutations invalidate the parent Load Analysis freshness timestamp.
+     * Existing Recommendation / Technical Calculation stale checks consume it.
+     *
+     * @var array<int, string>
+     */
+    protected $touches = ['loadAnalysis'];
+
+    /**
      * Get the company that owns the bill record.
      */
     public function company(): BelongsTo

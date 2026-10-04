@@ -6,14 +6,14 @@
         ? $routeCompany
         : $topbarUser->activeCompanies()->first();
 
+    $topbarMembership = $topbarCompany
+        ? $topbarUser->membershipForCompany($topbarCompany)
+        : null;
+
     $topbarRoleLabel = $topbarUser->isSuperAdmin()
         ? 'Super Admin'
         : ($topbarCompany
-            ? ($topbarUser->companyMemberships()
-                ->where('company_id', $topbarCompany->getKey())
-                ->where('status', 'active')
-                ->with('roles')
-                ->first()?->roles?->first()?->name ?? 'Company Member')
+            ? ($topbarMembership?->roles?->first()?->name ?? 'Company Member')
             : 'System User');
 
     $canCreateProject = $topbarCompany

@@ -4,6 +4,7 @@ namespace App\Services\Recommendation;
 
 use App\Models\Project;
 use App\Models\SystemRecommendation;
+use App\Services\Solar\SolarDatasetAssessment;
 use Illuminate\Support\Collection;
 
 class SystemRecommendationEngine
@@ -155,7 +156,7 @@ class SystemRecommendationEngine
         $loadAnalysis = $project->loadAnalysis;
         $loadSummary = $loadAnalysis?->calculateSummary();
         $solarProfile = $project->solarProfile;
-        $solarSummary = $solarProfile?->calculateSummary($project);
+        $solarSummary = $solarProfile ? app(SolarDatasetAssessment::class)->assess($project, $solarProfile) : null;
         $roofSurvey = $project->roofSiteSurvey;
         $roofSummary = $roofSurvey?->calculateSummary();
 
@@ -163,7 +164,7 @@ class SystemRecommendationEngine
             $hardConstraints[] = 'A load analysis with positive daily energy demand is required.';
         }
 
-        if ($solarProfile === null || ! ($solarSummary['is_ready_for_verification'] ?? false)) {
+        if ($solarProfile === null || ! ($solarSummary['is_dataset_complete'] ?? false)) {
             $hardConstraints[] = 'Complete all twelve months of location and solar data before running the recommendation.';
         }
 
@@ -183,8 +184,8 @@ class SystemRecommendationEngine
             $hardConstraints[] = 'On-grid and hybrid systems both require an available utility grid in the current prototype. Evaluate an off-grid system in the product roadmap instead.';
         }
 
-        if ($solarProfile !== null && $solarProfile->quality_status !== 'verified') {
-            $warnings[] = 'Location and solar data are complete but not engineer verified.';
+        if ($solarProfile !== null && ($solarSummary['is_dataset_complete'] ?? false) && ($solarSummary['state'] ?? null) !== 'reviewed') {
+            $warnings[] = 'The location and solar dataset is complete but the current dataset review has not been recorded.';
         }
 
         if ($roofSurvey !== null && $roofSurvey->quality_status !== 'verified') {
@@ -235,10 +236,11 @@ class SystemRecommendationEngine
                 'solar' => [
                     'available' => $solarProfile !== null,
                     'quality_status' => $solarProfile?->quality_status,
+                    'dataset_state' => $solarSummary['state'] ?? 'no_dataset',
+                    'dataset_state_label' => $solarSummary['state_label'] ?? 'No Dataset',
                     'complete_months' => (int) ($solarSummary['complete_months'] ?? 0),
                     'average_psh' => (float) ($solarSummary['average_psh'] ?? 0),
-                    'annual_irradiation_kwh_m2' => (float) ($solarSummary['annual_irradiation_kwh_m2'] ?? 0),
-                    'potential_label' => $solarSummary['potential_label'] ?? 'Not Available',
+                    'annual_irradiation_kwh_m2' => $solarSummary['derived_annual_ghi_kwh_m2'] ?? null,
                     'updated_at' => $solarProfile?->updated_at?->toIso8601String(),
                 ],
                 'roof' => [

@@ -27,6 +27,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class LoadAppliance extends Model
 {
     /**
+     * Appliance mutations invalidate the parent load-analysis freshness timestamp.
+     * Existing recommendation/technical stale checks already consume that timestamp.
+     *
+     * @var array<int, string>
+     */
+    protected $touches = ['loadAnalysis'];
+
+    /**
      * Get the company that owns the appliance record.
      */
     public function company(): BelongsTo

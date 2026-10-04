@@ -55,7 +55,7 @@ class FinancialAnalysisEngineTest extends TestCase
         );
         $this->assertSame(50000000.0, $custom['summary']['project_capex_idr']);
         $this->assertContains(
-            'Export credit is treated as a configurable commercial assumption. Verify it against the active regulation and utility approval.',
+            'Export credit is a model assumption. Confirm the project-specific commercial or utility basis before relying on export revenue.',
             $custom['warnings']
         );
     }
@@ -79,7 +79,27 @@ class FinancialAnalysisEngineTest extends TestCase
             $payload['warnings']
         );
         $this->assertContains(
-            'The technical calculation is not engineer verified. Treat financial analysis as a preliminary estimate.',
+            'The technical calculation is stored as Detailed. Financial analysis does not upgrade or approve the engineering result.',
+            $payload['warnings']
+        );
+    }
+
+    public function test_annual_energy_does_not_fall_back_to_boq_summary(): void
+    {
+        $calculation = $this->calculation('on_grid');
+        $calculation->results = [
+            'installed_pv_kw' => 8.25,
+        ];
+
+        $payload = (new FinancialAnalysisEngine())->calculate(
+            $this->project(),
+            $calculation,
+            $this->pricedBom()
+        );
+
+        $this->assertSame(0.0, $payload['summary']['annual_energy_kwh']);
+        $this->assertContains(
+            'Annual PV energy is zero or missing. Financial results are limited.',
             $payload['warnings']
         );
     }

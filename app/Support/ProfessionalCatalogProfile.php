@@ -279,6 +279,10 @@ class ProfessionalCatalogProfile
 
         $code = self::legacyAliases()[$code] ?? $code;
 
+        if ($masterRoot = EngineeringProductMasterDictionary::rootCodeFor($code)) {
+            return $masterRoot;
+        }
+
         static $subcategoryRoots = null;
         if ($subcategoryRoots === null) {
             $subcategoryRoots = [];

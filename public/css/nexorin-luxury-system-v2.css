@@ -1,0 +1,396 @@
+/* ========================================================================== 
+   NEXORIN Luxury Experience System v2 — Pages 002–010
+   Shared interaction/depth grammar only. Page-local layout remains authoritative.
+   ========================================================================== */
+:is(.page-bom-library-v6,.page-bom-workspace-v6,.page-company-create-v6,.page-company-edit-v6,.page-companies-index-v6,.page-company-show-v6,.page-customer-create-v6,.page-customer-edit-v6,.page-customers-index-v6){
+  --nxl-ease:cubic-bezier(.22,.78,.26,1);
+  --nxl-ease-out:cubic-bezier(.16,1,.3,1);
+  --nxl-fast:150ms;
+  --nxl-med:260ms;
+  --nxl-slow:420ms;
+  --nxl-cyan:41,198,223;
+  --nxl-green:69,205,164;
+  --nxl-amber:229,164,75;
+  --nxl-purple:137,124,239;
+  --nxl-red:221,106,106;
+  --nxl-blue:72,168,218;
+  --nxl-surface-shadow:0 16px 42px rgba(0,7,17,.14);
+  --nxl-surface-shadow-hover:0 22px 54px rgba(0,7,17,.19);
+  --nxl-line:rgba(111,165,189,.16);
+  --nxl-line-hover:rgba(70,190,214,.30);
+}
+
+/* Universal surface contract: intentionally optical, not "glow everywhere". */
+:is(.page-bom-library-v6,.page-bom-workspace-v6,.page-company-create-v6,.page-company-edit-v6,.page-companies-index-v6,.page-company-show-v6,.page-customer-create-v6,.page-customer-edit-v6,.page-customers-index-v6)
+[data-nxl-surface]{
+  --nxl-accent-rgb:var(--nxl-cyan);
+  position:relative;
+  isolation:isolate;
+  transition:border-color var(--nxl-fast) ease,box-shadow var(--nxl-med) var(--nxl-ease),transform var(--nxl-fast) var(--nxl-ease),background-color var(--nxl-fast) ease;
+}
+:is(.page-bom-library-v6,.page-bom-workspace-v6,.page-company-create-v6,.page-company-edit-v6,.page-companies-index-v6,.page-company-show-v6,.page-customer-create-v6,.page-customer-edit-v6,.page-customers-index-v6)
+[data-nxl-surface]::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:0;
+  border-radius:inherit;
+  pointer-events:none;
+  background:
+    radial-gradient(420px circle at var(--nxl-x,82%) var(--nxl-y,0%),rgba(var(--nxl-accent-rgb),.080),transparent 54%),
+    linear-gradient(180deg,rgba(255,255,255,.018),transparent 28%);
+  opacity:.46;
+  transition:opacity var(--nxl-med) ease;
+}
+[data-nxl-tone="green"]{--nxl-accent-rgb:var(--nxl-green)!important}
+[data-nxl-tone="amber"]{--nxl-accent-rgb:var(--nxl-amber)!important}
+[data-nxl-tone="purple"]{--nxl-accent-rgb:var(--nxl-purple)!important}
+[data-nxl-tone="red"]{--nxl-accent-rgb:var(--nxl-red)!important}
+[data-nxl-tone="blue"]{--nxl-accent-rgb:var(--nxl-blue)!important}
+
+:is(.page-bom-library-v6,.page-bom-workspace-v6,.page-company-create-v6,.page-company-edit-v6,.page-companies-index-v6,.page-company-show-v6,.page-customer-create-v6,.page-customer-edit-v6,.page-customers-index-v6)
+[data-nxl-surface] > *{position:relative;z-index:1}
+
+@media (hover:hover) and (pointer:fine){
+  :is(.page-bom-library-v6,.page-bom-workspace-v6,.page-company-create-v6,.page-company-edit-v6,.page-companies-index-v6,.page-company-show-v6,.page-customer-create-v6,.page-customer-edit-v6,.page-customers-index-v6)
+  [data-nxl-surface="raised"]:hover{
+    transform:translateY(-1px);
+    border-color:var(--nxl-line-hover);
+    box-shadow:var(--nxl-surface-shadow-hover),inset 0 1px rgba(255,255,255,.024);
+  }
+  :is(.page-bom-library-v6,.page-bom-workspace-v6,.page-company-create-v6,.page-company-edit-v6,.page-companies-index-v6,.page-company-show-v6,.page-customer-create-v6,.page-customer-edit-v6,.page-customers-index-v6)
+  [data-nxl-surface="raised"]:hover::after{opacity:1}
+}
+
+/* Hero/key surfaces get a little more authority without changing geometry. */
+:is(.page-bom-library-v6,.page-bom-workspace-v6,.page-company-create-v6,.page-company-edit-v6,.page-companies-index-v6,.page-company-show-v6,.page-customer-create-v6,.page-customer-edit-v6,.page-customers-index-v6)
+[data-nxl-surface="hero"]{
+  box-shadow:0 18px 52px rgba(0,7,17,.16),inset 0 1px rgba(255,255,255,.025);
+}
+:is(.page-bom-library-v6,.page-bom-workspace-v6,.page-company-create-v6,.page-company-edit-v6,.page-companies-index-v6,.page-company-show-v6,.page-customer-create-v6,.page-customer-edit-v6,.page-customers-index-v6)
+[data-nxl-surface="hero"]::after{opacity:.68}
+
+/* Rail grammar: chapters feel related even when each page keeps its own structure. */
+:is(.page-bom-library-v6,.page-bom-workspace-v6,.page-company-create-v6,.page-company-edit-v6,.page-companies-index-v6,.page-company-show-v6,.page-customer-create-v6,.page-customer-edit-v6,.page-customers-index-v6)
+[data-nxl-rail]{scrollbar-width:thin;scrollbar-color:rgba(68,126,151,.72) rgba(5,23,36,.20)}
+:is(.page-bom-library-v6,.page-bom-workspace-v6,.page-company-create-v6,.page-company-edit-v6,.page-companies-index-v6,.page-company-show-v6,.page-customer-create-v6,.page-customer-edit-v6,.page-customers-index-v6)
+[data-nxl-rail]::-webkit-scrollbar{width:6px;height:6px}
+:is(.page-bom-library-v6,.page-bom-workspace-v6,.page-company-create-v6,.page-company-edit-v6,.page-companies-index-v6,.page-company-show-v6,.page-customer-create-v6,.page-customer-edit-v6,.page-customers-index-v6)
+[data-nxl-rail]::-webkit-scrollbar-thumb{background:rgba(68,126,151,.72);border-radius:99px}
+
+/* Controls: same tactile grammar across pages. */
+:is(.page-bom-library-v6,.page-bom-workspace-v6,.page-company-create-v6,.page-company-edit-v6,.page-companies-index-v6,.page-company-show-v6,.page-customer-create-v6,.page-customer-edit-v6,.page-customers-index-v6)
+:is(button,a[class*="btn"],a[class*="button"],[role="button"]){-webkit-tap-highlight-color:transparent}
+@media (hover:hover) and (pointer:fine){
+  :is(.page-bom-library-v6,.page-bom-workspace-v6,.page-company-create-v6,.page-company-edit-v6,.page-companies-index-v6,.page-company-show-v6,.page-customer-create-v6,.page-customer-edit-v6,.page-customers-index-v6)
+  :is(button,a[class*="btn"],a[class*="button"],[role="button"]):not(:disabled){
+    transition:transform var(--nxl-fast) var(--nxl-ease),border-color var(--nxl-fast) ease,background-color var(--nxl-fast) ease,box-shadow var(--nxl-fast) ease,color var(--nxl-fast) ease,filter var(--nxl-fast) ease;
+  }
+  :is(.page-bom-library-v6,.page-bom-workspace-v6,.page-company-create-v6,.page-company-edit-v6,.page-companies-index-v6,.page-company-show-v6,.page-customer-create-v6,.page-customer-edit-v6,.page-customers-index-v6)
+  :is(button,a[class*="btn"],a[class*="button"],[role="button"]):not(:disabled):active{transform:translateY(1px) scale(.988)}
+}
+:is(.page-bom-library-v6,.page-bom-workspace-v6,.page-company-create-v6,.page-company-edit-v6,.page-companies-index-v6,.page-company-show-v6,.page-customer-create-v6,.page-customer-edit-v6,.page-customers-index-v6)
+:is(input,select,textarea,button,a):focus-visible{outline:2px solid rgba(59,215,226,.36);outline-offset:2px}
+
+/* Inputs receive depth without changing control height. */
+@media (hover:hover) and (pointer:fine){
+  :is(.page-company-create-v6,.page-company-edit-v6,.page-customer-create-v6,.page-customer-edit-v6)
+  :is(input,select,textarea):not(:disabled):hover{box-shadow:inset 0 1px rgba(255,255,255,.018),0 6px 18px rgba(0,8,18,.045)}
+}
+
+/* Rows: consistent premium hover without shifting columns. */
+@media (hover:hover) and (pointer:fine){
+  :is(.page-bom-library-v6,.page-bom-workspace-v6,.page-companies-index-v6,.page-customers-index-v6)
+  [data-nxl-row]{transition:background-color var(--nxl-fast) ease,box-shadow var(--nxl-fast) ease,border-color var(--nxl-fast) ease}
+  :is(.page-bom-library-v6,.page-bom-workspace-v6,.page-companies-index-v6,.page-customers-index-v6)
+  [data-nxl-row]:hover{background-color:rgba(14,69,83,.25);box-shadow:inset 2px 0 rgba(34,207,211,.40)}
+}
+
+/* Arrival motion: content is visible by default; JS only animates once. */
+@keyframes nxl-arrive{from{opacity:.90;transform:translateY(7px)}to{opacity:1;transform:none}}
+[data-nxl-reveal]{opacity:1;transform:none}
+[data-nxl-reveal].is-nxl-visible{animation:nxl-arrive 380ms var(--nxl-ease-out) both}
+
+/* Progress bars only animate width/scale; no fake values. */
+[data-nxl-progress]{transform-origin:left center}
+[data-nxl-progress].is-nxl-pending{transform:scaleX(0)}
+[data-nxl-progress].is-nxl-running{transform:scaleX(1);transition:transform 620ms var(--nxl-ease-out)}
+
+/* Page 003: correct the old shared selector mismatch. */
+.page-bom-workspace-v6 :is(.nxbom3-table-card,.nxbom3-side-card,.nxbom3-analytics>article,.nxbom3-commercial){
+  box-shadow:inset 0 1px rgba(255,255,255,.012);
+}
+
+/* Page 004: make the actual current surfaces receive premium hierarchy. */
+.page-company-create-v6 :is(.nxcg-create-panel,.nxcg-create-preview-card,.nxcg-create-readiness-card,.nxcg-create-flow-panel,.nxcg-create-rules-panel,.nxcg-create-onboarding-panel,.nxcg-create-review-side,.nxcg-create-postcreate-panel){
+  box-shadow:inset 0 1px rgba(255,255,255,.014);
+}
+.page-company-create-v6 :is(.nxcg-create-preview-meta,.nxcg-create-readiness-copy,.nxcg-panel-note,.nxcg-create-review-checks,.nxcg-rail-followup){font-size:max(8px,1em)}
+
+/* Page 008: current create-customer cards were outside v1 entirely. */
+.page-customer-create-v6 :is(.nxcus8-card,.nxcus8-rail-card){box-shadow:inset 0 1px rgba(255,255,255,.014)}
+.page-customer-create-v6 :is(.nxcus8-card-note,.nxcus8-doc-note,.nxcus8-followup-empty,.nxcus8-source-list,.nxcus8-data-quality){font-size:max(8px,1em)}
+
+/* Page 009: preserve recovered independent-column layout and containment. */
+.page-customer-edit-v6 .nxce9-editor-columns{align-items:start}
+.page-customer-edit-v6 .nxce9-editor-column{align-content:start}
+.page-customer-edit-v6 .nxce9-documents-card{min-width:0}
+.page-customer-edit-v6 .nxce9-documents-layout{min-width:0}
+.page-customer-edit-v6 .nxce9-documents-layout.is-empty .nxce9-doc-upload{grid-template-columns:1fr!important}
+.page-customer-edit-v6 .nxce9-drop{min-width:0;width:100%}
+.page-customer-edit-v6 .nxce9-drop-copy{min-width:0}
+.page-customer-edit-v6 .nxce9-drop-copy :is(strong,small){overflow-wrap:normal;word-break:normal}
+
+/* Page 010: chart/directory already strong; add motion/depth without changing proportions. */
+.page-customers-index-v6 :is(.nx10-kpi,.nx10-card,.nx10-rail-card,.nx10-directory){box-shadow:inset 0 1px rgba(255,255,255,.012)}
+.page-customers-index-v6 .nx10-chart-card{transition:border-color var(--nxl-fast) ease,box-shadow var(--nxl-med) var(--nxl-ease)}
+
+@media (max-width:1040px){
+  [data-nxl-surface="raised"]:hover{transform:none}
+}
+
+@media (prefers-reduced-motion:reduce){
+  :is(.page-bom-library-v6,.page-bom-workspace-v6,.page-company-create-v6,.page-company-edit-v6,.page-companies-index-v6,.page-company-show-v6,.page-customer-create-v6,.page-customer-edit-v6,.page-customers-index-v6) *,
+  :is(.page-bom-library-v6,.page-bom-workspace-v6,.page-company-create-v6,.page-company-edit-v6,.page-companies-index-v6,.page-company-show-v6,.page-customer-create-v6,.page-customer-edit-v6,.page-customers-index-v6) *::before,
+  :is(.page-bom-library-v6,.page-bom-workspace-v6,.page-company-create-v6,.page-company-edit-v6,.page-companies-index-v6,.page-company-show-v6,.page-customer-create-v6,.page-customer-edit-v6,.page-customers-index-v6) *::after{
+    animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important
+  }
+  [data-nxl-reveal]{opacity:1!important;transform:none!important}
+  [data-nxl-progress]{transform:none!important}
+}
+[data-nxl-reveal].is-nxl-visible{animation-delay:var(--nxl-delay,0ms)}
+
+/* Baseline optical depth for raised surfaces. */
+:is(.page-bom-library-v6,.page-bom-workspace-v6,.page-company-create-v6,.page-company-edit-v6,.page-companies-index-v6,.page-company-show-v6,.page-customer-create-v6,.page-customer-edit-v6,.page-customers-index-v6)
+[data-nxl-surface="raised"]{
+  box-shadow:0 10px 30px rgba(0,7,17,.08),inset 0 1px rgba(255,255,255,.018);
+}
+
+/* Primary CTA signature: restrained sheen, no continuous animation. */
+:is(
+  .page-bom-library-v6 .nxbomlib-button.is-primary,
+  .page-bom-workspace-v6 .nxbom3-primary,
+  .page-company-create-v6 .nxcg-button-primary,
+  .page-company-edit-v6 .nx5-btn-primary,
+  .page-companies-index-v6 .nx6-btn-primary,
+  .page-company-show-v6 .nx7-btn--primary,
+  .page-customer-create-v6 .nxcus8-btn--primary,
+  .page-customer-edit-v6 .nxce9-btn--primary,
+  .page-customers-index-v6 .nx10-btn--primary
+){position:relative;overflow:hidden;isolation:isolate}
+:is(
+  .page-bom-library-v6 .nxbomlib-button.is-primary,
+  .page-bom-workspace-v6 .nxbom3-primary,
+  .page-company-create-v6 .nxcg-button-primary,
+  .page-company-edit-v6 .nx5-btn-primary,
+  .page-companies-index-v6 .nx6-btn-primary,
+  .page-company-show-v6 .nx7-btn--primary,
+  .page-customer-create-v6 .nxcus8-btn--primary,
+  .page-customer-edit-v6 .nxce9-btn--primary,
+  .page-customers-index-v6 .nx10-btn--primary
+)::after{
+  content:"";position:absolute;inset:-30% auto -30% -45%;width:32%;pointer-events:none;z-index:-1;
+  background:linear-gradient(110deg,transparent,rgba(255,255,255,.20),transparent);transform:skewX(-14deg);opacity:0
+}
+@media (hover:hover) and (pointer:fine){
+  :is(
+    .page-bom-library-v6 .nxbomlib-button.is-primary,
+    .page-bom-workspace-v6 .nxbom3-primary,
+    .page-company-create-v6 .nxcg-button-primary,
+    .page-company-edit-v6 .nx5-btn-primary,
+    .page-companies-index-v6 .nx6-btn-primary,
+    .page-company-show-v6 .nx7-btn--primary,
+    .page-customer-create-v6 .nxcus8-btn--primary,
+    .page-customer-edit-v6 .nxce9-btn--primary,
+    .page-customers-index-v6 .nx10-btn--primary
+  ):hover::after{opacity:.8;animation:nxl-sheen 520ms var(--nxl-ease-out) both}
+}
+@keyframes nxl-sheen{from{left:-45%}to{left:120%}}
+
+/* Page 004 readability debt: preserve density, remove microscopic normal UI. */
+.page-company-create-v6 .nxcg-create-preview-meta dd{font-size:8.2px;white-space:normal;line-height:1.3}
+.page-company-create-v6 .nxcg-summary-row>span:nth-child(3) b{font-size:8px;line-height:1.2}
+.page-company-create-v6 :is(.nxcg-rail-followup strong,.nxcg-rail-actions strong){font-size:8.2px}
+.page-company-create-v6 :is(.nxcg-rail-followup small,.nxcg-rail-actions small){font-size:8px;line-height:1.4}
+.page-company-create-v6 :is(.nxcg-rail-followup b,.nxcg-onboarding-list i,.nxcg-rail-actions i){font-size:8px}
+
+/* Page 008 readability + premium sparse-state treatment. */
+.page-customer-create-v6 .nxcus8-card-head>b{font-size:8px}
+.page-customer-create-v6 .nxcus8-preview-visual figcaption small{font-size:8.2px}
+.page-customer-create-v6 .nxcus8-preview-title>div>span{font-size:8px}
+.page-customer-create-v6 .nxcus8-preview-metrics small{font-size:8.2px}
+.page-customer-create-v6 .nxcus8-advanced summary span{font-size:8.2px}
+.page-customer-create-v6 :is(.nxcus8-doc-row small,.nxcus8-doc-row em,.nxcus8-doc-row-action,.nxcus8-doc-quick-head small,.nxcus8-doc-quick-head>span,.nxcus8-doc-category>span,.nxcus8-doc-browse,.nxcus8-doc-note){font-size:8.2px}
+.page-customer-create-v6 :is(.nxcus8-timeline>header small,.nxcus8-timeline>header em,.nxcus8-timeline-track strong,.nxcus8-timeline-track span,.nxcus8-gauge span,.nxcus8-gauge small,.nxcus8-next-action p span,.nxcus8-source-list small,.nxcus8-followup-empty,.nxcus8-rail-empty span,.nxcus8-rail-empty a,.nxcus8-data-quality em,.nxcus8-data-quality small){font-size:8.2px;line-height:1.4}
+.page-customer-create-v6 .nxcus8-source-list li>i{font-size:8px}
+
+/* Page 009: keep helper roles readable after recovered layout. */
+.page-customer-edit-v6 :is(.nxce9-field small,.nxce9-assessment small,.nxce9-empty span,.nxce9-doc-empty span,.nxce9-doc-record-meta,.nxce9-doc-record-file,.nxce9-doc-note,.nxce9-rail-note,.nxce9-context small,.nxce9-next-action-copy p){font-size:8.2px;line-height:1.42}
+.page-customer-edit-v6 :is(.nxce9-doc-record strong,.nxce9-doc-upload>label>span,.nxce9-drop strong,.nxce9-drop small,.nxce9-drop-action){font-size:8.3px}
+
+/* Page 010: keep intelligence rail and chronology in the same visual chapter grammar. */
+.page-customers-index-v6 .nx10-right-rail{position:relative}
+.page-customers-index-v6 .nx10-right-rail::before{content:"";position:absolute;inset:-1px;pointer-events:none;border-radius:10px;background:linear-gradient(180deg,rgba(34,181,207,.025),transparent 36%);z-index:-1}
+
+/* Page 014 — Financial Engineering Workspace
+   Additive adoption of the shared luxury interaction grammar. Existing page selectors remain unchanged. */
+.page-financial-show-v6 {
+  --nxl-ease:cubic-bezier(.22,.78,.26,1);
+  --nxl-ease-out:cubic-bezier(.16,1,.3,1);
+  --nxl-fast:150ms;
+  --nxl-med:260ms;
+  --nxl-slow:420ms;
+  --nxl-cyan:41,198,223;
+  --nxl-green:69,205,164;
+  --nxl-amber:229,164,75;
+  --nxl-purple:137,124,239;
+  --nxl-red:221,106,106;
+  --nxl-blue:72,168,218;
+  --nxl-surface-shadow:0 16px 42px rgba(0,7,17,.14);
+  --nxl-surface-shadow-hover:0 22px 54px rgba(0,7,17,.19);
+  --nxl-line:rgba(111,165,189,.16);
+  --nxl-line-hover:rgba(70,190,214,.30);
+}
+.page-financial-show-v6 [data-nxl-surface] {
+  --nxl-accent-rgb:var(--nxl-cyan);
+  position:relative;
+  isolation:isolate;
+  transition:border-color var(--nxl-fast) ease,box-shadow var(--nxl-med) var(--nxl-ease),transform var(--nxl-fast) var(--nxl-ease),background-color var(--nxl-fast) ease;
+}
+.page-financial-show-v6 [data-nxl-surface]::after {
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:0;
+  border-radius:inherit;
+  pointer-events:none;
+  background:
+    radial-gradient(420px circle at var(--nxl-x,82%) var(--nxl-y,0%),rgba(var(--nxl-accent-rgb),.074),transparent 54%),
+    linear-gradient(180deg,rgba(255,255,255,.016),transparent 28%);
+  opacity:.42;
+  transition:opacity var(--nxl-med) ease;
+}
+.page-financial-show-v6 [data-nxl-surface] > * { position:relative; z-index:1; }
+.page-financial-show-v6 [data-nxl-surface="hero"] {
+  box-shadow:0 18px 52px rgba(0,7,17,.15),inset 0 1px rgba(255,255,255,.024);
+}
+.page-financial-show-v6 [data-nxl-surface="hero"]::after { opacity:.64; }
+.page-financial-show-v6 [data-nxl-surface="raised"] {
+  box-shadow:0 10px 30px rgba(0,7,17,.08),inset 0 1px rgba(255,255,255,.018);
+}
+.page-financial-show-v6 [data-nxl-rail] {
+  scrollbar-width:thin;
+  scrollbar-color:rgba(68,126,151,.72) rgba(5,23,36,.20);
+}
+.page-financial-show-v6 :is(button,a[class*="button"],[role="button"]) { -webkit-tap-highlight-color:transparent; }
+.page-financial-show-v6 :is(input,textarea,button,a):focus-visible { outline:2px solid rgba(59,215,226,.36); outline-offset:2px; }
+
+@media (hover:hover) and (pointer:fine) {
+  .page-financial-show-v6 [data-nxl-surface="raised"]:hover {
+    transform:translateY(-1px);
+    border-color:var(--nxl-line-hover);
+    box-shadow:var(--nxl-surface-shadow-hover),inset 0 1px rgba(255,255,255,.024);
+  }
+  .page-financial-show-v6 [data-nxl-surface="raised"]:hover::after { opacity:1; }
+  .page-financial-show-v6 :is(button,a[class*="button"],[role="button"]):not(:disabled) {
+    transition:transform var(--nxl-fast) var(--nxl-ease),border-color var(--nxl-fast) ease,background-color var(--nxl-fast) ease,box-shadow var(--nxl-fast) ease,color var(--nxl-fast) ease,filter var(--nxl-fast) ease;
+  }
+  .page-financial-show-v6 :is(button,a[class*="button"],[role="button"]):not(:disabled):active { transform:translateY(1px) scale(.988); }
+  .page-financial-show-v6 [data-nxl-row] {
+    transition:background-color var(--nxl-fast) ease,box-shadow var(--nxl-fast) ease,border-color var(--nxl-fast) ease;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-financial-show-v6 *,
+  .page-financial-show-v6 *::before,
+  .page-financial-show-v6 *::after {
+    animation-duration:.001ms!important;
+    animation-iteration-count:1!important;
+    transition-duration:.001ms!important;
+    scroll-behavior:auto!important;
+  }
+}
+/* Page 014 reveal must release transform after arrival so hover depth remains functional. */
+.page-financial-show-v6 [data-nxl-reveal].is-nxl-visible { animation-fill-mode:none; }
+
+/* Page 015 — Equipment Load Intake
+   Additive shared luxury interaction grammar; Page 014 selectors remain untouched. */
+.page-load-appliance-create-v6 {
+  --nxl-ease:cubic-bezier(.22,.78,.26,1);
+  --nxl-ease-out:cubic-bezier(.16,1,.3,1);
+  --nxl-fast:150ms;
+  --nxl-med:260ms;
+  --nxl-slow:420ms;
+  --nxl-cyan:41,198,223;
+  --nxl-green:69,205,164;
+  --nxl-amber:229,164,75;
+  --nxl-purple:137,124,239;
+  --nxl-red:221,106,106;
+  --nxl-blue:72,168,218;
+  --nxl-surface-shadow:0 16px 42px rgba(0,7,17,.14);
+  --nxl-surface-shadow-hover:0 22px 54px rgba(0,7,17,.19);
+  --nxl-line:rgba(111,165,189,.16);
+  --nxl-line-hover:rgba(70,190,214,.30);
+}
+.page-load-appliance-create-v6 [data-nxl-surface] {
+  --nxl-accent-rgb:var(--nxl-cyan);
+  position:relative;
+  isolation:isolate;
+  transition:border-color var(--nxl-fast) ease,box-shadow var(--nxl-med) var(--nxl-ease),transform var(--nxl-fast) var(--nxl-ease),background-color var(--nxl-fast) ease;
+}
+.page-load-appliance-create-v6 [data-nxl-surface]::after {
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:0;
+  border-radius:inherit;
+  pointer-events:none;
+  background:
+    radial-gradient(420px circle at var(--nxl-x,82%) var(--nxl-y,0%),rgba(var(--nxl-accent-rgb),.072),transparent 54%),
+    linear-gradient(180deg,rgba(255,255,255,.015),transparent 28%);
+  opacity:.40;
+  transition:opacity var(--nxl-med) ease;
+}
+.page-load-appliance-create-v6 [data-nxl-surface] > * { position:relative; z-index:1; }
+.page-load-appliance-create-v6 [data-nxl-surface="hero"] {
+  box-shadow:0 18px 52px rgba(0,7,17,.17),inset 0 1px rgba(255,255,255,.022);
+}
+.page-load-appliance-create-v6 [data-nxl-surface="hero"]::after { opacity:.66; }
+.page-load-appliance-create-v6 [data-nxl-surface="raised"] {
+  box-shadow:0 10px 30px rgba(0,7,17,.09),inset 0 1px rgba(255,255,255,.016);
+}
+.page-load-appliance-create-v6 [data-nxl-rail] {
+  scrollbar-width:thin;
+  scrollbar-color:rgba(68,126,151,.72) rgba(5,23,36,.20);
+}
+.page-load-appliance-create-v6 [data-nxl-rail]::-webkit-scrollbar { width:6px; height:6px; }
+.page-load-appliance-create-v6 [data-nxl-rail]::-webkit-scrollbar-thumb { background:rgba(68,126,151,.72); border-radius:99px; }
+.page-load-appliance-create-v6 :is(button,a[class*="button"],[role="button"]) { -webkit-tap-highlight-color:transparent; }
+.page-load-appliance-create-v6 :is(input,select,textarea,button,a):focus-visible { outline:2px solid rgba(59,215,226,.36); outline-offset:2px; }
+
+@media (hover:hover) and (pointer:fine) {
+  .page-load-appliance-create-v6 [data-nxl-surface="raised"]:hover {
+    transform:translateY(-1px);
+    border-color:var(--nxl-line-hover);
+    box-shadow:var(--nxl-surface-shadow-hover),inset 0 1px rgba(255,255,255,.022);
+  }
+  .page-load-appliance-create-v6 [data-nxl-surface="raised"]:hover::after { opacity:1; }
+  .page-load-appliance-create-v6 :is(button,a[class*="button"],[role="button"]):not(:disabled) {
+    transition:transform var(--nxl-fast) var(--nxl-ease),border-color var(--nxl-fast) ease,background-color var(--nxl-fast) ease,box-shadow var(--nxl-fast) ease,color var(--nxl-fast) ease,filter var(--nxl-fast) ease;
+  }
+  .page-load-appliance-create-v6 :is(button,a[class*="button"],[role="button"]):not(:disabled):active { transform:translateY(1px) scale(.988); }
+}
+
+.page-load-appliance-create-v6 [data-nxl-reveal].is-nxl-visible { animation-fill-mode:none; }
+
+@media (prefers-reduced-motion:reduce) {
+  .page-load-appliance-create-v6 *,
+  .page-load-appliance-create-v6 *::before,
+  .page-load-appliance-create-v6 *::after {
+    animation-duration:.001ms!important;
+    animation-iteration-count:1!important;
+    transition-duration:.001ms!important;
+    scroll-behavior:auto!important;
+  }
+}

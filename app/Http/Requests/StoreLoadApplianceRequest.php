@@ -2,7 +2,10 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Company;
+use App\Models\Project;
 use Illuminate\Foundation\Http\FormRequest;
+use Symfony\Component\HttpFoundation\Response;
 
 class StoreLoadApplianceRequest extends FormRequest
 {
@@ -11,7 +14,31 @@ class StoreLoadApplianceRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        $user = $this->user();
+        $company = $this->route('company');
+        $project = $this->route('project');
+
+        if (! $user || ! $company instanceof Company || ! $project instanceof Project) {
+            return false;
+        }
+
+        if ((int) $project->company_id !== (int) $company->getKey()) {
+            abort(Response::HTTP_NOT_FOUND);
+        }
+
+        if ($user->hasAnyCompanyPermission($company, ['load_analysis.manage'])) {
+            return true;
+        }
+
+        if ($user->hasAnyCompanyPermission($company, ['load_analysis.manage_own'])) {
+            if ($project->isOwnedBy($user)) {
+                return true;
+            }
+
+            abort(Response::HTTP_NOT_FOUND);
+        }
+
+        return false;
     }
 
     /**
@@ -37,22 +64,51 @@ class StoreLoadApplianceRequest extends FormRequest
     }
 
     /**
-     * Prepare the data for validation.
+     * Human-readable field names for validation feedback.
+     *
+     * @return array<string, string>
+     */
+    public function attributes(): array
+    {
+        return [
+            'name' => 'equipment name',
+            'category' => 'category',
+            'quantity' => 'quantity',
+            'rated_power_w' => 'rated power per unit',
+            'operating_hours_per_day' => 'operating hours per day',
+            'usage_factor' => 'usage factor',
+            'start_hour' => 'daily start time',
+            'starting_multiplier' => 'starting multiplier',
+            'is_critical' => 'critical load classification',
+            'sort_order' => 'display order',
+            'notes' => 'engineering notes',
+        ];
+    }
+
+    /**
+     * Prepare the data for validation without silently choosing engineering inputs.
      */
     protected function prepareForValidation(): void
     {
-        $this->merge([
+        $prepared = [
             'name' => trim((string) $this->input('name')),
             'category' => $this->filled('category')
                 ? trim((string) $this->input('category'))
                 : null,
-            'is_critical' => $this->boolean('is_critical'),
             'sort_order' => $this->filled('sort_order')
                 ? $this->integer('sort_order')
                 : 0,
             'notes' => $this->filled('notes')
                 ? trim((string) $this->input('notes'))
                 : null,
-        ]);
+        ];
+
+        // Preserve an unselected state so the create form cannot silently turn
+        // an omitted criticality choice into a standard-load classification.
+        if ($this->has('is_critical') && $this->input('is_critical') !== '') {
+            $prepared['is_critical'] = $this->boolean('is_critical');
+        }
+
+        $this->merge($prepared);
     }
 }
