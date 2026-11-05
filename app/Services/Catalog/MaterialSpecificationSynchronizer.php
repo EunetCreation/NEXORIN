@@ -87,7 +87,17 @@ class MaterialSpecificationSynchronizer
         }
 
         $material->refresh();
-        $coreChanged = collect($core)->contains(fn ($value, string $column): bool => (string) ($material->{$column} ?? '') !== (string) ($value ?? ''));
+        $coreChanged = collect($core)->contains(function ($value, string $column) use ($material): bool {
+            $current = $material->{$column};
+            if ($current === null && $value === null) {
+                return false;
+            }
+            if (is_numeric($current) && is_numeric($value)) {
+                return abs((float) $current - (float) $value) > 0.000001;
+            }
+
+            return (string) ($current ?? '') !== (string) ($value ?? '');
+        });
         if ($coreChanged) {
             $material->forceFill($core)->save();
             $changed = true;

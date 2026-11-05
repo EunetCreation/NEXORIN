@@ -22,6 +22,39 @@ use Illuminate\View\View;
 class MaterialCatalogController extends Controller
 {
     /**
+     * Fields whose mutation alters the engineering, identity, or applicability basis
+     * of a persisted Material and therefore invalidates an existing catalog approval.
+     *
+     * @var array<int, string>
+     */
+    private const GOVERNANCE_IMPACT_FIELDS = [
+        'material_category_id',
+        'sku',
+        'name',
+        'brand',
+        'model',
+        'uom',
+        'system_types',
+        'project_scales',
+        'suitable_roof_types',
+        'default_scope_mode',
+        'is_active',
+        'technical_notes',
+    ];
+
+    /**
+     * Fields that are administrative/commercial catalog organizers and do not
+     * by themselves alter the engineering or compliance basis of an approved Material.
+     *
+     * @var array<int, string>
+     */
+    private const ADMINISTRATIVE_ONLY_FIELDS = [
+        'material_type',
+        'cost_group',
+        'description',
+    ];
+
+    /**
      * Display the material catalog directory.
      */
     public function index(Request $request, Company $company): View
@@ -271,10 +304,13 @@ class MaterialCatalogController extends Controller
     }
 
     /**
-     * Show the material edit form.
+     * Show the material edit form (Page 022 persisted-material mutation workspace).
      */
-    public function edit(Company $company, string $material): View|RedirectResponse
-    {
+    public function edit(
+        Company $company,
+        string $material,
+        MaterialCatalogCompletenessEvaluator $evaluator
+    ): View|RedirectResponse {
         $material = $this->findMaterial($company, $material);
 
         if ((int) $material->company_id !== (int) $company->getKey()) {
@@ -283,16 +319,35 @@ class MaterialCatalogController extends Controller
                 ->with('error', 'Global catalog items are read-only for this company. Create a company-specific material to customize it.');
         }
 
-        $material->loadMissing(['category.parent', 'specs']);
+        $material->load([
+            'category:id,parent_id,name,code',
+            'category.parent:id,name,code',
+            'company:id,name',
+            'specs',
+            'datasheets.applications.applier:id,name',
+            'certificates.verifier:id,name',
+            'documents.verifier:id,name',
+            'priceBookItems.priceBook.supplier:id,name,supplier_code',
+            'priceBookItems.supplier:id,name,supplier_code',
+            'creator:id,name',
+            'updater:id,name',
+            'approver:id,name',
+            'reviewer:id,name',
+        ]);
+
+        $formData = $this->materialFormData($company, $material);
+        $catalogReadiness = $evaluator->evaluate($material);
 
         return view('materials.edit', array_merge([
             'company' => $company,
             'material' => $material,
-        ], $this->materialFormData($company, $material)));
+            'catalogReadiness' => $catalogReadiness,
+            'mutationContext' => $this->buildMutationContext($material, $formData['initialSpecificationSchema'], $catalogReadiness),
+        ], $formData));
     }
 
     /**
-     * Update a company-specific material item.
+     * Update a company-specific material item with controlled governance & evidence invalidation.
      */
     public function update(Request $request, Company $company, string $material): RedirectResponse
     {
@@ -305,45 +360,81 @@ class MaterialCatalogController extends Controller
         }
 
         $material->loadMissing(['category.parent', 'specs']);
-        $previousSchemaKeys = array_merge(
+        $previousManagedKeys = array_values(array_unique(array_merge(
             ProfessionalSpecificationSchema::requiredKeysFor($material),
-            ProfessionalSpecificationSchema::optionalKeysFor($material)
-        );
+            ProfessionalSpecificationSchema::optionalKeysFor($material),
+            array_intersect(
+                $material->specs->pluck('spec_key')->map(fn ($key): string => (string) $key)->all(),
+                ProfessionalSpecificationSchema::managedKeys()
+            )
+        )));
+
         $payload = $this->validatedMaterialPayload($request, $company, $material);
 
-        DB::transaction(function () use ($request, $material, $payload, $previousSchemaKeys): void {
+        $outcome = DB::transaction(function () use ($request, $material, $payload, $previousManagedKeys): array {
+            $wasApproved = $material->catalog_status === 'approved' || $material->compliance_status === 'compliant';
+
             $data = $payload['material'];
-            $data['updated_by'] = $request->user()->getKey();
             $data['is_active'] = $request->boolean('is_active');
 
             $material->fill($data);
-            $baseChanged = $material->isDirty();
-            $material->save();
+            $dirtyKeys = array_keys($material->getDirty());
+
+            $governanceBaseChanged = array_intersect($dirtyKeys, self::GOVERNANCE_IMPACT_FIELDS) !== [];
+            $adminBaseChanged = array_intersect($dirtyKeys, self::ADMINISTRATIVE_ONLY_FIELDS) !== [];
+            $baseChanged = $governanceBaseChanged || $adminBaseChanged;
+
+            if ($baseChanged) {
+                $material->updated_by = $request->user()->getKey();
+                $material->save();
+            }
 
             $specResult = app(MaterialSpecificationSynchronizer::class)->sync(
                 $material,
                 $payload['category'],
                 $payload['technical_specs'],
-                $previousSchemaKeys
+                $previousManagedKeys
             );
 
-            if (($baseChanged || $specResult['changed']) && $material->catalog_status === 'approved') {
-                $material->update([
-                    'catalog_status' => 'needs_review',
-                    'compliance_status' => 'needs_review',
-                    'approved_at' => null,
-                    'approved_by' => null,
-                    'last_reviewed_at' => now(),
-                    'last_reviewed_by' => $request->user()->getKey(),
-                ]);
+            if ($specResult['changed'] && ! $baseChanged) {
+                $material->forceFill(['updated_by' => $request->user()->getKey()])->save();
             }
+
+            $requiresReview = $governanceBaseChanged || $specResult['changed'];
+            $approvalInvalidated = false;
+
+            if ($requiresReview) {
+                if ($wasApproved) {
+                    $material->markForCatalogReview($request->user()->getKey());
+                    $approvalInvalidated = true;
+                } elseif ($material->compliance_status !== 'needs_review') {
+                    $material->forceFill([
+                        'compliance_status' => 'needs_review',
+                        'last_reviewed_at' => now(),
+                        'last_reviewed_by' => $request->user()->getKey(),
+                    ])->save();
+                }
+            }
+
+            return [
+                'changed' => $baseChanged || $specResult['changed'],
+                'requires_review' => $requiresReview,
+                'admin_only' => $adminBaseChanged && ! $requiresReview,
+                'approval_invalidated' => $approvalInvalidated,
+            ];
         });
+
+        $message = match (true) {
+            ! $outcome['changed'] => 'No material changes were detected. The current catalog record and governance state remain unchanged.',
+            $outcome['approval_invalidated'] => 'Material updated. Because identity, classification, applicability, or technical parameters changed, catalog approval was reset to Needs Review.',
+            $outcome['admin_only'] => 'Material administrative metadata updated. Existing catalog governance state was preserved.',
+            default => 'Material identity and category-specific technical profile updated successfully.',
+        };
 
         return redirect()
             ->route('companies.materials.show', [$company, $material->getKey()])
-            ->with('success', 'Material identity and category-specific technical profile updated successfully.');
+            ->with('success', $message);
     }
-
 
     /**
      * Approve a company-specific catalog item after standardization checks pass.
@@ -456,9 +547,11 @@ class MaterialCatalogController extends Controller
             ->flatMap(fn (array $group): array => $group['fields'])
             ->keyBy('key');
 
+        $categoryRequired = ! $material || $material->material_category_id !== null;
+
         $rules = [
             'material_category_id' => [
-                $material ? 'nullable' : 'required',
+                $categoryRequired ? 'required' : 'nullable',
                 'integer',
                 Rule::exists('material_categories', 'id')->where(function ($query) use ($company) {
                     $query->where('is_active', true)->where(function ($scopeQuery) use ($company): void {
@@ -511,6 +604,17 @@ class MaterialCatalogController extends Controller
                 );
             }
 
+            $wasCanonicalClass = $material
+                && $material->category
+                && EngineeringProductMasterDictionary::has((string) $material->category->code);
+
+            if ($wasCanonicalClass && $category && ! EngineeringProductMasterDictionary::has((string) $category->code)) {
+                $validator->errors()->add(
+                    'material_category_id',
+                    'Select one of the exact engineering component classes for this material record.'
+                );
+            }
+
             if ($isProfessionalDomain && ! $editingSameLegacyDomain) {
                 $validator->errors()->add(
                     'material_category_id',
@@ -531,9 +635,9 @@ class MaterialCatalogController extends Controller
             ->all();
 
         unset($validated['technical_specs']);
-        $validated['system_types'] = $validated['system_types'] ?? [];
-        $validated['project_scales'] = $validated['project_scales'] ?? [];
-        $validated['suitable_roof_types'] = $validated['suitable_roof_types'] ?? [];
+        $validated['system_types'] = array_values($validated['system_types'] ?? []);
+        $validated['project_scales'] = array_values($validated['project_scales'] ?? []);
+        $validated['suitable_roof_types'] = array_values($validated['suitable_roof_types'] ?? []);
         $validated['catalog_status'] = $material?->catalog_status ?? 'draft';
         $validated['compliance_status'] = $material?->compliance_status ?? 'needs_review';
 
@@ -603,6 +707,79 @@ class MaterialCatalogController extends Controller
                 ProfessionalSpecificationSchema::legacySpecValues($material),
                 $material->specs->pluck('spec_value', 'spec_key')->all()
             ),
+        ];
+    }
+
+    /**
+     * Build authoritative mutation & evidence context for Page 022 (Edit Material).
+     *
+     * @param array<string, mixed> $initialSchema
+     * @param array<string, mixed> $catalogReadiness
+     * @return array<string, mixed>
+     */
+    private function buildMutationContext(Material $material, array $initialSchema, array $catalogReadiness): array
+    {
+        $schemaKeys = collect($initialSchema['groups'] ?? [])
+            ->flatMap(fn (array $group): array => collect($group['fields'] ?? [])->pluck('key')->all())
+            ->values()
+            ->all();
+
+        $activeDatasheets = $material->datasheets->where('is_active', true)->values();
+        $parsedDatasheets = $activeDatasheets->filter(
+            fn ($datasheet): bool => in_array($datasheet->extraction_status, ['parsed', 'reviewed', 'applied'], true)
+        )->values();
+        $activeApplications = $activeDatasheets
+            ->flatMap(fn ($datasheet) => $datasheet->applications ?? collect())
+            ->where('status', 'applied')
+            ->values();
+        $appliedSpecKeys = $activeApplications
+            ->flatMap(fn ($application): array => array_keys((array) ($application->after_specs ?? [])))
+            ->unique()
+            ->values()
+            ->all();
+
+        $activeCertificates = $material->certificates->where('is_active', true)->values();
+        $verifiedCertificates = $activeCertificates->filter(
+            fn ($cert): bool => in_array($cert->verification_status, ['verified', 'accepted'], true)
+                && ! ($cert->expires_at?->isPast() ?? false)
+        )->values();
+
+        $activeDocuments = $material->documents->where('is_active', true)->values();
+        $verifiedDocuments = $activeDocuments->filter(
+            fn ($doc): bool => in_array($doc->verification_status, ['verified', 'accepted'], true)
+                && ! ($doc->expires_at?->isPast() ?? false)
+        )->values();
+
+        $positivePriceItems = $material->priceBookItems->filter(fn ($item): bool => (float) $item->unit_cost > 0)->values();
+
+        $customSpecs = $material->specs
+            ->reject(fn ($spec): bool => in_array($spec->spec_key, $schemaKeys, true))
+            ->values();
+
+        return [
+            'catalog_status' => $material->catalog_status ?? 'draft',
+            'compliance_status' => $material->compliance_status ?? 'needs_review',
+            'is_approved' => ($material->catalog_status ?? 'draft') === 'approved',
+            'is_compliant' => ($material->compliance_status ?? 'needs_review') === 'compliant',
+            'is_active' => (bool) $material->is_active,
+            'boq_ready' => (bool) $material->is_active && ($material->catalog_status ?? 'draft') === 'approved',
+            'readiness_score' => (int) ($catalogReadiness['score'] ?? 0),
+            'readiness_status' => (string) ($catalogReadiness['status'] ?? 'incomplete'),
+            'can_approve' => (bool) ($catalogReadiness['can_approve'] ?? false),
+            'active_datasheets_count' => $activeDatasheets->count(),
+            'parsed_datasheets_count' => $parsedDatasheets->count(),
+            'active_applications_count' => $activeApplications->count(),
+            'applied_spec_keys' => $appliedSpecKeys,
+            'active_certificates_count' => $activeCertificates->count(),
+            'verified_certificates_count' => $verifiedCertificates->count(),
+            'active_documents_count' => $activeDocuments->count(),
+            'verified_documents_count' => $verifiedDocuments->count(),
+            'price_items_count' => $material->priceBookItems->count(),
+            'positive_price_items_count' => $positivePriceItems->count(),
+            'custom_specs' => $customSpecs,
+            'has_any_evidence' => $activeDatasheets->isNotEmpty() || $activeCertificates->isNotEmpty() || $activeDocuments->isNotEmpty(),
+            'governance_impact_fields' => self::GOVERNANCE_IMPACT_FIELDS,
+            'administrative_only_fields' => self::ADMINISTRATIVE_ONLY_FIELDS,
         ];
     }
 

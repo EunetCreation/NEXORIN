@@ -51,7 +51,7 @@
                 </div>
                 <div class="nxmci-preview-copy" aria-live="polite">
                     <div class="nxmci-preview-heading-row">
-                        <span class="nxmc-panel-kicker">Live catalog identity</span>
+                        <span class="nxmc-panel-kicker" data-nxmci-preview-kicker>Engineering catalog</span>
                         <span class="nxmci-preview-profile" data-nxmci-preview-profile>Unclassified</span>
                     </div>
                     <h3 id="nxmci-preview-title" data-nxmci-preview-title>Unclassified material</h3>

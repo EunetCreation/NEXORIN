@@ -1,0 +1,4286 @@
+/* ==========================================================================
+   NEXORIN PAGE 022 — EDIT MATERIAL (PERSISTED MATERIAL MUTATION WORKSPACE)
+   V6 Dark Enterprise Luxury Grammar & Tokens
+   Scoped strictly to body.page-material-edit-v6 — zero impact on Page 021
+   ========================================================================== */
+
+body.page-material-edit-v6 {
+    --nxmce-bg-workspace: #050a14;
+    --nxmce-bg-surface: rgba(10, 19, 35, 0.94);
+    --nxmce-bg-raised: rgba(14, 26, 46, 0.95);
+    --nxmce-bg-inset: rgba(6, 12, 24, 0.90);
+    --nxmce-bg-input: rgba(7, 15, 29, 0.95);
+    --nxmce-border-subtle: rgba(118, 165, 225, 0.15);
+    --nxmce-border-strong: rgba(88, 192, 246, 0.30);
+    --nxmce-border-accent: rgba(46, 211, 247, 0.56);
+    --nxmce-text-primary: #f3f7fc;
+    --nxmce-text-secondary: #b5c5dc;
+    --nxmce-text-muted: #7f95b5;
+    --nxmce-cyan: #25d0f7;
+    --nxmce-cyan-soft: rgba(37, 208, 247, 0.13);
+    --nxmce-green: #22c983;
+    --nxmce-green-soft: rgba(34, 201, 131, 0.14);
+    --nxmce-amber: #f5b638;
+    --nxmce-amber-soft: rgba(245, 182, 56, 0.15);
+    --nxmce-red: #f25f67;
+    --nxmce-red-soft: rgba(242, 95, 103, 0.15);
+    --nxmce-blue: #6aa7ff;
+    --nxmce-blue-soft: rgba(106, 167, 255, 0.14);
+    --nxmce-font-ui: Inter, "Segoe UI", Arial, sans-serif;
+    --nxmce-font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+
+    background:
+        radial-gradient(circle at 18% 0%, rgba(28, 118, 196, 0.14), transparent 36%),
+        radial-gradient(circle at 86% 6%, rgba(21, 181, 219, 0.10), transparent 34%),
+        linear-gradient(180deg, #040913 0%, #060d1b 52%, #050a14 100%) !important;
+    color: var(--nxmce-text-primary) !important;
+    font-family: var(--nxmce-font-ui) !important;
+}
+
+body.page-material-edit-v6 .app-content,
+body.page-material-edit-v6 .workspace-main,
+body.page-material-edit-v6 .workspace-content {
+    background:
+        radial-gradient(circle at 74% 0%, rgba(19, 170, 162, 0.06), transparent 30rem),
+        radial-gradient(circle at 8% 64%, rgba(57, 120, 216, 0.04), transparent 32rem),
+        transparent !important;
+    min-width: 0;
+}
+
+body.page-material-edit-v6 .content-container {
+    max-width: 1720px;
+    width: 100%;
+    min-width: 0;
+    padding-inline: clamp(14px, 1.5vw, 24px);
+    padding-bottom: 34px;
+}
+
+body.page-material-edit-v6 .nxmc-editor.nxmce-workspace,
+body.page-material-edit-v6 #nxmceEditForm {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+}
+
+body.page-material-edit-v6 .nxmce-workspace {
+    width: 100%;
+    max-width: 100%;
+    padding: 2px 4px 32px;
+    color: var(--nxmce-text-primary);
+    font-family: var(--nxmce-font-ui);
+    box-sizing: border-box;
+}
+
+body.page-material-edit-v6 .nxmce-workspace *,
+body.page-material-edit-v6 .nxmce-workspace *::before,
+body.page-material-edit-v6 .nxmce-workspace *::after {
+    box-sizing: border-box;
+}
+
+body.page-material-edit-v6 .nxmc-mono {
+    font-family: var(--nxmce-font-mono);
+    letter-spacing: -0.01em;
+}
+
+body.page-material-edit-v6 .nxmce-req {
+    color: var(--nxmce-red);
+    font-weight: 700;
+    margin-left: 2px;
+}
+
+/* ==========================================================================
+   TOP COMMAND HEADER
+   ========================================================================== */
+
+body.page-material-edit-v6 .nxmce-header {
+    background:
+        radial-gradient(circle at 88% 12%, rgba(37, 208, 247, 0.11), transparent 44%),
+        linear-gradient(180deg, rgba(12, 23, 43, 0.96) 0%, rgba(8, 16, 31, 0.96) 100%);
+    border: 1px solid var(--nxmce-border-subtle);
+    border-radius: 14px;
+    padding: 16px 20px 0;
+    margin-bottom: 14px;
+    box-shadow:
+        0 18px 42px rgba(2, 6, 15, 0.52),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+body.page-material-edit-v6 .nxmce-header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+body.page-material-edit-v6 .nxmce-breadcrumbs {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+body.page-material-edit-v6 .nxmce-back-link,
+body.page-material-edit-v6 .nxmce-record-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--nxmce-text-secondary);
+    font-size: 11.5px;
+    font-weight: 600;
+    text-decoration: none;
+    padding: 4px 8px;
+    border-radius: 7px;
+    transition: color 0.15s ease, background 0.15s ease;
+}
+
+body.page-material-edit-v6 .nxmce-back-link:hover,
+body.page-material-edit-v6 .nxmce-record-link:hover {
+    color: var(--nxmce-cyan);
+    background: rgba(37, 208, 247, 0.08);
+}
+
+body.page-material-edit-v6 .nxmce-back-link svg {
+    width: 14px;
+    height: 14px;
+}
+
+body.page-material-edit-v6 .nxmce-record-link code {
+    font-family: var(--nxmce-font-mono);
+    font-size: 10.5px;
+    padding: 2px 6px;
+    border-radius: 5px;
+    color: #8ce7ff;
+    background: rgba(37, 208, 247, 0.12);
+    border: 1px solid rgba(37, 208, 247, 0.25);
+}
+
+body.page-material-edit-v6 .nxmce-crumb-sep {
+    color: rgba(145, 179, 224, 0.35);
+    font-size: 11px;
+}
+
+body.page-material-edit-v6 .nxmce-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+body.page-material-edit-v6 .nxmc-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 36px;
+    padding: 7px 14px;
+    border-radius: 9px;
+    font-family: var(--nxmce-font-ui);
+    font-size: 11.5px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform 0.14s ease, border-color 0.14s ease, background 0.14s ease, box-shadow 0.14s ease;
+    white-space: nowrap;
+}
+
+body.page-material-edit-v6 .nxmc-button svg {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+}
+
+body.page-material-edit-v6 .nxmc-button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+body.page-material-edit-v6 .nxmc-button-secondary {
+    background: rgba(12, 24, 44, 0.88);
+    color: var(--nxmce-text-secondary);
+    border: 1px solid var(--nxmce-border-subtle);
+}
+
+body.page-material-edit-v6 .nxmc-button-secondary:hover:not(:disabled) {
+    color: var(--nxmce-text-primary);
+    border-color: var(--nxmce-border-strong);
+    background: rgba(18, 35, 62, 0.94);
+}
+
+body.page-material-edit-v6 .nxmc-button-primary {
+    background: linear-gradient(135deg, #27d3f8 0%, #1098d8 100%);
+    color: #031322;
+    font-weight: 700;
+    border: 1px solid rgba(132, 234, 255, 0.65);
+    box-shadow: 0 8px 22px rgba(21, 181, 230, 0.28);
+}
+
+body.page-material-edit-v6 .nxmc-button-primary:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 26px rgba(37, 208, 247, 0.38);
+}
+
+body.page-material-edit-v6 .nxmce-header-main {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 18px;
+    margin-top: 12px;
+    padding-bottom: 14px;
+    flex-wrap: wrap;
+}
+
+body.page-material-edit-v6 .nxmce-title-cluster {
+    flex: 1 1 520px;
+    min-width: 260px;
+}
+
+body.page-material-edit-v6 .nxmce-kicker-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 4px;
+}
+
+body.page-material-edit-v6 .nxmc-kicker {
+    font-size: 9.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    color: var(--nxmce-cyan);
+}
+
+body.page-material-edit-v6 .nxmce-scope-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--nxmce-text-secondary);
+    background: rgba(106, 167, 255, 0.12);
+    border: 1px solid rgba(106, 167, 255, 0.24);
+}
+
+body.page-material-edit-v6 .nxmce-title-row {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+body.page-material-edit-v6 .nxmce-title-row h2 {
+    margin: 0;
+    font-size: 28px;
+    line-height: 1.12;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--nxmce-text-primary);
+}
+
+body.page-material-edit-v6 .nxmce-title-divider {
+    color: rgba(145, 179, 224, 0.4);
+    font-size: 20px;
+}
+
+body.page-material-edit-v6 .nxmce-record-headline {
+    font-size: 20px;
+    line-height: 1.25;
+    font-weight: 600;
+    color: #d8ebff;
+    word-break: break-word;
+}
+
+body.page-material-edit-v6 .nxmce-record-submeta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+    font-size: 11.5px;
+    color: var(--nxmce-text-muted);
+    flex-wrap: wrap;
+}
+
+body.page-material-edit-v6 .nxmce-status-cluster {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(132px, auto));
+    gap: 8px;
+    flex: 0 1 auto;
+}
+
+body.page-material-edit-v6 .nxmce-status-badge {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 7px 10px;
+    border-radius: 10px;
+    background: rgba(7, 15, 29, 0.86);
+    border: 1px solid var(--nxmce-border-subtle);
+    position: relative;
+}
+
+body.page-material-edit-v6 .nxmce-status-badge small {
+    font-size: 8.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--nxmce-text-muted);
+}
+
+body.page-material-edit-v6 .nxmce-status-badge strong {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--nxmce-text-primary);
+    white-space: nowrap;
+}
+
+body.page-material-edit-v6 .nxmce-status-badge.is-green {
+    border-color: rgba(34, 201, 131, 0.36);
+    background: rgba(34, 201, 131, 0.10);
+}
+body.page-material-edit-v6 .nxmce-status-badge.is-green strong { color: #52e5a4; }
+
+body.page-material-edit-v6 .nxmce-status-badge.is-amber {
+    border-color: rgba(245, 182, 56, 0.38);
+    background: rgba(245, 182, 56, 0.11);
+}
+body.page-material-edit-v6 .nxmce-status-badge.is-amber strong { color: #ffd16b; }
+
+body.page-material-edit-v6 .nxmce-status-badge.is-red {
+    border-color: rgba(242, 95, 103, 0.38);
+    background: rgba(242, 95, 103, 0.11);
+}
+body.page-material-edit-v6 .nxmce-status-badge.is-red strong { color: #ff8e95; }
+
+body.page-material-edit-v6 .nxmce-status-badge.is-teal,
+body.page-material-edit-v6 .nxmce-status-badge.is-cyan {
+    border-color: rgba(37, 208, 247, 0.36);
+    background: rgba(37, 208, 247, 0.10);
+}
+body.page-material-edit-v6 .nxmce-status-badge.is-teal strong,
+body.page-material-edit-v6 .nxmce-status-badge.is-cyan strong { color: #6ce3ff; }
+
+/* Section Anchor Tabs */
+body.page-material-edit-v6 .nxmce-section-tabs {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border-top: 1px solid rgba(118, 165, 225, 0.13);
+    padding: 8px 0;
+    flex-wrap: wrap;
+    overflow: visible;
+}
+
+body.page-material-edit-v6 .nxmce-section-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 9px;
+    border-radius: 8px;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--nxmce-text-secondary);
+    text-decoration: none;
+    white-space: nowrap;
+    border: 1px solid transparent;
+    transition: all 0.15s ease;
+}
+
+body.page-material-edit-v6 .nxmce-section-tab:hover {
+    color: var(--nxmce-text-primary);
+    background: rgba(37, 208, 247, 0.08);
+}
+
+body.page-material-edit-v6 .nxmce-section-tab.is-active {
+    color: var(--nxmce-cyan);
+    background: rgba(37, 208, 247, 0.13);
+    border-color: rgba(37, 208, 247, 0.3);
+}
+
+body.page-material-edit-v6 .nxmce-tab-index {
+    font-family: var(--nxmce-font-mono);
+    font-size: 9.5px;
+    color: var(--nxmce-cyan);
+    opacity: 0.85;
+}
+
+body.page-material-edit-v6 .nxmce-tab-badge {
+    font-style: normal;
+    font-size: 9.5px;
+    font-family: var(--nxmce-font-mono);
+    padding: 1px 6px;
+    border-radius: 999px;
+    background: rgba(15, 29, 52, 0.9);
+    border: 1px solid rgba(118, 165, 225, 0.2);
+    color: var(--nxmce-text-muted);
+}
+
+/* Validation Alert Banner */
+body.page-material-edit-v6 .nxmce-validation-banner {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    margin-bottom: 14px;
+    background: linear-gradient(90deg, rgba(242, 95, 103, 0.17), rgba(11, 21, 39, 0.95));
+    border: 1px solid rgba(242, 95, 103, 0.45);
+    color: #ffd9dc;
+}
+
+body.page-material-edit-v6 .nxmce-validation-banner .nxmc-alert-icon svg {
+    width: 20px;
+    height: 20px;
+    color: var(--nxmce-red);
+}
+
+body.page-material-edit-v6 .nxmce-validation-banner strong {
+    display: block;
+    font-size: 12px;
+    margin-bottom: 4px;
+    color: #ffffff;
+}
+
+body.page-material-edit-v6 .nxmce-validation-banner ul {
+    margin: 0;
+    padding-left: 18px;
+    font-size: 11px;
+}
+
+/* ==========================================================================
+   MAIN 2-COLUMN WORKSPACE GRID (PRIMARY + RIGHT RAIL)
+   ========================================================================== */
+
+body.page-material-edit-v6 .nxmce-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 368px;
+    gap: 14px;
+    align-items: start;
+}
+
+@media (min-width: 1800px) {
+    body.page-material-edit-v6 .nxmce-grid {
+        grid-template-columns: minmax(0, 1fr) 406px;
+        gap: 16px;
+    }
+}
+
+body.page-material-edit-v6 .nxmce-main {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    min-width: 0;
+}
+
+body.page-material-edit-v6 .nxmce-rail {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-width: 0;
+    overflow: visible !important;
+    max-height: none !important;
+}
+
+/* ==========================================================================
+   CARDS & SECTION HEADERS
+   ========================================================================== */
+
+body.page-material-edit-v6 .nxmce-card,
+body.page-material-edit-v6 .nxmce-rail-card {
+    background: linear-gradient(180deg, rgba(13, 25, 46, 0.95) 0%, rgba(8, 16, 31, 0.95) 100%);
+    border: 1px solid var(--nxmce-border-subtle);
+    border-radius: 13px;
+    padding: 16px 18px;
+    box-shadow:
+        0 14px 32px rgba(2, 6, 15, 0.42),
+        inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+body.page-material-edit-v6 .nxmce-rail-card {
+    padding: 14px 15px;
+}
+
+body.page-material-edit-v6 .nxmce-card-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+    padding-bottom: 12px;
+    margin-bottom: 14px;
+    border-bottom: 1px solid rgba(118, 165, 225, 0.12);
+    flex-wrap: wrap;
+}
+
+body.page-material-edit-v6 .nxmc-form-section-title {
+    display: flex;
+    align-items: flex-start;
+    gap: 11px;
+    min-width: 0;
+    flex: 1;
+}
+
+body.page-material-edit-v6 .nxmc-form-section-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: rgba(37, 208, 247, 0.11);
+    border: 1px solid rgba(37, 208, 247, 0.26);
+    color: var(--nxmce-cyan);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+body.page-material-edit-v6 .nxmc-form-section-icon svg {
+    width: 16px;
+    height: 16px;
+}
+
+body.page-material-edit-v6 .nxmce-section-kicker {
+    display: block;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    color: var(--nxmce-cyan);
+    margin-bottom: 2px;
+}
+
+body.page-material-edit-v6 .nxmc-form-section-title h3 {
+    margin: 0;
+    font-size: 14.5px;
+    font-weight: 700;
+    color: var(--nxmce-text-primary);
+}
+
+body.page-material-edit-v6 .nxmc-form-section-title p {
+    margin: 3px 0 0;
+    font-size: 11px;
+    color: var(--nxmce-text-muted);
+    line-height: 1.4;
+}
+
+body.page-material-edit-v6 .nxmc-section-state {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 700;
+    font-family: var(--nxmce-font-mono);
+    color: var(--nxmce-text-secondary);
+    background: rgba(15, 29, 52, 0.85);
+    border: 1px solid rgba(118, 165, 225, 0.22);
+}
+
+body.page-material-edit-v6 .nxmc-section-state.is-complete {
+    color: #4be3a0;
+    background: rgba(34, 201, 131, 0.12);
+    border-color: rgba(34, 201, 131, 0.34);
+}
+
+/* ==========================================================================
+   SECTION 01: OVERVIEW & IDENTITY STAGE (VISUAL + FIELDS + 6-CELL READOUT)
+   ========================================================================== */
+
+body.page-material-edit-v6 .nxmce-identity-stage {
+    display: grid;
+    grid-template-columns: 244px minmax(0, 1fr);
+    gap: 18px;
+    align-items: stretch;
+}
+
+body.page-material-edit-v6 .nxmce-media-stage {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background: rgba(6, 12, 24, 0.90);
+    border: 1px solid rgba(118, 165, 225, 0.16);
+    border-radius: 11px;
+    padding: 12px;
+}
+
+body.page-material-edit-v6 .nxmce-visual-frame {
+    position: relative;
+    width: 100%;
+    height: 198px;
+    border-radius: 9px;
+    background: radial-gradient(circle at 50% 38%, rgba(37, 208, 247, 0.15), rgba(5, 11, 22, 0.96) 72%);
+    border: 1px solid rgba(88, 192, 246, 0.24);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    padding: 14px;
+}
+
+body.page-material-edit-v6 .nxmce-visual-badges {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    right: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    z-index: 2;
+}
+
+body.page-material-edit-v6 .nxmce-visual-tag,
+body.page-material-edit-v6 .nxmce-visual-code {
+    font-size: 8.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 2px 6px;
+    border-radius: 5px;
+    background: rgba(5, 13, 26, 0.88);
+    border: 1px solid rgba(37, 208, 247, 0.28);
+    color: #9be8ff;
+}
+
+body.page-material-edit-v6 .nxmce-class-image {
+    max-width: 100%;
+    max-height: 152px;
+    object-fit: contain;
+    margin-top: 14px;
+    filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.55));
+}
+
+body.page-material-edit-v6 .nxmce-media-caption {
+    margin-top: 10px;
+}
+
+body.page-material-edit-v6 .nxmce-media-caption-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    font-size: 10px;
+    margin-bottom: 4px;
+}
+
+body.page-material-edit-v6 .nxmce-media-caption-head span {
+    color: var(--nxmce-text-muted);
+    text-transform: uppercase;
+    font-weight: 700;
+    font-size: 8.5px;
+    letter-spacing: 0.07em;
+}
+
+body.page-material-edit-v6 .nxmce-media-caption-head strong {
+    color: var(--nxmce-cyan);
+    font-size: 10.5px;
+}
+
+body.page-material-edit-v6 .nxmce-media-caption p {
+    margin: 0;
+    font-size: 9.5px;
+    line-height: 1.4;
+    color: var(--nxmce-text-muted);
+}
+
+body.page-material-edit-v6 .nxmce-identity-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-width: 0;
+}
+
+body.page-material-edit-v6 .nxmc-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px 12px;
+}
+
+body.page-material-edit-v6 .nxmc-form-span-2 {
+    grid-column: span 2;
+}
+
+body.page-material-edit-v6 .nxmc-field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 0;
+}
+
+body.page-material-edit-v6 .nxmc-label {
+    font-size: 9.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--nxmce-text-secondary);
+}
+
+body.page-material-edit-v6 .nxmc-field-hint {
+    font-size: 9.5px;
+    color: var(--nxmce-text-muted);
+    line-height: 1.35;
+    margin: 0;
+}
+
+body.page-material-edit-v6 .nxmc-field-error {
+    font-size: 10px;
+    color: #ff8e95;
+    font-weight: 600;
+}
+
+body.page-material-edit-v6 .nxmc-input,
+body.page-material-edit-v6 .nxmc-select,
+body.page-material-edit-v6 .nxmc-textarea {
+    width: 100%;
+    min-height: 38px;
+    padding: 7px 11px;
+    border-radius: 8px;
+    background: var(--nxmce-bg-input);
+    border: 1px solid rgba(118, 165, 225, 0.22);
+    color: var(--nxmce-text-primary);
+    font-family: var(--nxmce-font-ui);
+    font-size: 12px;
+    line-height: 1.35;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+body.page-material-edit-v6 .nxmc-textarea {
+    min-height: 70px;
+    resize: vertical;
+}
+
+body.page-material-edit-v6 .nxmc-input:focus,
+body.page-material-edit-v6 .nxmc-select:focus,
+body.page-material-edit-v6 .nxmc-textarea:focus {
+    outline: none;
+    border-color: var(--nxmce-cyan);
+    box-shadow: 0 0 0 3px rgba(37, 208, 247, 0.14);
+}
+
+body.page-material-edit-v6 .nxmce-input-with-badge {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+body.page-material-edit-v6 .nxmce-input-with-badge .nxmc-input {
+    padding-right: 92px;
+}
+
+body.page-material-edit-v6 .nxmce-inline-status {
+    position: absolute;
+    right: 8px;
+    padding: 2px 7px;
+    border-radius: 5px;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    pointer-events: none;
+}
+
+body.page-material-edit-v6 .nxmce-inline-status.is-recorded {
+    color: #4be3a0;
+    background: rgba(34, 201, 131, 0.14);
+}
+
+body.page-material-edit-v6 .nxmce-inline-status.is-missing {
+    color: #ffd06b;
+    background: rgba(245, 182, 56, 0.15);
+}
+
+/* 6-Column Key Parameter Readout Strip */
+body.page-material-edit-v6 .nxmce-key-readout {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 8px;
+    padding: 9px;
+    border-radius: 10px;
+    background: rgba(5, 11, 22, 0.88);
+    border: 1px solid rgba(118, 165, 225, 0.16);
+}
+
+body.page-material-edit-v6 .nxmce-readout-cell {
+    padding: 6px 8px;
+    border-radius: 7px;
+    background: rgba(11, 22, 41, 0.76);
+    border: 1px solid rgba(118, 165, 225, 0.12);
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+body.page-material-edit-v6 .nxmce-readout-cell small {
+    font-size: 8.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--nxmce-text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+body.page-material-edit-v6 .nxmce-readout-cell strong {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--nxmce-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+body.page-material-edit-v6 .nxmce-readout-cell strong.is-empty {
+    color: #f5b638;
+    font-weight: 600;
+}
+
+body.page-material-edit-v6 .nxmce-label-split {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+body.page-material-edit-v6 .nxmce-char-counter {
+    font-size: 9.5px;
+    color: var(--nxmce-text-muted);
+}
+
+/* Overview Pills Bar */
+body.page-material-edit-v6 .nxmce-overview-pills {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(118, 165, 225, 0.12);
+    flex-wrap: wrap;
+}
+
+body.page-material-edit-v6 .nxmce-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 600;
+    background: rgba(11, 22, 41, 0.85);
+    border: 1px solid rgba(118, 165, 225, 0.22);
+    color: var(--nxmce-text-secondary);
+}
+
+body.page-material-edit-v6 .nxmce-pill i {
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: currentColor;
+}
+
+body.page-material-edit-v6 .nxmce-pill b {
+    font-weight: 600;
+}
+
+body.page-material-edit-v6 .nxmce-pill.is-green {
+    color: #4be3a0;
+    border-color: rgba(34, 201, 131, 0.35);
+    background: rgba(34, 201, 131, 0.11);
+}
+
+body.page-material-edit-v6 .nxmce-pill.is-amber {
+    color: #ffd06b;
+    border-color: rgba(245, 182, 56, 0.36);
+    background: rgba(245, 182, 56, 0.11);
+}
+
+body.page-material-edit-v6 .nxmce-pill.is-teal {
+    color: #6ce3ff;
+    border-color: rgba(37, 208, 247, 0.36);
+    background: rgba(37, 208, 247, 0.11);
+}
+
+body.page-material-edit-v6 .nxmce-pill.is-blue {
+    color: #9dc4ff;
+    border-color: rgba(106, 167, 255, 0.35);
+    background: rgba(106, 167, 255, 0.11);
+}
+
+/* ==========================================================================
+   CATEGORY PICKER & PREMIUM SELECT CONTROLS (SHARED WITH CATALOG JS)
+   ========================================================================== */
+
+body.page-material-edit-v6 .nxmci-category-label-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+body.page-material-edit-v6 .nxmci-category-coverage {
+    font-size: 9.5px;
+    font-family: var(--nxmce-font-mono);
+    color: var(--nxmce-cyan);
+}
+
+body.page-material-edit-v6 .nxmci-category-selector.is-enhanced .nxmci-category-native,
+body.page-material-edit-v6 .nxmci-select-native {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}
+
+body.page-material-edit-v6 .nxmci-category-picker,
+body.page-material-edit-v6 .nxmci-select-control {
+    position: relative;
+    width: 100%;
+}
+
+body.page-material-edit-v6 .nxmci-category-trigger,
+body.page-material-edit-v6 .nxmci-select-trigger {
+    width: 100%;
+    min-height: 38px;
+    padding: 6px 11px;
+    border-radius: 8px;
+    background: var(--nxmce-bg-input);
+    border: 1px solid rgba(118, 165, 225, 0.24);
+    color: var(--nxmce-text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    cursor: pointer;
+    text-align: left;
+}
+
+body.page-material-edit-v6 .nxmci-category-trigger:hover,
+body.page-material-edit-v6 .nxmci-select-trigger:hover {
+    border-color: rgba(37, 208, 247, 0.48);
+}
+
+body.page-material-edit-v6 .nxmci-category-trigger-copy,
+body.page-material-edit-v6 .nxmci-select-trigger-copy {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    flex: 1;
+}
+
+body.page-material-edit-v6 .nxmci-category-trigger-copy strong,
+body.page-material-edit-v6 .nxmci-select-trigger-copy strong {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--nxmce-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+body.page-material-edit-v6 .nxmci-category-trigger-copy small,
+body.page-material-edit-v6 .nxmci-select-trigger-copy small {
+    font-size: 9.5px;
+    color: var(--nxmce-text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+body.page-material-edit-v6 .nxmci-category-trigger-icon,
+body.page-material-edit-v6 .nxmci-select-trigger-icon {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    color: var(--nxmce-text-muted);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+body.page-material-edit-v6 .nxmci-category-trigger-icon svg,
+body.page-material-edit-v6 .nxmci-select-trigger-icon svg {
+    width: 15px;
+    height: 15px;
+}
+
+body.page-material-edit-v6 .nxmci-category-menu,
+body.page-material-edit-v6 .nxmci-select-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    z-index: 95;
+    background: #081326;
+    border: 1px solid rgba(37, 208, 247, 0.4);
+    border-radius: 11px;
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.75);
+    padding: 10px;
+}
+
+body.page-material-edit-v6 .nxmci-category-menu-head,
+body.page-material-edit-v6 .nxmci-select-menu-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 9.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--nxmce-cyan);
+    margin-bottom: 8px;
+}
+
+body.page-material-edit-v6 .nxmci-category-search {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 5px 9px;
+    border-radius: 7px;
+    background: rgba(5, 11, 22, 0.94);
+    border: 1px solid rgba(118, 165, 225, 0.24);
+    margin-bottom: 8px;
+}
+
+body.page-material-edit-v6 .nxmci-category-search-icon svg {
+    width: 14px;
+    height: 14px;
+    color: var(--nxmce-text-muted);
+}
+
+body.page-material-edit-v6 .nxmci-category-filter {
+    flex: 1;
+    background: transparent;
+    border: 0;
+    color: var(--nxmce-text-primary);
+    font-size: 11.5px;
+    outline: none;
+}
+
+body.page-material-edit-v6 .nxmci-category-search kbd {
+    font-size: 9.5px;
+    font-family: var(--nxmce-font-mono);
+    padding: 1px 5px;
+    border-radius: 4px;
+    background: rgba(15, 29, 52, 0.9);
+    color: var(--nxmce-text-muted);
+}
+
+body.page-material-edit-v6 .nxmci-category-options,
+body.page-material-edit-v6 .nxmci-select-options {
+    max-height: 260px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+body.page-material-edit-v6 .nxmci-category-option-group-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #8ebdff;
+    padding: 4px 6px;
+}
+
+body.page-material-edit-v6 .nxmci-category-option,
+body.page-material-edit-v6 .nxmci-select-option {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 6px 8px;
+    border-radius: 7px;
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--nxmce-text-secondary);
+    font-size: 11.5px;
+    cursor: pointer;
+    text-align: left;
+}
+
+body.page-material-edit-v6 .nxmci-category-option:hover,
+body.page-material-edit-v6 .nxmci-select-option:hover {
+    background: rgba(37, 208, 247, 0.1);
+    color: var(--nxmce-text-primary);
+}
+
+body.page-material-edit-v6 .nxmci-category-option.is-selected,
+body.page-material-edit-v6 .nxmci-select-option.is-selected {
+    background: rgba(37, 208, 247, 0.15);
+    border-color: rgba(37, 208, 247, 0.35);
+    color: var(--nxmce-text-primary);
+}
+
+body.page-material-edit-v6 .nxmci-category-option-state svg,
+body.page-material-edit-v6 .nxmci-select-option-state svg {
+    width: 14px;
+    height: 14px;
+}
+
+/* ==========================================================================
+   SECTION 02: APPLICABILITY & CHOICES
+   ========================================================================== */
+
+body.page-material-edit-v6 .nxmce-active-toggle-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 9px;
+    background: rgba(6, 13, 25, 0.82);
+    border: 1px solid rgba(118, 165, 225, 0.16);
+}
+
+body.page-material-edit-v6 .nxmc-toggle-copy strong {
+    display: block;
+    font-size: 11.5px;
+    color: var(--nxmce-text-primary);
+}
+
+body.page-material-edit-v6 .nxmc-toggle-copy small {
+    display: block;
+    font-size: 9.5px;
+    color: var(--nxmce-text-muted);
+    margin-top: 2px;
+    line-height: 1.35;
+}
+
+body.page-material-edit-v6 .nxmc-choices {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+}
+
+body.page-material-edit-v6 .nxmc-choices.is-two {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+body.page-material-edit-v6 .nxmc-choice {
+    position: relative;
+    cursor: pointer;
+    display: block;
+}
+
+body.page-material-edit-v6 .nxmc-choice input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+body.page-material-edit-v6 .nxmc-choice-surface {
+    display: block;
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: rgba(7, 15, 29, 0.85);
+    border: 1px solid rgba(118, 165, 225, 0.18);
+    transition: all 0.14s ease;
+}
+
+body.page-material-edit-v6 .nxmc-choice input[type="checkbox"]:checked + .nxmc-choice-surface {
+    background: rgba(37, 208, 247, 0.13);
+    border-color: rgba(37, 208, 247, 0.45);
+    box-shadow: inset 0 0 0 1px rgba(37, 208, 247, 0.2);
+}
+
+body.page-material-edit-v6 .nxmc-choice-copy strong {
+    display: block;
+    font-size: 11.5px;
+    color: var(--nxmce-text-primary);
+}
+
+body.page-material-edit-v6 .nxmc-choice-copy small {
+    display: block;
+    font-size: 9.5px;
+    color: var(--nxmce-text-muted);
+    margin-top: 2px;
+    line-height: 1.3;
+}
+
+/* ==========================================================================
+   SECTION 03: SCHEMA-DRIVEN TECHNICAL SPECIFICATIONS
+   ========================================================================== */
+
+body.page-material-edit-v6 .nxmce-category-switch-banner {
+    padding: 12px 14px;
+    border-radius: 10px;
+    margin-bottom: 12px;
+    background: rgba(245, 182, 56, 0.13);
+    border: 1px solid rgba(245, 182, 56, 0.42);
+}
+
+body.page-material-edit-v6 .nxmce-switch-banner-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+body.page-material-edit-v6 .nxmce-switch-title {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    flex: 1;
+}
+
+body.page-material-edit-v6 .nxmce-switch-icon svg {
+    width: 18px;
+    height: 18px;
+    color: var(--nxmce-amber);
+}
+
+body.page-material-edit-v6 .nxmce-switch-title strong {
+    display: block;
+    font-size: 12px;
+    color: #ffd479;
+}
+
+body.page-material-edit-v6 .nxmce-switch-title p {
+    margin: 2px 0 0;
+    font-size: 11px;
+    color: var(--nxmce-text-secondary);
+}
+
+body.page-material-edit-v6 .nxmce-switch-columns {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 10px;
+}
+
+body.page-material-edit-v6 .nxmce-switch-box {
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: rgba(6, 13, 25, 0.84);
+    border: 1px solid rgba(118, 165, 225, 0.16);
+}
+
+body.page-material-edit-v6 .nxmce-switch-box span {
+    display: block;
+    font-size: 9.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--nxmce-text-muted);
+}
+
+body.page-material-edit-v6 .nxmce-switch-box p {
+    margin: 4px 0 0;
+    font-size: 10.5px;
+    font-family: var(--nxmce-font-mono);
+    color: var(--nxmce-text-primary);
+    word-break: break-word;
+}
+
+body.page-material-edit-v6 .nxmce-schema-context {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: rgba(6, 13, 26, 0.82);
+    border: 1px solid rgba(118, 165, 225, 0.15);
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+}
+
+body.page-material-edit-v6 .nxmci-schema-authority-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 9.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--nxmce-cyan);
+    margin-bottom: 3px;
+}
+
+body.page-material-edit-v6 .nxmci-schema-authority-row em {
+    font-style: normal;
+    padding: 1px 6px;
+    border-radius: 4px;
+    background: rgba(37, 208, 247, 0.12);
+}
+
+body.page-material-edit-v6 .nxmce-schema-context strong {
+    font-size: 13px;
+    color: var(--nxmce-text-primary);
+}
+
+body.page-material-edit-v6 .nxmce-schema-context p {
+    margin: 3px 0 0;
+    font-size: 11px;
+    color: var(--nxmce-text-muted);
+}
+
+body.page-material-edit-v6 .nxmc-profile-meter {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+body.page-material-edit-v6 .nxmc-profile-meter > div {
+    padding: 6px 10px;
+    border-radius: 8px;
+    background: rgba(11, 22, 41, 0.85);
+    border: 1px solid rgba(118, 165, 225, 0.15);
+    text-align: center;
+    min-width: 68px;
+}
+
+body.page-material-edit-v6 .nxmc-profile-meter small {
+    display: block;
+    font-size: 8.5px;
+    text-transform: uppercase;
+    color: var(--nxmce-text-muted);
+}
+
+body.page-material-edit-v6 .nxmc-profile-meter strong {
+    font-size: 13px;
+    font-family: var(--nxmce-font-mono);
+    color: var(--nxmce-text-primary);
+}
+
+body.page-material-edit-v6 .nxmc-profile-requirements {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+body.page-material-edit-v6 .nxmc-profile-requirements > div {
+    padding: 9px 12px;
+    border-radius: 9px;
+    background: rgba(6, 13, 25, 0.72);
+    border: 1px solid rgba(118, 165, 225, 0.12);
+}
+
+body.page-material-edit-v6 .nxmc-profile-requirements span {
+    display: block;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--nxmce-cyan);
+    margin-bottom: 2px;
+}
+
+body.page-material-edit-v6 .nxmc-profile-requirements p {
+    margin: 0;
+    font-size: 10.5px;
+    color: var(--nxmce-text-secondary);
+}
+
+body.page-material-edit-v6 .nxmce-spec-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 9px;
+    background: rgba(6, 12, 24, 0.86);
+    border: 1px solid rgba(118, 165, 225, 0.15);
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+}
+
+body.page-material-edit-v6 .nxmce-spec-toolbar-copy span {
+    display: block;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--nxmce-cyan);
+}
+
+body.page-material-edit-v6 .nxmce-spec-toolbar-copy strong {
+    font-size: 12px;
+    color: var(--nxmce-text-primary);
+}
+
+body.page-material-edit-v6 .nxmce-spec-toolbar-copy p {
+    margin: 2px 0 0;
+    font-size: 10.5px;
+    color: var(--nxmce-text-muted);
+}
+
+body.page-material-edit-v6 .nxmce-spec-toolbar-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+body.page-material-edit-v6 .nxmce-spec-filters {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+body.page-material-edit-v6 .nxmce-spec-filter {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--nxmce-text-secondary);
+    background: transparent;
+    border: 1px solid transparent;
+    cursor: pointer;
+}
+
+body.page-material-edit-v6 .nxmce-spec-filter.is-active {
+    color: var(--nxmce-cyan);
+    background: rgba(37, 208, 247, 0.14);
+    border-color: rgba(37, 208, 247, 0.34);
+}
+
+body.page-material-edit-v6 .nxspec-progress {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+body.page-material-edit-v6 .nxspec-progress > span {
+    width: 84px;
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(15, 29, 52, 0.9);
+    overflow: hidden;
+    display: inline-block;
+}
+
+body.page-material-edit-v6 .nxspec-progress > span > i {
+    display: block;
+    height: 100%;
+    background: linear-gradient(90deg, #25d0f7, #22c983);
+}
+
+body.page-material-edit-v6 .nxspec-progress strong {
+    font-size: 10.5px;
+    font-family: var(--nxmce-font-mono);
+    color: var(--nxmce-text-secondary);
+}
+
+body.page-material-edit-v6 .nxmci-spec-group-nav {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 10px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+}
+
+body.page-material-edit-v6 .nxmci-spec-group-link {
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--nxmce-text-secondary);
+    background: rgba(10, 20, 38, 0.85);
+    border: 1px solid rgba(118, 165, 225, 0.16);
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+body.page-material-edit-v6 .nxmci-spec-group-link.is-active {
+    color: var(--nxmce-cyan);
+    border-color: rgba(37, 208, 247, 0.38);
+    background: rgba(37, 208, 247, 0.12);
+}
+
+body.page-material-edit-v6 .nxspec-groups {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+body.page-material-edit-v6 .nxspec-group {
+    border: 1px solid rgba(118, 165, 225, 0.14);
+    border-radius: 10px;
+    background: rgba(6, 13, 26, 0.74);
+    padding: 12px 14px;
+}
+
+body.page-material-edit-v6 .nxspec-group-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding-bottom: 8px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid rgba(118, 165, 225, 0.10);
+}
+
+body.page-material-edit-v6 .nxspec-group-identity {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+
+body.page-material-edit-v6 .nxspec-group-index {
+    font-family: var(--nxmce-font-mono);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 6px;
+    border-radius: 5px;
+    color: var(--nxmce-cyan);
+    background: rgba(37, 208, 247, 0.12);
+}
+
+body.page-material-edit-v6 .nxspec-group-identity h4 {
+    margin: 0;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--nxmce-text-primary);
+}
+
+body.page-material-edit-v6 .nxspec-group-identity p {
+    margin: 2px 0 0;
+    font-size: 10px;
+    color: var(--nxmce-text-muted);
+}
+
+body.page-material-edit-v6 .nxspec-group-count {
+    font-size: 10px;
+    font-family: var(--nxmce-font-mono);
+    color: var(--nxmce-text-muted);
+}
+
+body.page-material-edit-v6 .nxspec-field-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px 12px;
+}
+
+@media (min-width: 1750px) {
+    body.page-material-edit-v6 .nxspec-field-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+body.page-material-edit-v6 .nxspec-field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 9px 11px;
+    border-radius: 8px;
+    background: rgba(10, 20, 38, 0.86);
+    border: 1px solid rgba(118, 165, 225, 0.14);
+    min-width: 0;
+}
+
+body.page-material-edit-v6 .nxspec-field.is-required:not(.is-recorded) {
+    border-color: rgba(245, 182, 56, 0.34);
+    background: rgba(24, 21, 14, 0.52);
+}
+
+body.page-material-edit-v6 .nxspec-field.is-modified {
+    border-color: rgba(37, 208, 247, 0.55) !important;
+    background: rgba(10, 28, 48, 0.90) !important;
+}
+
+body.page-material-edit-v6 .nxspec-field-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+body.page-material-edit-v6 .nxspec-field-state {
+    font-size: 8.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: var(--nxmce-font-mono);
+    color: var(--nxmce-text-muted);
+    background: rgba(127, 149, 181, 0.12);
+    flex-shrink: 0;
+}
+
+body.page-material-edit-v6 .nxspec-field.is-recorded .nxspec-field-state {
+    color: #4be3a0;
+    background: rgba(34, 201, 131, 0.14);
+}
+
+body.page-material-edit-v6 .nxspec-field.is-required:not(.is-recorded) .nxspec-field-state {
+    color: #ffd06b;
+    background: rgba(245, 182, 56, 0.16);
+}
+
+body.page-material-edit-v6 .nxspec-field.is-modified .nxspec-field-state {
+    color: #6ce3ff;
+    background: rgba(37, 208, 247, 0.18);
+}
+
+body.page-material-edit-v6 .nxspec-control {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+body.page-material-edit-v6 .nxspec-unit {
+    padding: 5px 8px;
+    border-radius: 6px;
+    background: rgba(15, 29, 52, 0.92);
+    border: 1px solid rgba(118, 165, 225, 0.18);
+    font-family: var(--nxmce-font-mono);
+    font-size: 10px;
+    color: var(--nxmce-text-secondary);
+    flex-shrink: 0;
+}
+
+/* ==========================================================================
+   SECTION 04: EVIDENCE BASIS & MUTATION IMPACT CARDS
+   ========================================================================== */
+
+body.page-material-edit-v6 .nxmce-evidence-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+body.page-material-edit-v6 .nxmce-evidence-card {
+    background: rgba(6, 13, 25, 0.82);
+    border: 1px solid rgba(118, 165, 225, 0.15);
+    border-radius: 10px;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+body.page-material-edit-v6 .nxmce-evidence-card-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+body.page-material-edit-v6 .nxmce-evidence-card-head span {
+    display: block;
+    font-size: 8.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--nxmce-cyan);
+}
+
+body.page-material-edit-v6 .nxmce-evidence-card-head h4 {
+    margin: 2px 0 0;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--nxmce-text-primary);
+}
+
+body.page-material-edit-v6 .nxmce-mini-badge {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: rgba(15, 29, 52, 0.9);
+    border: 1px solid rgba(118, 165, 225, 0.2);
+    color: var(--nxmce-text-secondary);
+    white-space: nowrap;
+}
+
+body.page-material-edit-v6 .nxmce-mini-badge.is-green { color: #4be3a0; border-color: rgba(34, 201, 131, 0.35); background: rgba(34, 201, 131, 0.12); }
+body.page-material-edit-v6 .nxmce-mini-badge.is-amber { color: #ffd06b; border-color: rgba(245, 182, 56, 0.35); background: rgba(245, 182, 56, 0.12); }
+body.page-material-edit-v6 .nxmce-mini-badge.is-red { color: #ff8e95; border-color: rgba(242, 95, 103, 0.35); background: rgba(242, 95, 103, 0.12); }
+body.page-material-edit-v6 .nxmce-mini-badge.is-teal { color: #6ce3ff; border-color: rgba(37, 208, 247, 0.35); background: rgba(37, 208, 247, 0.12); }
+body.page-material-edit-v6 .nxmce-mini-badge.is-blue { color: #9dc4ff; border-color: rgba(106, 167, 255, 0.35); background: rgba(106, 167, 255, 0.12); }
+
+body.page-material-edit-v6 .nxmce-evidence-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+body.page-material-edit-v6 .nxmce-evidence-list li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 7px 9px;
+    border-radius: 7px;
+    background: rgba(11, 22, 41, 0.82);
+    border: 1px solid rgba(118, 165, 225, 0.12);
+}
+
+body.page-material-edit-v6 .nxmce-evidence-list strong {
+    display: block;
+    font-size: 11px;
+    color: var(--nxmce-text-primary);
+}
+
+body.page-material-edit-v6 .nxmce-evidence-list small {
+    display: block;
+    font-size: 9.5px;
+    color: var(--nxmce-text-muted);
+    margin-top: 1px;
+}
+
+body.page-material-edit-v6 .nxmce-evidence-empty {
+    margin: 0;
+    padding: 10px;
+    border-radius: 7px;
+    background: rgba(8, 16, 30, 0.65);
+    border: 1px dashed rgba(118, 165, 225, 0.18);
+    font-size: 10.5px;
+    color: var(--nxmce-text-muted);
+    line-height: 1.4;
+}
+
+body.page-material-edit-v6 .nxmce-evidence-foot {
+    padding-top: 8px;
+    border-top: 1px solid rgba(118, 165, 225, 0.1);
+    font-size: 10px;
+    color: var(--nxmce-text-muted);
+    line-height: 1.38;
+}
+
+/* ==========================================================================
+   SECTION 05: LINEAGE STRIP & FOOTER ACTION BAR
+   ========================================================================== */
+
+body.page-material-edit-v6 .nxmce-lineage-strip {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 12px;
+}
+
+body.page-material-edit-v6 .nxmce-lineage-strip > div {
+    padding: 9px 11px;
+    border-radius: 8px;
+    background: rgba(6, 13, 25, 0.82);
+    border: 1px solid rgba(118, 165, 225, 0.14);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+body.page-material-edit-v6 .nxmce-lineage-strip small {
+    font-size: 8.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--nxmce-text-muted);
+}
+
+body.page-material-edit-v6 .nxmce-lineage-strip strong {
+    font-size: 11.5px;
+    color: var(--nxmce-text-primary);
+}
+
+body.page-material-edit-v6 .nxmce-lineage-strip span {
+    font-size: 10px;
+    color: var(--nxmce-text-muted);
+}
+
+body.page-material-edit-v6 .nxmc-editor-actionbar.nxmce-actionbar {
+    position: static !important;
+    bottom: auto !important;
+    z-index: 1 !important;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 18px;
+    border-radius: 13px;
+    background: linear-gradient(90deg, rgba(13, 27, 50, 0.96) 0%, rgba(9, 19, 36, 0.96) 100%);
+    border: 1px solid rgba(88, 192, 246, 0.26);
+    box-shadow: 0 12px 28px rgba(2, 6, 15, 0.48);
+    flex-wrap: wrap;
+}
+
+body.page-material-edit-v6 .nxmce-action-headline {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+body.page-material-edit-v6 .nxmc-dirty-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: var(--nxmce-cyan);
+    box-shadow: 0 0 10px var(--nxmce-cyan);
+}
+
+body.page-material-edit-v6 .nxmce-action-headline strong {
+    font-size: 12px;
+    color: var(--nxmce-text-primary);
+}
+
+body.page-material-edit-v6 .nxmce-consequence-pill {
+    font-size: 9.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgba(15, 29, 52, 0.9);
+    border: 1px solid rgba(118, 165, 225, 0.22);
+    color: var(--nxmce-text-secondary);
+}
+
+body.page-material-edit-v6 .nxmce-consequence-pill.is-amber {
+    color: #ffd06b;
+    border-color: rgba(245, 182, 56, 0.4);
+    background: rgba(245, 182, 56, 0.14);
+}
+
+body.page-material-edit-v6 .nxmce-consequence-pill.is-blue {
+    color: #9dc4ff;
+    border-color: rgba(106, 167, 255, 0.4);
+    background: rgba(106, 167, 255, 0.14);
+}
+
+body.page-material-edit-v6 .nxmce-action-status small {
+    display: block;
+    font-size: 10.5px;
+    color: var(--nxmce-text-muted);
+    margin-top: 3px;
+}
+
+body.page-material-edit-v6 .nxmc-action-buttons {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* ==========================================================================
+   RIGHT RAIL CARDS (CHANGE IMPACT, CURRENT RECORD, GOVERNANCE, TECH, EVIDENCE)
+   ========================================================================== */
+
+body.page-material-edit-v6 .nxmce-impact-card {
+    border-color: rgba(37, 208, 247, 0.30);
+    background:
+        radial-gradient(circle at 100% 0%, rgba(37, 208, 247, 0.10), transparent 54%),
+        linear-gradient(180deg, rgba(14, 28, 52, 0.96) 0%, rgba(8, 17, 33, 0.96) 100%);
+}
+
+body.page-material-edit-v6 .nxmce-rail-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid rgba(118, 165, 225, 0.12);
+}
+
+body.page-material-edit-v6 .nxmc-panel-kicker {
+    display: block;
+    font-size: 8.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--nxmce-cyan);
+    margin-bottom: 2px;
+}
+
+body.page-material-edit-v6 .nxmce-rail-head h3 {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--nxmce-text-primary);
+}
+
+body.page-material-edit-v6 .nxmce-impact-badge,
+body.page-material-edit-v6 .nxmce-rail-tag,
+body.page-material-edit-v6 .nxmce-rail-code,
+body.page-material-edit-v6 .nxmce-readiness-pill {
+    font-size: 9.5px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: rgba(15, 29, 52, 0.9);
+    border: 1px solid rgba(118, 165, 225, 0.22);
+    color: var(--nxmce-text-secondary);
+    white-space: nowrap;
+}
+
+body.page-material-edit-v6 .nxmce-impact-badge.is-clean {
+    color: #6ce3ff;
+    border-color: rgba(37, 208, 247, 0.35);
+    background: rgba(37, 208, 247, 0.12);
+}
+
+body.page-material-edit-v6 .nxmce-impact-badge.is-warning {
+    color: #ffd06b;
+    border-color: rgba(245, 182, 56, 0.4);
+    background: rgba(245, 182, 56, 0.15);
+}
+
+body.page-material-edit-v6 .nxmce-impact-badge.is-info {
+    color: #9dc4ff;
+    border-color: rgba(106, 167, 255, 0.38);
+    background: rgba(106, 167, 255, 0.14);
+}
+
+body.page-material-edit-v6 .nxmce-rail-copy {
+    margin: 0 0 10px;
+    font-size: 11px;
+    color: var(--nxmce-text-secondary);
+    line-height: 1.42;
+}
+
+body.page-material-edit-v6 .nxmce-impact-list,
+body.page-material-edit-v6 .nxmce-rail-kv {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+body.page-material-edit-v6 .nxmce-impact-list > div,
+body.page-material-edit-v6 .nxmce-rail-kv > div {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 11px;
+}
+
+body.page-material-edit-v6 .nxmce-impact-list dt,
+body.page-material-edit-v6 .nxmce-rail-kv dt {
+    color: var(--nxmce-text-muted);
+    font-weight: 500;
+    flex-shrink: 0;
+}
+
+body.page-material-edit-v6 .nxmce-impact-list dd,
+body.page-material-edit-v6 .nxmce-rail-kv dd {
+    margin: 0;
+    color: var(--nxmce-text-primary);
+    font-weight: 600;
+    text-align: right;
+    word-break: break-word;
+}
+
+body.page-material-edit-v6 .nxmce-changed-fields-box {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(118, 165, 225, 0.14);
+}
+
+body.page-material-edit-v6 .nxmce-changed-fields-box > span {
+    display: block;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--nxmce-cyan);
+    margin-bottom: 6px;
+}
+
+body.page-material-edit-v6 .nxmce-changed-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+body.page-material-edit-v6 .nxmce-changed-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: 600;
+    background: rgba(6, 13, 26, 0.88);
+    border: 1px solid rgba(118, 165, 225, 0.2);
+    color: var(--nxmce-text-primary);
+}
+
+body.page-material-edit-v6 .nxmce-changed-chip.is-governance {
+    border-color: rgba(245, 182, 56, 0.4);
+    color: #ffd479;
+}
+
+body.page-material-edit-v6 .nxmce-changed-chip.is-admin {
+    border-color: rgba(106, 167, 255, 0.4);
+    color: #a8cbff;
+}
+
+body.page-material-edit-v6 .nxmce-governance-matrix,
+body.page-material-edit-v6 .nxmce-tech-metrics {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+body.page-material-edit-v6 .nxmce-governance-matrix > div,
+body.page-material-edit-v6 .nxmce-tech-metrics > div {
+    padding: 7px 9px;
+    border-radius: 8px;
+    background: rgba(6, 13, 25, 0.82);
+    border: 1px solid rgba(118, 165, 225, 0.13);
+}
+
+body.page-material-edit-v6 .nxmce-governance-matrix small,
+body.page-material-edit-v6 .nxmce-tech-metrics small {
+    display: block;
+    font-size: 8.5px;
+    text-transform: uppercase;
+    color: var(--nxmce-text-muted);
+}
+
+body.page-material-edit-v6 .nxmce-governance-matrix strong,
+body.page-material-edit-v6 .nxmce-tech-metrics strong {
+    font-size: 12px;
+    color: var(--nxmce-text-primary);
+}
+
+body.page-material-edit-v6 .nxmce-governance-rule {
+    padding: 9px 10px;
+    border-radius: 8px;
+    background: rgba(6, 13, 26, 0.78);
+    border: 1px solid rgba(118, 165, 225, 0.13);
+    font-size: 10px;
+    color: var(--nxmce-text-muted);
+    line-height: 1.4;
+}
+
+body.page-material-edit-v6 .nxmce-governance-rule strong {
+    display: block;
+    color: var(--nxmce-text-secondary);
+    margin-bottom: 2px;
+}
+
+body.page-material-edit-v6 .nxmce-governance-rule p {
+    margin: 0;
+}
+
+body.page-material-edit-v6 .nxmce-blocker-list {
+    margin: 8px 0 0;
+    padding-left: 16px;
+    font-size: 10px;
+    color: #ffd06b;
+}
+
+body.page-material-edit-v6 .nxmc-editor-track {
+    width: 100%;
+    height: 7px;
+    border-radius: 999px;
+    background: rgba(6, 12, 24, 0.9);
+    border: 1px solid rgba(118, 165, 225, 0.16);
+    overflow: hidden;
+    margin-bottom: 6px;
+}
+
+body.page-material-edit-v6 .nxmc-editor-track > span {
+    display: block;
+    height: 100%;
+    background: linear-gradient(90deg, #25d0f7, #22c983);
+}
+
+body.page-material-edit-v6 .nxmce-tech-rail-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 10px;
+    color: var(--nxmce-text-muted);
+    margin-bottom: 8px;
+}
+
+body.page-material-edit-v6 .nxmce-rail-jump {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--nxmce-cyan);
+    text-decoration: none;
+}
+
+body.page-material-edit-v6 .nxmce-evidence-summary-rows {
+    list-style: none;
+    margin: 0 0 10px;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+body.page-material-edit-v6 .nxmce-evidence-summary-rows li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 11px;
+}
+
+body.page-material-edit-v6 .nxmce-evidence-summary-rows span {
+    color: var(--nxmce-text-muted);
+}
+
+body.page-material-edit-v6 .nxmce-evidence-summary-rows strong {
+    color: var(--nxmce-text-primary);
+}
+
+body.page-material-edit-v6 .nxmce-rail-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+body.page-material-edit-v6 .nxmce-rail-actions .nxmc-button {
+    flex: 1 1 auto;
+}
+
+/* ==========================================================================
+   RESPONSIVE BREAKPOINTS (2048 / 1440 / 1180 / 1024 / 768 / 390)
+   ========================================================================== */
+
+@media (max-width: 1180px) {
+    body.page-material-edit-v6 .nxmce-grid {
+        grid-template-columns: 1fr;
+    }
+
+    body.page-material-edit-v6 .nxmce-rail {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+}
+
+@media (max-width: 1100px) {
+    body.page-material-edit-v6 .nxmce-identity-stage {
+        grid-template-columns: 1fr;
+    }
+
+    body.page-material-edit-v6 .nxmce-key-readout {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    body.page-material-edit-v6 .nxmce-status-cluster {
+        grid-template-columns: repeat(2, minmax(140px, 1fr));
+        flex: 1 1 100%;
+    }
+}
+
+@media (max-width: 820px) {
+    body.page-material-edit-v6 .nxmc-form-grid,
+    body.page-material-edit-v6 .nxspec-field-grid,
+    body.page-material-edit-v6 .nxmce-evidence-grid,
+    body.page-material-edit-v6 .nxmce-rail,
+    body.page-material-edit-v6 .nxmc-choices,
+    body.page-material-edit-v6 .nxmc-choices.is-two,
+    body.page-material-edit-v6 .nxmce-switch-columns,
+    body.page-material-edit-v6 .nxmc-profile-requirements,
+    body.page-material-edit-v6 .nxmce-lineage-strip {
+        grid-template-columns: 1fr;
+    }
+
+    body.page-material-edit-v6 .nxmc-form-span-2 {
+        grid-column: span 1;
+    }
+
+    body.page-material-edit-v6 .nxmce-key-readout {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 480px) {
+    body.page-material-edit-v6 .nxmce-workspace {
+        padding: 2px 0 24px;
+    }
+
+    body.page-material-edit-v6 .nxmce-header {
+        padding: 12px 12px 0;
+    }
+
+    body.page-material-edit-v6 .nxmce-card,
+    body.page-material-edit-v6 .nxmce-rail-card {
+        padding: 12px;
+    }
+
+    body.page-material-edit-v6 .nxmce-title-row h2 {
+        font-size: 22px;
+    }
+
+    body.page-material-edit-v6 .nxmce-record-headline {
+        font-size: 16px;
+    }
+
+    body.page-material-edit-v6 .nxmce-status-cluster,
+    body.page-material-edit-v6 .nxmce-key-readout {
+        grid-template-columns: 1fr;
+    }
+}
+
+body.page-material-edit-v6 .nxmce-rail-code,
+body.page-material-edit-v6 .nxmce-record-link code {
+    max-width: 175px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+body.page-material-edit-v6 .topbar .page-heading h1 {
+    font-family: var(--nxmce-font-ui) !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.02em !important;
+}
+
+
+/* ==========================================================================
+   PAGE 022 R2 — V6 ENTERPRISE LUXURY TYPOGRAPHY, ZERO-DEAD-SPACE GEOMETRY,
+   REFINED SCROLLBARS, AND VISUAL BREATHING ROOM (SS 01 – SS 14 FIXES)
+   ========================================================================== */
+
+/* 1. Force V6 Inter Sans-Serif across all headings & override legacy Fraunces serif */
+body.page-material-edit-v6 .nxmce-workspace {
+    --nxmc-display: Inter, "Segoe UI", Arial, sans-serif !important;
+    --nxmc-body: Inter, "Segoe UI", Arial, sans-serif !important;
+}
+
+body.page-material-edit-v6 .nxmce-workspace :is(h1, h2, h3, h4, h5, h6, strong, b),
+body.page-material-edit-v6 .nxmc-form-section-head h3,
+body.page-material-edit-v6 .nxspec-group-head h4,
+body.page-material-edit-v6 .nxmce-evidence-card-head h4,
+body.page-material-edit-v6 .nxmce-rail-head h3 {
+    font-family: Inter, "Segoe UI", Arial, sans-serif !important;
+    letter-spacing: -0.015em !important;
+}
+
+/* 2. Generous breathing room in Top Command Header & Cards (SS 01, SS 11, SS 12, SS 13) */
+body.page-material-edit-v6 .nxmce-header {
+    padding: 20px 24px 6px !important;
+    margin-bottom: 18px !important;
+}
+
+body.page-material-edit-v6 .nxmce-header-main {
+    margin-top: 16px !important;
+    padding-bottom: 18px !important;
+    gap: 24px !important;
+}
+
+body.page-material-edit-v6 .nxmce-record-submeta {
+    margin-top: 8px !important;
+    gap: 10px !important;
+    font-size: 12px !important;
+}
+
+body.page-material-edit-v6 .nxmce-section-tabs {
+    padding: 10px 0 8px !important;
+    gap: 8px !important;
+    overflow: visible !important;
+}
+
+body.page-material-edit-v6 .nxmce-main {
+    gap: 18px !important;
+}
+
+body.page-material-edit-v6 .nxmce-card {
+    padding: 20px 22px !important;
+}
+
+body.page-material-edit-v6 .nxmce-card-head {
+    padding: 14px 16px !important;
+    margin-bottom: 18px !important;
+    border-radius: 10px !important;
+    background: linear-gradient(90deg, rgba(20, 82, 96, 0.14), rgba(8, 22, 40, 0.65)) !important;
+    border: 1px solid rgba(118, 165, 225, 0.14) !important;
+}
+
+/* 3. Custom Luxury Dark Scrollbars & Auto-Expanding Textareas (SS 02, SS 03, SS 06) */
+body.page-material-edit-v6 .nxmci-category-options,
+body.page-material-edit-v6 .nxmci-select-options,
+body.page-material-edit-v6 .nxmci-spec-group-nav,
+body.page-material-edit-v6 .nxmc-textarea {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(56, 189, 214, 0.45) rgba(5, 16, 30, 0.65);
+}
+
+body.page-material-edit-v6 .nxmci-category-options::-webkit-scrollbar,
+body.page-material-edit-v6 .nxmci-select-options::-webkit-scrollbar,
+body.page-material-edit-v6 .nxmci-spec-group-nav::-webkit-scrollbar,
+body.page-material-edit-v6 .nxmc-textarea::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+body.page-material-edit-v6 .nxmci-category-options::-webkit-scrollbar-track,
+body.page-material-edit-v6 .nxmci-select-options::-webkit-scrollbar-track,
+body.page-material-edit-v6 .nxmci-spec-group-nav::-webkit-scrollbar-track,
+body.page-material-edit-v6 .nxmc-textarea::-webkit-scrollbar-track {
+    background: rgba(5, 16, 30, 0.65);
+    border-radius: 999px;
+}
+
+body.page-material-edit-v6 .nxmci-category-options::-webkit-scrollbar-thumb,
+body.page-material-edit-v6 .nxmci-select-options::-webkit-scrollbar-thumb,
+body.page-material-edit-v6 .nxmci-spec-group-nav::-webkit-scrollbar-thumb,
+body.page-material-edit-v6 .nxmc-textarea::-webkit-scrollbar-thumb {
+    background: rgba(56, 189, 214, 0.48);
+    border-radius: 999px;
+}
+
+body.page-material-edit-v6 .nxmc-textarea {
+    padding: 11px 14px !important;
+    line-height: 1.55 !important;
+    font-size: 12.5px !important;
+    overflow-y: hidden;
+}
+
+/* Wrap spec group navigation pills cleanly so no ugly horizontal scrollbar appears (SS 06) */
+body.page-material-edit-v6 .nxmci-spec-group-nav {
+    flex-wrap: wrap !important;
+    overflow-x: visible !important;
+    gap: 7px !important;
+    padding: 8px 10px !important;
+    border-radius: 10px !important;
+    background: rgba(6, 15, 29, 0.85) !important;
+    border: 1px solid rgba(118, 165, 225, 0.14) !important;
+}
+
+/* 4. Applicability Choice Cards — Crisp V6 Check Indicator instead of bulky square (SS 04) */
+body.page-material-edit-v6 .nxmc-choice-surface {
+    display: grid !important;
+    grid-template-columns: 20px minmax(0, 1fr) !important;
+    gap: 10px !important;
+    align-items: flex-start !important;
+    padding: 11px 13px !important;
+    min-height: 60px !important;
+    border-radius: 10px !important;
+    background: rgba(7, 16, 31, 0.86) !important;
+    border: 1px solid rgba(118, 165, 225, 0.18) !important;
+}
+
+body.page-material-edit-v6 .nxmc-choice-surface::before {
+    width: 18px !important;
+    height: 18px !important;
+    margin-top: 2px !important;
+    border-radius: 5px !important;
+    border: 1.5px solid rgba(118, 165, 225, 0.38) !important;
+    background: rgba(4, 11, 22, 0.9) !important;
+    box-shadow: none !important;
+    content: "" !important;
+    display: grid !important;
+    place-items: center !important;
+    font-size: 11px !important;
+    font-weight: 800 !important;
+    color: #031521 !important;
+}
+
+body.page-material-edit-v6 .nxmc-choice input[type="checkbox"]:checked + .nxmc-choice-surface {
+    background: linear-gradient(180deg, rgba(22, 118, 138, 0.22), rgba(8, 28, 46, 0.9)) !important;
+    border-color: rgba(37, 208, 247, 0.52) !important;
+    box-shadow: 0 6px 18px rgba(0, 10, 20, 0.25), inset 0 1px rgba(255, 255, 255, 0.05) !important;
+}
+
+body.page-material-edit-v6 .nxmc-choice input[type="checkbox"]:checked + .nxmc-choice-surface::before {
+    content: "✓" !important;
+    background: #25d0f7 !important;
+    border-color: #6ce3ff !important;
+    box-shadow: 0 0 10px rgba(37, 208, 247, 0.35) !important;
+}
+
+body.page-material-edit-v6 .nxmc-choice-copy strong {
+    font-size: 12px !important;
+    font-weight: 650 !important;
+    color: #f3f7fc !important;
+}
+
+body.page-material-edit-v6 .nxmc-choice-copy small {
+    font-size: 10.5px !important;
+    line-height: 1.4 !important;
+    color: #8da5c4 !important;
+    margin-top: 3px !important;
+}
+
+/* 5. Zero-Dead-Space Technical Specification Grids (SS 06, SS 07, SS 08, SS 09, SS 10)
+      Override legacy .nxspec-group.is-compact 620px cap and span odd/single fields full-width! */
+body.page-material-edit-v6 .nxspec-field-grid,
+body.page-material-edit-v6 .nxspec-group.is-compact .nxspec-field-grid,
+body.page-material-edit-v6 .nxspec-group.is-balanced-pair .nxspec-field-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+    padding: 4px 0 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+body.page-material-edit-v6 .nxspec-group.is-single .nxspec-field-grid {
+    grid-template-columns: 1fr !important;
+}
+
+body.page-material-edit-v6 .nxspec-group.has-odd-count .nxspec-field.is-wide,
+body.page-material-edit-v6 .nxspec-group.has-odd-count .nxspec-field:last-child,
+body.page-material-edit-v6 .nxspec-group.is-single .nxspec-field,
+body.page-material-edit-v6 .nxspec-field.is-span-full {
+    grid-column: 1 / -1 !important;
+}
+
+body.page-material-edit-v6 .nxspec-group:not(.has-odd-count):not(.is-single) .nxspec-field:not(.is-span-full) {
+    grid-column: auto !important;
+}
+
+body.page-material-edit-v6 .nxspec-field .nxspec-textarea {
+    min-height: 54px !important;
+    height: auto !important;
+    padding: 8px 12px !important;
+    line-height: 1.38 !important;
+}
+
+@media (max-width: 820px) {
+    body.page-material-edit-v6 .nxspec-field-grid,
+    body.page-material-edit-v6 .nxspec-group.is-compact .nxspec-field-grid,
+    body.page-material-edit-v6 .nxspec-group.is-balanced-pair .nxspec-field-grid {
+        grid-template-columns: 1fr !important;
+    }
+    body.page-material-edit-v6 .nxspec-group.has-odd-count .nxspec-field.is-wide,
+    body.page-material-edit-v6 .nxspec-field:has(.nxspec-textarea) {
+        grid-column: auto !important;
+    }
+}
+
+/* Hide repetitive boilerplate helper text inside spec cards unless focused, keeping cards super clean */
+body.page-material-edit-v6 .nxspec-field {
+    padding: 12px 14px !important;
+    gap: 8px !important;
+    border-radius: 10px !important;
+    background: rgba(8, 18, 34, 0.88) !important;
+    border: 1px solid rgba(118, 165, 225, 0.16) !important;
+}
+
+body.page-material-edit-v6 .nxspec-field .nxmc-field-hint {
+    display: none !important;
+}
+
+/* 6. Sticky Right Rail & 3-or-4-Column Auto-Fit Metrics so no empty bottom-right hole exists (SS 12/13, SS 14) */
+@media (min-width: 1281px) {
+    body.page-material-edit-v6 .nxmce-rail {
+        position: sticky !important;
+        top: 72px !important;
+        align-self: start !important;
+    }
+}
+
+body.page-material-edit-v6 .nxmce-tech-metrics {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(78px, 1fr)) !important;
+    gap: 8px !important;
+}
+
+body.page-material-edit-v6 .nxmc-profile-meter {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+}
+
+
+/* ==========================================================================
+   PAGE 022 R3 — SELF-AUDIT VISUAL POLISH:
+   1. Single-row 5-tab navigation at 1440px
+   2. 3x2 spacious Key Engineering Parameter Readout Grid (no "CELL..." truncation)
+   3. Clean textarea resize:none (no diagonal native grabber)
+   ========================================================================== */
+
+body.page-material-edit-v6 .nxmce-section-tabs {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    gap: 5px !important;
+    padding: 10px 0 8px !important;
+}
+
+body.page-material-edit-v6 .nxmce-section-tab {
+    justify-content: center !important;
+    padding: 6px 8px !important;
+    width: auto !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    gap: 5px !important;
+    font-size: 11px !important;
+}
+
+@media (max-width: 1180px) {
+    body.page-material-edit-v6 .nxmce-section-tabs {
+        flex-wrap: wrap !important;
+    }
+}
+
+body.page-material-edit-v6 .nxmce-tab-label {
+    overflow: visible !important;
+    text-overflow: clip !important;
+    white-space: nowrap !important;
+}
+
+@media (max-width: 768px) {
+    body.page-material-edit-v6 .nxmce-section-tab {
+        flex: 1 1 100% !important;
+        justify-content: space-between !important;
+    }
+}
+
+/* 3 columns x 2 rows for the 6-cell readout strip so every label and value is 100% legible */
+body.page-material-edit-v6 .nxmce-key-readout {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+    padding: 12px !important;
+}
+
+body.page-material-edit-v6 .nxmce-readout-cell {
+    padding: 9px 12px !important;
+    border-radius: 8px !important;
+    background: rgba(9, 20, 38, 0.85) !important;
+    border: 1px solid rgba(118, 165, 225, 0.16) !important;
+}
+
+body.page-material-edit-v6 .nxmce-readout-cell small {
+    font-size: 9px !important;
+    letter-spacing: 0.03em !important;
+    color: #8da5c4 !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    line-height: 1.25 !important;
+}
+
+body.page-material-edit-v6 .nxmce-readout-cell strong {
+    font-size: 13px !important;
+    margin-top: 2px !important;
+}
+
+@media (max-width: 820px) {
+    body.page-material-edit-v6 .nxmce-key-readout {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+}
+
+@media (max-width: 480px) {
+    body.page-material-edit-v6 .nxmce-key-readout {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* Remove ugly browser resize handle on auto-expanding textareas */
+body.page-material-edit-v6 .nxmc-textarea {
+    resize: none !important;
+}
+
+
+/* ==========================================================================
+   PAGE 022 R4 — ZERO-EMPTY-SPACE GEOMETRY FOR SECTION 01, SECTION 02
+   (SYSTEM APPLICABILITY / PROJECT SCALE / ROOF SUITABILITY), AND SECTION 03
+   ========================================================================== */
+
+/* Section 01 Left Visual Card: fill vertical space with 2x2 Persisted Record Baseline Grid */
+body.page-material-edit-v6 .nxmce-media-stage,
+body.page-material-edit-v6 .nxmce-identity-visual-card {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    gap: 10px !important;
+}
+
+body.page-material-edit-v6 .nxmce-visual-frame {
+    flex: 1 1 auto !important;
+    min-height: 170px !important;
+    max-height: 210px !important;
+}
+
+body.page-material-edit-v6 .nxmce-visual-stage {
+    flex: 0 0 156px !important;
+    height: 156px !important;
+    min-height: 156px !important;
+    max-height: 156px !important;
+    overflow: hidden !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 10px !important;
+    background: radial-gradient(circle at 50% 40%, rgba(37, 208, 247, 0.14), rgba(5, 12, 24, 0.92)) !important;
+    border: 1px solid rgba(118, 165, 225, 0.14) !important;
+    padding: 10px !important;
+}
+
+body.page-material-edit-v6 .nxmce-visual-stage img,
+body.page-material-edit-v6 .nxmce-visual-img {
+    max-height: 136px !important;
+    max-width: 100% !important;
+    width: auto !important;
+    height: auto !important;
+    object-fit: contain !important;
+    display: block !important;
+    margin: 0 auto !important;
+}
+
+body.page-material-edit-v6 .nxmce-visual-meta-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+}
+
+body.page-material-edit-v6 .nxmce-visual-meta-cell {
+    padding: 8px 10px !important;
+    border-radius: 8px !important;
+    background: rgba(9, 20, 38, 0.88) !important;
+    border: 1px solid rgba(118, 165, 225, 0.16) !important;
+}
+
+body.page-material-edit-v6 .nxmce-visual-meta-cell small {
+    display: block !important;
+    font-size: 8.5px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.05em !important;
+    text-transform: uppercase !important;
+    color: #8da5c4 !important;
+    margin-bottom: 2px !important;
+}
+
+body.page-material-edit-v6 .nxmce-visual-meta-cell strong {
+    display: block !important;
+    font-size: 11px !important;
+    font-weight: 650 !important;
+    color: #f3f7fc !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+body.page-material-edit-v6 .nxmce-visual-meta-cell strong.is-green {
+    color: #4be3a0 !important;
+}
+
+body.page-material-edit-v6 .nxmce-visual-meta-cell strong.is-amber {
+    color: #ffd06b !important;
+}
+
+/* Section 02 Row 1: Match height of Default BOM/BOQ Scope Mode and Active Catalog Record */
+body.page-material-edit-v6 .nxmce-applicability-top-grid {
+    align-items: stretch !important;
+    gap: 14px !important;
+}
+
+body.page-material-edit-v6 .nxmce-applicability-top-grid > .nxmc-field {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+}
+
+body.page-material-edit-v6 .nxmce-active-toggle-card {
+    min-height: 46px !important;
+    padding: 8px 12px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+}
+
+/* Section 02 Row 2 & Row 3: Perfect 3-Column Alignment across System Applicability (3 cols),
+   Project Scale Suitability (1/3 width, 2 stacked rows), and Roof & Site Suitability (2/3 width, 2x2 grid) */
+body.page-material-edit-v6 .nxmce-choices-3col {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+}
+
+body.page-material-edit-v6 .nxmce-suitability-split {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) !important;
+    gap: 12px !important;
+    align-items: stretch !important;
+}
+
+body.page-material-edit-v6 .nxmce-suitability-col {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+}
+
+body.page-material-edit-v6 .nxmce-choices-stack-2 {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    grid-template-rows: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+    flex: 1 1 auto !important;
+}
+
+body.page-material-edit-v6 .nxmce-choices-grid-2x2 {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-template-rows: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+    flex: 1 1 auto !important;
+}
+
+body.page-material-edit-v6 .nxmc-choice {
+    height: 100% !important;
+    display: flex !important;
+}
+
+body.page-material-edit-v6 .nxmc-choice-surface {
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 54px !important;
+    padding: 10px 12px !important;
+    align-items: center !important;
+}
+
+@media (max-width: 960px) {
+    body.page-material-edit-v6 .nxmce-choices-3col,
+    body.page-material-edit-v6 .nxmce-suitability-split {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* Section 03 Toolbar: Keep title + filter pills + progress bar side-by-side without awkward wrapping */
+body.page-material-edit-v6 .nxmce-spec-toolbar {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 16px !important;
+    flex-wrap: nowrap !important;
+    padding: 12px 14px !important;
+}
+
+body.page-material-edit-v6 .nxmce-spec-toolbar-copy {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+}
+
+body.page-material-edit-v6 .nxmce-spec-toolbar-controls {
+    flex: 0 0 auto !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    flex-wrap: nowrap !important;
+}
+
+@media (max-width: 1100px) {
+    body.page-material-edit-v6 .nxmce-spec-toolbar {
+        flex-wrap: wrap !important;
+    }
+}
+
+
+/* ==========================================================================
+   PAGE 022 R5 — COMPREHENSIVE HIERARCHY, SPACING & RIGHT-RAIL REFINEMENT
+   Fixes cramped (mepet) labels/values in Catalog Governance, Mutation
+   Intelligence, Schema Completeness, Supporting Records, Header, & Sections 01-05
+   ========================================================================== */
+
+/* 1. Top Command Header Hierarchy & Breathing Room */
+body.page-material-edit-v6 .nxmce-header {
+    padding: 18px 22px 8px !important;
+    margin-bottom: 16px !important;
+}
+
+body.page-material-edit-v6 .nxmce-kicker-row {
+    gap: 10px !important;
+    margin-bottom: 6px !important;
+}
+
+body.page-material-edit-v6 .nxmc-kicker {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 7px !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.08em !important;
+    text-transform: uppercase !important;
+    color: #25d0f7 !important;
+}
+
+body.page-material-edit-v6 .nxmc-kicker::before {
+    content: "" !important;
+    width: 7px !important;
+    height: 7px !important;
+    border-radius: 999px !important;
+    background: #25d0f7 !important;
+    box-shadow: 0 0 8px rgba(37, 208, 247, 0.7) !important;
+}
+
+body.page-material-edit-v6 .nxmce-title-row {
+    gap: 10px !important;
+    margin: 4px 0 6px !important;
+}
+
+body.page-material-edit-v6 .nxmce-status-cluster {
+    gap: 10px !important;
+}
+
+body.page-material-edit-v6 .nxmce-status-badge {
+    padding: 9px 13px !important;
+    gap: 4px !important;
+    border-radius: 10px !important;
+}
+
+body.page-material-edit-v6 .nxmce-status-badge small {
+    font-size: 8.5px !important;
+    letter-spacing: 0.07em !important;
+    color: #8da5c4 !important;
+}
+
+body.page-material-edit-v6 .nxmce-status-badge strong {
+    font-size: 12px !important;
+    line-height: 1.2 !important;
+}
+
+/* 2. Main Grid & Section Spacing */
+body.page-material-edit-v6 .nxmce-grid {
+    grid-template-columns: minmax(0, 1fr) 376px !important;
+    gap: 16px !important;
+}
+
+body.page-material-edit-v6 .nxmce-main {
+    gap: 16px !important;
+}
+
+body.page-material-edit-v6 .nxmce-card {
+    padding: 18px 20px !important;
+    border-radius: 14px !important;
+}
+
+body.page-material-edit-v6 .nxmce-card-head {
+    padding-bottom: 14px !important;
+    margin-bottom: 16px !important;
+}
+
+body.page-material-edit-v6 .nxmc-form-grid {
+    gap: 14px 14px !important;
+}
+
+body.page-material-edit-v6 .nxmc-field {
+    gap: 6px !important;
+}
+
+/* 3. Section 01 Visual Frame & 2x2 Baseline Metadata Grid (No Clipped Text) */
+body.page-material-edit-v6 .nxmce-identity-stage {
+    grid-template-columns: 256px minmax(0, 1fr) !important;
+    gap: 18px !important;
+}
+
+body.page-material-edit-v6 .nxmce-visual-frame {
+    height: 180px !important;
+    min-height: 180px !important;
+    max-height: 180px !important;
+    padding: 32px 12px 10px !important;
+}
+
+body.page-material-edit-v6 .nxmce-visual-frame {
+    height: 188px !important;
+    min-height: 188px !important;
+    max-height: 188px !important;
+    padding: 30px 12px 28px !important;
+}
+
+body.page-material-edit-v6 .nxmce-visual-badges {
+    position: absolute !important;
+    inset: 8px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    justify-content: space-between !important;
+    pointer-events: none !important;
+}
+
+body.page-material-edit-v6 .nxmce-visual-tag,
+body.page-material-edit-v6 .nxmce-visual-code {
+    font-size: 8px !important;
+    padding: 2px 7px !important;
+    white-space: nowrap !important;
+    max-width: 100% !important;
+}
+
+body.page-material-edit-v6 .nxmce-visual-code {
+    align-self: flex-end !important;
+}
+
+/* Match 1-line label height & 44px control height between Manufacturer/Brand and Engineering Component Class */
+body.page-material-edit-v6 .nxmci-category-label-row {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    flex-wrap: nowrap !important;
+    gap: 6px !important;
+}
+
+body.page-material-edit-v6 .nxmci-category-label-row .nxmc-label {
+    white-space: nowrap !important;
+    font-size: 8.5px !important;
+    letter-spacing: 0.04em !important;
+}
+
+body.page-material-edit-v6 .nxmci-category-coverage {
+    white-space: nowrap !important;
+    font-size: 8px !important;
+    letter-spacing: 0.02em !important;
+    padding: 1px 5px !important;
+    border-radius: 4px !important;
+    background: rgba(37, 208, 247, 0.12) !important;
+    color: #25d0f7 !important;
+    flex-shrink: 0 !important;
+}
+
+body.page-material-edit-v6 .nxmce-identity-grid .nxmc-input,
+body.page-material-edit-v6 .nxmce-identity-grid .nxmc-select,
+body.page-material-edit-v6 .nxmci-category-trigger {
+    min-height: 44px !important;
+    height: 44px !important;
+    padding: 6px 12px !important;
+}
+
+/* Match 48px control height in Section 02 Row 1 (Default BOM/BOQ Scope Mode vs Active Catalog Record) */
+body.page-material-edit-v6 .nxmce-applicability-top-grid #default_scope_mode,
+body.page-material-edit-v6 .nxmce-applicability-top-grid .nxmci-select-trigger,
+body.page-material-edit-v6 .nxmce-applicability-top-grid .nxmce-active-toggle-card {
+    min-height: 48px !important;
+    height: 48px !important;
+}
+
+body.page-material-edit-v6 .nxmce-class-image {
+    max-height: 130px !important;
+    margin-top: 4px !important;
+}
+
+body.page-material-edit-v6 .nxmce-visual-meta-grid {
+    gap: 8px !important;
+    margin: 2px 0 !important;
+}
+
+body.page-material-edit-v6 .nxmce-visual-meta-cell {
+    padding: 8px 10px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 3px !important;
+}
+
+body.page-material-edit-v6 .nxmce-visual-meta-cell small {
+    font-size: 8px !important;
+    letter-spacing: 0.05em !important;
+    color: #8da5c4 !important;
+    margin: 0 !important;
+}
+
+body.page-material-edit-v6 .nxmce-visual-meta-cell strong {
+    font-size: 10.5px !important;
+    line-height: 1.25 !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+}
+
+/* 4. RIGHT RAIL — Complete Redesign for Clean Hierarchy & Zero Cramped (Mepet) Text */
+body.page-material-edit-v6 .nxmce-rail {
+    gap: 14px !important;
+}
+
+body.page-material-edit-v6 .nxmce-rail-card {
+    padding: 16px 18px !important;
+    border-radius: 14px !important;
+}
+
+body.page-material-edit-v6 .nxmce-rail-head {
+    padding-bottom: 12px !important;
+    margin-bottom: 12px !important;
+    align-items: center !important;
+}
+
+body.page-material-edit-v6 .nxmc-panel-kicker {
+    font-size: 9px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.08em !important;
+    text-transform: uppercase !important;
+    color: #25d0f7 !important;
+    margin-bottom: 3px !important;
+}
+
+body.page-material-edit-v6 .nxmce-rail-head h3 {
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    color: #f3f7fc !important;
+}
+
+body.page-material-edit-v6 .nxmce-rail-copy {
+    margin: 0 0 12px !important;
+    font-size: 11.5px !important;
+    line-height: 1.48 !important;
+    color: #9ab0ce !important;
+}
+
+/* Right Rail Card 1: Mutation Intelligence (.nxmce-impact-list)
+   Top 2 items in a 2-column grid, remaining items as clean full-width stacked boxes with left-aligned text! */
+body.page-material-edit-v6 .nxmce-impact-list {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    margin: 0 !important;
+}
+
+body.page-material-edit-v6 .nxmce-impact-list > div {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    gap: 4px !important;
+    padding: 9px 11px !important;
+    border-radius: 9px !important;
+    background: rgba(6, 13, 26, 0.82) !important;
+    border: 1px solid rgba(118, 165, 225, 0.14) !important;
+}
+
+body.page-material-edit-v6 .nxmce-impact-list > div:nth-child(n+3) {
+    grid-column: 1 / -1 !important;
+}
+
+body.page-material-edit-v6 .nxmce-impact-list dt {
+    font-size: 8.5px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.06em !important;
+    color: #8da5c4 !important;
+    margin: 0 !important;
+}
+
+body.page-material-edit-v6 .nxmce-impact-list dd {
+    margin: 0 !important;
+    font-size: 11.5px !important;
+    font-weight: 650 !important;
+    color: #f3f7fc !important;
+    text-align: left !important;
+    line-height: 1.38 !important;
+}
+
+/* Right Rail Card 2: Catalog Governance (.nxmce-governance-matrix & .nxmce-governance-rule) */
+body.page-material-edit-v6 .nxmce-governance-matrix {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+    margin-bottom: 12px !important;
+}
+
+body.page-material-edit-v6 .nxmce-governance-matrix > div {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    justify-content: center !important;
+    gap: 5px !important;
+    padding: 11px 13px !important;
+    border-radius: 10px !important;
+    background: rgba(6, 13, 26, 0.86) !important;
+    border: 1px solid rgba(118, 165, 225, 0.16) !important;
+}
+
+body.page-material-edit-v6 .nxmce-governance-matrix small {
+    display: block !important;
+    font-size: 8.5px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.07em !important;
+    color: #8da5c4 !important;
+    margin: 0 !important;
+    line-height: 1.2 !important;
+}
+
+body.page-material-edit-v6 .nxmce-governance-matrix strong {
+    display: block !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    color: #f3f7fc !important;
+    line-height: 1.25 !important;
+}
+
+body.page-material-edit-v6 .nxmce-governance-matrix strong.is-green {
+    color: #4be3a0 !important;
+}
+
+body.page-material-edit-v6 .nxmce-governance-matrix strong.is-amber {
+    color: #ffd06b !important;
+}
+
+body.page-material-edit-v6 .nxmce-governance-matrix strong.is-red {
+    color: #ff8e95 !important;
+}
+
+body.page-material-edit-v6 .nxmce-governance-rule {
+    padding: 11px 13px !important;
+    border-radius: 9px !important;
+    background: rgba(8, 18, 35, 0.86) !important;
+    border: 1px solid rgba(118, 165, 225, 0.15) !important;
+    border-left: 3px solid #25d0f7 !important;
+}
+
+body.page-material-edit-v6 .nxmce-governance-rule strong {
+    display: block !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    color: #f3f7fc !important;
+    margin-bottom: 4px !important;
+}
+
+body.page-material-edit-v6 .nxmce-governance-rule p {
+    margin: 0 !important;
+    font-size: 10.5px !important;
+    line-height: 1.45 !important;
+    color: #9ab0ce !important;
+}
+
+/* Right Rail Card 3: Schema Completeness / Technical Data Status (.nxmce-tech-metrics) */
+body.page-material-edit-v6 .nxmce-tech-metrics {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+    margin-bottom: 12px !important;
+}
+
+body.page-material-edit-v6 .nxmce-tech-metrics:has(> div[data-nxmci-rail-metric="conditional"]:not([hidden])) {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
+body.page-material-edit-v6 .nxmce-tech-metrics > div {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 5px !important;
+    padding: 10px 12px !important;
+    border-radius: 10px !important;
+    background: rgba(6, 13, 26, 0.86) !important;
+    border: 1px solid rgba(118, 165, 225, 0.16) !important;
+}
+
+body.page-material-edit-v6 .nxmce-tech-metrics > div[hidden] {
+    display: none !important;
+}
+
+body.page-material-edit-v6 .nxmci-category-picker ~ .nxmci-category-native {
+    display: none !important;
+}
+
+body.page-material-edit-v6 .nxmce-evidence-card-head h4 {
+    white-space: nowrap !important;
+    font-size: 12.5px !important;
+}
+
+body.page-material-edit-v6 .nxmce-tech-metrics small {
+    font-size: 8.5px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.07em !important;
+    color: #8da5c4 !important;
+}
+
+body.page-material-edit-v6 .nxmce-tech-metrics strong {
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    color: #f3f7fc !important;
+    line-height: 1.15 !important;
+}
+
+body.page-material-edit-v6 .nxmc-editor-track {
+    height: 8px !important;
+    margin: 10px 0 10px !important;
+}
+
+body.page-material-edit-v6 .nxmce-tech-rail-foot {
+    align-items: flex-start !important;
+    gap: 12px !important;
+    font-size: 10.5px !important;
+    line-height: 1.45 !important;
+    color: #9ab0ce !important;
+    margin-bottom: 12px !important;
+}
+
+body.page-material-edit-v6 .nxmce-tech-rail-foot .nxmc-preview-score {
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    color: #4be3a0 !important;
+    font-family: var(--nxmce-font-mono) !important;
+    flex-shrink: 0 !important;
+}
+
+/* Right Rail Card 4: Supporting Records / Evidence & Baseline (.nxmce-evidence-summary-rows) */
+body.page-material-edit-v6 .nxmce-evidence-summary-rows {
+    gap: 7px !important;
+    margin: 0 0 14px !important;
+}
+
+body.page-material-edit-v6 .nxmce-evidence-summary-rows li {
+    padding: 8px 11px !important;
+    border-radius: 8px !important;
+    background: rgba(6, 13, 26, 0.82) !important;
+    border: 1px solid rgba(118, 165, 225, 0.13) !important;
+    font-size: 11px !important;
+}
+
+body.page-material-edit-v6 .nxmce-evidence-summary-rows span {
+    color: #8da5c4 !important;
+    font-weight: 500 !important;
+}
+
+body.page-material-edit-v6 .nxmce-evidence-summary-rows strong {
+    font-weight: 650 !important;
+    color: #f3f7fc !important;
+}
+
+body.page-material-edit-v6 .nxmce-evidence-summary-rows strong.is-green {
+    color: #4be3a0 !important;
+}
+
+body.page-material-edit-v6 .nxmce-evidence-summary-rows strong.is-amber {
+    color: #ffd06b !important;
+}
+
+body.page-material-edit-v6 .nxmce-evidence-summary-rows strong.is-blue {
+    color: #8cc0ff !important;
+}
+
+body.page-material-edit-v6 .nxmce-evidence-summary-rows strong.is-muted {
+    color: #b5c5dc !important;
+}
+
+body.page-material-edit-v6 .nxmce-rail-actions {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+}
+
+/* 5. Section 04 Evidence Cards & Section 05 Lineage Strip Breathing Room */
+body.page-material-edit-v6 .nxmce-evidence-grid {
+    gap: 14px !important;
+}
+
+body.page-material-edit-v6 .nxmce-evidence-card {
+    padding: 14px 16px !important;
+    border-radius: 12px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    gap: 10px !important;
+}
+
+body.page-material-edit-v6 .nxmce-evidence-card-head {
+    display: flex !important;
+    align-items: flex-start !important;
+    justify-content: space-between !important;
+    gap: 10px !important;
+    padding-bottom: 10px !important;
+    border-bottom: 1px solid rgba(118, 165, 225, 0.12) !important;
+}
+
+body.page-material-edit-v6 .nxmce-evidence-card-head span:first-child {
+    display: block !important;
+    font-size: 8.5px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.07em !important;
+    text-transform: uppercase !important;
+    color: #25d0f7 !important;
+    margin-bottom: 3px !important;
+}
+
+body.page-material-edit-v6 .nxmce-evidence-card-head h4 {
+    margin: 0 !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    color: #f3f7fc !important;
+}
+
+body.page-material-edit-v6 .nxmce-evidence-list {
+    list-style: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+}
+
+body.page-material-edit-v6 .nxmce-evidence-list li {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 10px !important;
+    padding: 9px 11px !important;
+    border-radius: 8px !important;
+    background: rgba(9, 19, 36, 0.85) !important;
+    border: 1px solid rgba(118, 165, 225, 0.14) !important;
+}
+
+body.page-material-edit-v6 .nxmce-evidence-list li strong {
+    display: block !important;
+    font-size: 11.5px !important;
+    font-weight: 650 !important;
+    color: #f3f7fc !important;
+    margin-bottom: 2px !important;
+}
+
+body.page-material-edit-v6 .nxmce-evidence-list li small {
+    display: block !important;
+    font-size: 10px !important;
+    color: #8da5c4 !important;
+}
+
+body.page-material-edit-v6 .nxmce-lineage-strip {
+    gap: 12px !important;
+    margin-top: 14px !important;
+}
+
+body.page-material-edit-v6 .nxmce-lineage-strip > div {
+    padding: 11px 13px !important;
+    gap: 4px !important;
+    border-radius: 10px !important;
+}
+
+
+
+
+
+/* ==========================================================================
+   PAGE-022 R7 — CALM, DECLUTTERED, EYE-FRIENDLY ENTERPRISE UI
+   (Eliminates Box-Inside-Box Noise, Softens Typography & Aligns All Grids)
+   ========================================================================== */
+
+/* 0. Calm Matte Dark Palette & Full Content Container Alignment */
+body.page-material-edit-v6 .nxmce-workspace {
+    --nxmce-bg-card: #0b1322;
+    --nxmce-bg-elevated: #0f192d;
+    --nxmce-bg-input: #0f192d;
+    --nxmce-border: rgba(148, 163, 184, 0.14);
+    --nxmce-border-strong: rgba(148, 163, 184, 0.22);
+    --nxmce-text-primary: #f1f5f9;
+    --nxmce-text-secondary: #cbd5e1;
+    --nxmce-text-muted: #94a3b8;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 4px 0 48px !important;
+    box-sizing: border-box !important;
+}
+
+/* 1. Top Command Header — Compact, Single-Surface, Calm Pills & Scrollbar-Free 5-Tab Bar */
+body.page-material-edit-v6 .nxmce-header {
+    background: #0b1322 !important;
+    border: 1px solid rgba(148, 163, 184, 0.14) !important;
+    border-radius: 14px !important;
+    padding: 16px 20px 12px !important;
+    margin-bottom: 18px !important;
+    box-shadow: 0 8px 24px rgba(2, 6, 23, 0.35) !important;
+}
+
+body.page-material-edit-v6 .nxmce-header::before,
+body.page-material-edit-v6 .nxmce-header::after,
+body.page-material-edit-v6 .nxmce-card::before,
+body.page-material-edit-v6 .nxmce-card::after,
+body.page-material-edit-v6 .nxmce-rail-card::before,
+body.page-material-edit-v6 .nxmce-rail-card::after {
+    display: none !important;
+}
+
+body.page-material-edit-v6 .nxmce-header-top {
+    padding-bottom: 12px !important;
+    margin-bottom: 12px !important;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.1) !important;
+}
+
+body.page-material-edit-v6 .nxmce-header-main {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    flex-wrap: wrap !important;
+    gap: 12px 16px !important;
+    padding: 0 0 12px !important;
+    margin: 0 !important;
+    background: transparent !important;
+    border: 0 !important;
+}
+
+body.page-material-edit-v6 .nxmce-kicker-row {
+    display: none !important;
+}
+
+body.page-material-edit-v6 .nxmce-title-row h2 {
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    color: #f8fafc !important;
+}
+
+body.page-material-edit-v6 .nxmce-record-headline {
+    font-size: 18px !important;
+    font-weight: 600 !important;
+    color: #38bdf8 !important;
+}
+
+body.page-material-edit-v6 .nxmce-record-submeta {
+    margin-top: 4px !important;
+    font-size: 12px !important;
+    color: #94a3b8 !important;
+}
+
+/* Convert bulky 2-line header status boxes into calm single-line inline badges */
+body.page-material-edit-v6 .nxmce-status-cluster {
+    display: flex !important;
+    align-items: center !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+}
+
+body.page-material-edit-v6 .nxmce-status-badge {
+    display: inline-flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 6px !important;
+    padding: 5px 11px !important;
+    min-height: 28px !important;
+    border-radius: 999px !important;
+    background: rgba(15, 23, 42, 0.75) !important;
+    border: 1px solid rgba(148, 163, 184, 0.18) !important;
+}
+
+body.page-material-edit-v6 .nxmce-status-badge small {
+    font-size: 10.5px !important;
+    font-weight: 500 !important;
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+    color: #94a3b8 !important;
+    margin: 0 !important;
+}
+
+body.page-material-edit-v6 .nxmce-status-badge small::after {
+    content: ":";
+}
+
+body.page-material-edit-v6 .nxmce-status-badge strong {
+    font-size: 11px !important;
+    font-weight: 600 !important;
+}
+
+/* 5-Column Equal Grid for Section Tabs — ZERO Horizontal Scrollbar! */
+body.page-material-edit-v6 .nxmce-section-tabs {
+    display: grid !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    padding: 12px 0 0 !important;
+    margin: 0 !important;
+    border-top: 1px solid rgba(148, 163, 184, 0.1) !important;
+    background: transparent !important;
+    overflow: visible !important;
+}
+
+@media (max-width: 900px) {
+    body.page-material-edit-v6 .nxmce-section-tabs {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+}
+
+body.page-material-edit-v6 .nxmce-section-tab {
+    display: inline-flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 7px !important;
+    padding: 0 10px !important;
+    height: 36px !important;
+    min-height: 36px !important;
+    border-radius: 8px !important;
+    background: rgba(15, 23, 42, 0.45) !important;
+    border: 1px solid rgba(148, 163, 184, 0.12) !important;
+    white-space: nowrap !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+}
+
+body.page-material-edit-v6 .nxmce-section-tab:hover {
+    background: rgba(30, 41, 59, 0.65) !important;
+}
+
+body.page-material-edit-v6 .nxmce-section-tab.is-active {
+    background: rgba(56, 189, 248, 0.12) !important;
+    border-color: rgba(56, 189, 248, 0.35) !important;
+}
+
+body.page-material-edit-v6 .nxmce-tab-index {
+    font-size: 10.5px !important;
+    font-weight: 700 !important;
+    color: #38bdf8 !important;
+    background: transparent !important;
+    border: 0 !important;
+    padding: 0 !important;
+    width: auto !important;
+    height: auto !important;
+    flex-shrink: 0 !important;
+}
+
+body.page-material-edit-v6 .nxmce-tab-label {
+    font-size: 11.5px !important;
+    font-weight: 600 !important;
+    color: #e2e8f0 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+}
+
+body.page-material-edit-v6 .nxmce-tab-badge {
+    display: none !important;
+}
+
+/* 2. Main Layout Grid vs Single-Column Sticky Right Rail */
+@media (min-width: 1181px) {
+    body.page-material-edit-v6 .nxmce-grid {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) 316px !important;
+        gap: 20px !important;
+        align-items: start !important;
+    }
+
+    body.page-material-edit-v6 .nxmce-rail {
+        position: sticky !important;
+        top: 16px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 14px !important;
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+}
+
+@media (min-width: 1440px) {
+    body.page-material-edit-v6 .nxmce-grid {
+        grid-template-columns: minmax(0, 1fr) 340px !important;
+        gap: 22px !important;
+    }
+}
+
+@media (max-width: 1180px) {
+    body.page-material-edit-v6 .nxmce-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    body.page-material-edit-v6 .nxmce-rail {
+        position: static !important;
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 14px !important;
+    }
+}
+
+/* 3. Section Cards — Remove Box-Inside-Box Header Clutter! */
+body.page-material-edit-v6 .nxmce-main {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 18px !important;
+}
+
+body.page-material-edit-v6 .nxmc-form-section.nxmce-card {
+    background: #0b1322 !important;
+    border: 1px solid rgba(148, 163, 184, 0.14) !important;
+    border-radius: 14px !important;
+    padding: 0 !important;
+    box-shadow: 0 4px 18px rgba(2, 6, 23, 0.25) !important;
+    overflow: hidden !important;
+}
+
+body.page-material-edit-v6 .nxmc-form-section-head.nxmce-card-head {
+    background: rgba(15, 23, 42, 0.4) !important;
+    border: 0 !important;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.12) !important;
+    border-radius: 0 !important;
+    padding: 16px 22px !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+}
+
+body.page-material-edit-v6 .nxmce-section-kicker {
+    font-size: 10px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.06em !important;
+    color: #38bdf8 !important;
+    margin-bottom: 2px !important;
+}
+
+body.page-material-edit-v6 .nxmce-card-head h3 {
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    color: #f8fafc !important;
+    margin: 0 !important;
+}
+
+body.page-material-edit-v6 .nxmce-card-head p {
+    font-size: 12px !important;
+    line-height: 1.45 !important;
+    color: #94a3b8 !important;
+    margin: 3px 0 0 !important;
+    max-width: 68ch !important;
+}
+
+body.page-material-edit-v6 .nxmc-form-section-body,
+body.page-material-edit-v6 .nxmce-overview-body {
+    padding: 20px 22px !important;
+    background: transparent !important;
+}
+
+/* 4. Section 01 — Compact Class Preview Bar + Clean 2-Column Form */
+body.page-material-edit-v6 .nxmce-identity-stage {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 18px !important;
+    width: 100% !important;
+}
+
+body.page-material-edit-v6 .nxmce-media-stage {
+    display: grid !important;
+    grid-template-columns: 64px minmax(0, 1fr) !important;
+    gap: 14px !important;
+    align-items: center !important;
+    padding: 10px 14px !important;
+    border-radius: 10px !important;
+    background: rgba(15, 23, 42, 0.55) !important;
+    border: 1px solid rgba(148, 163, 184, 0.12) !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+body.page-material-edit-v6 .nxmce-visual-frame {
+    width: 64px !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    max-height: 48px !important;
+    border-radius: 8px !important;
+    margin: 0 !important;
+    padding: 4px !important;
+}
+
+body.page-material-edit-v6 .nxmce-visual-badges {
+    display: none !important;
+}
+
+body.page-material-edit-v6 .nxmce-media-caption {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 2px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: transparent !important;
+    border: 0 !important;
+}
+
+body.page-material-edit-v6 .nxmce-media-caption-head {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+body.page-material-edit-v6 .nxmce-media-caption-head span {
+    font-size: 10.5px !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.04em !important;
+    color: #94a3b8 !important;
+}
+
+body.page-material-edit-v6 .nxmce-media-caption-head strong {
+    font-size: 11px !important;
+    color: #38bdf8 !important;
+}
+
+body.page-material-edit-v6 .nxmce-media-caption p {
+    font-size: 11.5px !important;
+    line-height: 1.35 !important;
+    color: #64748b !important;
+    margin: 0 !important;
+}
+
+body.page-material-edit-v6 .nxmce-identity-fields {
+    width: 100% !important;
+    min-width: 0 !important;
+}
+
+body.page-material-edit-v6 .nxmce-identity-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 16px 18px !important;
+    align-items: start !important;
+}
+
+body.page-material-edit-v6 .nxmce-identity-grid > .nxmc-field {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: 20px 40px auto !important;
+    justify-content: stretch !important;
+    justify-items: stretch !important;
+    align-content: start !important;
+    gap: 6px !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+}
+
+body.page-material-edit-v6 .nxmce-identity-grid .nxmci-category-label-row {
+    height: 20px !important;
+    min-height: 20px !important;
+    max-height: 20px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Soft, readable label typography instead of harsh all-caps micro text */
+body.page-material-edit-v6 .nxmc-label {
+    font-size: 11.5px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.01em !important;
+    text-transform: none !important;
+    color: #cbd5e1 !important;
+    margin: 0 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+body.page-material-edit-v6 .nxmce-identity-grid .nxmci-category-coverage,
+body.page-material-edit-v6 .nxmce-identity-grid .nxmce-inline-status {
+    position: static !important;
+    transform: none !important;
+    flex-shrink: 0 !important;
+    padding: 2px 7px !important;
+    font-size: 10px !important;
+    font-weight: 600 !important;
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+    border-radius: 999px !important;
+}
+
+body.page-material-edit-v6 .nxmce-identity-grid .nxmc-input,
+body.page-material-edit-v6 .nxmce-identity-grid .nxmc-select,
+body.page-material-edit-v6 .nxmce-identity-grid .nxmci-category-picker,
+body.page-material-edit-v6 .nxmce-identity-grid .nxmci-category-trigger {
+    height: 40px !important;
+    min-height: 40px !important;
+    max-height: 40px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    border-radius: 8px !important;
+    background: #0f192d !important;
+    border: 1px solid rgba(148, 163, 184, 0.2) !important;
+    font-size: 13px !important;
+    color: #f8fafc !important;
+}
+
+body.page-material-edit-v6 .nxmce-identity-grid .nxmci-category-trigger {
+    padding: 0 12px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+}
+
+body.page-material-edit-v6 .nxmce-identity-grid .nxmci-category-trigger-copy {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: baseline !important;
+    gap: 8px !important;
+    min-width: 0 !important;
+}
+
+body.page-material-edit-v6 .nxmce-identity-grid .nxmci-category-trigger-copy strong {
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: #f8fafc !important;
+}
+
+body.page-material-edit-v6 .nxmce-identity-grid .nxmci-category-trigger-copy small {
+    font-size: 11px !important;
+    color: #64748b !important;
+}
+
+body.page-material-edit-v6 .nxmce-description-field {
+    margin-top: 16px !important;
+    padding-top: 16px !important;
+    border-top: 1px solid rgba(148, 163, 184, 0.1) !important;
+}
+
+/* 5. Section 02 — Laser-Aligned Top Row & Clean Single-Line Choice Cards */
+body.page-material-edit-v6 .nxmce-applicability-top-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 18px !important;
+    align-items: start !important;
+}
+
+body.page-material-edit-v6 .nxmce-applicability-top-grid > .nxmc-field:not(.nxmc-form-span-2) {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: 20px 42px auto !important;
+    justify-content: stretch !important;
+    justify-items: stretch !important;
+    align-content: start !important;
+    gap: 6px !important;
+    margin: 0 !important;
+    min-width: 0 !important;
+    width: 100% !important;
+}
+
+body.page-material-edit-v6 .nxmce-applicability-top-grid > .nxmc-field:not(.nxmc-form-span-2) > .nxmc-label {
+    height: 20px !important;
+    line-height: 20px !important;
+    margin: 0 !important;
+}
+
+body.page-material-edit-v6 .nxmce-applicability-top-grid > .nxmc-field:not(.nxmc-form-span-2) .nxmc-select {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 42px !important;
+    min-height: 42px !important;
+    max-height: 42px !important;
+    margin: 0 !important;
+    padding: 0 12px !important;
+    border-radius: 8px !important;
+    background-color: #0f192d !important;
+    border: 1px solid rgba(148, 163, 184, 0.2) !important;
+    box-sizing: border-box !important;
+}
+
+body.page-material-edit-v6 .nxmce-applicability-top-grid > .nxmc-field:not(.nxmc-form-span-2) .nxmci-select-control,
+body.page-material-edit-v6 .nxmce-applicability-top-grid > .nxmc-field:not(.nxmc-form-span-2) .nxmci-select-trigger,
+body.page-material-edit-v6 .nxmce-applicability-top-grid > .nxmc-field:not(.nxmc-form-span-2) .nxmce-active-toggle-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 42px !important;
+    min-height: 42px !important;
+    max-height: 42px !important;
+    margin: 0 !important;
+    padding: 0 12px !important;
+    border-radius: 8px !important;
+    background: #0f192d !important;
+    border: 1px solid rgba(148, 163, 184, 0.2) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    box-sizing: border-box !important;
+}
+
+body.page-material-edit-v6 .nxmce-active-toggle-card .nxmc-toggle-copy {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+body.page-material-edit-v6 .nxmce-active-toggle-card .nxmc-toggle-copy strong {
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    color: #f8fafc !important;
+}
+
+body.page-material-edit-v6 .nxmce-active-toggle-card .nxmc-toggle-copy small {
+    display: none !important;
+}
+
+/* Stack Project Scale (2x2) and Roof Suitability (2x2) full-width so labels never collide */
+body.page-material-edit-v6 .nxmce-suitability-split {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 16px !important;
+    margin-top: 2px !important;
+    width: 100% !important;
+}
+
+body.page-material-edit-v6 .nxmce-suitability-col {
+    background: transparent !important;
+    border: 0 !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    width: 100% !important;
+}
+
+body.page-material-edit-v6 .nxmce-choices-3col {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+    margin-top: 8px !important;
+}
+
+body.page-material-edit-v6 .nxmce-choices-stack-2,
+body.page-material-edit-v6 .nxmce-choices-grid-2x2 {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+    margin-top: 8px !important;
+}
+
+body.page-material-edit-v6 .nxmc-choice {
+    display: block !important;
+    position: relative !important;
+    min-height: 0 !important;
+    height: auto !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    min-width: 0 !important;
+}
+
+body.page-material-edit-v6 .nxmc-choice-surface {
+    display: grid !important;
+    grid-template-columns: 18px minmax(0, 1fr) !important;
+    align-items: center !important;
+    gap: 10px !important;
+    width: 100% !important;
+    height: 42px !important;
+    min-height: 42px !important;
+    max-height: 42px !important;
+    padding: 0 12px !important;
+    border-radius: 8px !important;
+    background: #0f192d !important;
+    border: 1px solid rgba(148, 163, 184, 0.18) !important;
+    box-shadow: none !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+}
+
+body.page-material-edit-v6 .nxmc-choice-surface::before {
+    margin: 0 !important;
+}
+
+body.page-material-edit-v6 .nxmc-choice input[type="checkbox"]:checked + .nxmc-choice-surface {
+    background: #10233a !important;
+    border-color: rgba(56, 189, 248, 0.45) !important;
+    box-shadow: none !important;
+}
+
+/* Hide the 9 repetitive filler sub-captions under checkboxes so Section 02 is ultra-clean */
+body.page-material-edit-v6 .nxmc-choice-copy small {
+    display: none !important;
+}
+
+body.page-material-edit-v6 .nxmc-choice-copy {
+    min-width: 0 !important;
+    overflow: hidden !important;
+}
+
+body.page-material-edit-v6 .nxmc-choice-copy strong {
+    font-size: 12.5px !important;
+    font-weight: 500 !important;
+    color: #e2e8f0 !important;
+    line-height: 1.2 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    display: block !important;
+}
+
+/* 6. Section 03 — Clean Toolbar, Calm Group Tabs, & Borderless Spec Field Rows */
+body.page-material-edit-v6 .nxspec-commandbar.nxmce-spec-toolbar {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    flex-wrap: wrap !important;
+    gap: 12px 16px !important;
+    padding: 12px 16px !important;
+    border-radius: 10px !important;
+    background: rgba(15, 23, 42, 0.55) !important;
+    border: 1px solid rgba(148, 163, 184, 0.12) !important;
+    margin-bottom: 12px !important;
+}
+
+body.page-material-edit-v6 .nxmce-spec-toolbar-copy {
+    flex: 1 1 260px !important;
+    min-width: 0 !important;
+}
+
+body.page-material-edit-v6 .nxmce-spec-toolbar-copy > span {
+    display: none !important;
+}
+
+body.page-material-edit-v6 .nxmce-spec-toolbar-copy strong {
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: #f8fafc !important;
+}
+
+body.page-material-edit-v6 .nxmce-spec-toolbar-copy p {
+    font-size: 11.5px !important;
+    color: #94a3b8 !important;
+    margin: 2px 0 0 !important;
+}
+
+body.page-material-edit-v6 .nxmce-spec-toolbar-controls {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    flex-wrap: wrap !important;
+    border: 0 !important;
+    padding: 0 !important;
+    width: auto !important;
+}
+
+body.page-material-edit-v6 .nxmci-spec-group-nav {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+    padding: 0 0 12px !important;
+    margin: 0 0 14px !important;
+    background: transparent !important;
+    border: 0 !important;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.12) !important;
+    border-radius: 0 !important;
+}
+
+body.page-material-edit-v6 .nxmci-spec-group-nav[hidden] {
+    display: none !important;
+}
+
+body.page-material-edit-v6 .nxmci-spec-group-link {
+    width: auto !important;
+    height: 30px !important;
+    padding: 0 11px !important;
+    font-size: 11.5px !important;
+    font-weight: 500 !important;
+    border-radius: 6px !important;
+    background: rgba(15, 23, 42, 0.6) !important;
+    border: 1px solid rgba(148, 163, 184, 0.14) !important;
+    color: #cbd5e1 !important;
+}
+
+body.page-material-edit-v6 .nxmci-spec-group-link.is-active {
+    background: rgba(56, 189, 248, 0.12) !important;
+    border-color: rgba(56, 189, 248, 0.35) !important;
+    color: #38bdf8 !important;
+}
+
+/* Remove Box-Inside-Box around individual specification fields in Section 03! */
+body.page-material-edit-v6 .nxspec-group {
+    background: rgba(15, 23, 42, 0.35) !important;
+    border: 1px solid rgba(148, 163, 184, 0.12) !important;
+    border-radius: 12px !important;
+    padding: 16px 18px !important;
+}
+
+body.page-material-edit-v6 .nxspec-field-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 16px 18px !important;
+}
+
+body.page-material-edit-v6 .nxspec-field {
+    background: transparent !important;
+    border: 0 !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+
+/* 7. Section 04 — Clean 2x2 Evidence Grid Without Overflowing Badges */
+body.page-material-edit-v6 .nxmce-evidence-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 14px !important;
+}
+
+body.page-material-edit-v6 .nxmce-evidence-card {
+    background: rgba(15, 23, 42, 0.45) !important;
+    border: 1px solid rgba(148, 163, 184, 0.14) !important;
+    border-radius: 10px !important;
+    padding: 14px 16px !important;
+    overflow: hidden !important;
+}
+
+body.page-material-edit-v6 .nxmce-evidence-card-head {
+    display: flex !important;
+    align-items: flex-start !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
+    flex-wrap: wrap !important;
+}
+
+body.page-material-edit-v6 .nxmce-evidence-card-head h4 {
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: #f8fafc !important;
+    white-space: normal !important;
+}
+
+body.page-material-edit-v6 .nxmce-evidence-empty {
+    background: transparent !important;
+    border: 0 !important;
+    padding: 4px 0 !important;
+    font-size: 12px !important;
+    color: #94a3b8 !important;
+}
+
+/* 8. Right Rail — Clean Key-Value Hairline Rows Instead of 19 Nested Boxes! */
+body.page-material-edit-v6 .nxmce-rail-card {
+    background: #0b1322 !important;
+    border: 1px solid rgba(148, 163, 184, 0.14) !important;
+    border-radius: 12px !important;
+    padding: 16px 18px !important;
+    box-shadow: 0 4px 16px rgba(2, 6, 23, 0.25) !important;
+}
+
+body.page-material-edit-v6 .nxmce-rail-head {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
+    padding-bottom: 10px !important;
+    margin-bottom: 10px !important;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.12) !important;
+}
+
+body.page-material-edit-v6 .nxmc-panel-kicker {
+    display: none !important;
+}
+
+body.page-material-edit-v6 .nxmce-rail-head h3 {
+    font-size: 13.5px !important;
+    font-weight: 700 !important;
+    color: #f8fafc !important;
+    margin: 0 !important;
+}
+
+/* Clean horizontal hairline rows in Change Impact & Supporting Records (NO inner boxes!) */
+body.page-material-edit-v6 .nxmce-impact-list {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0 !important;
+    margin: 8px 0 0 !important;
+}
+
+body.page-material-edit-v6 .nxmce-impact-list > div {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: baseline !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
+    padding: 7px 0 !important;
+    background: transparent !important;
+    border: 0 !important;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.08) !important;
+    border-radius: 0 !important;
+}
+
+body.page-material-edit-v6 .nxmce-impact-list > div:last-child {
+    border-bottom: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+body.page-material-edit-v6 .nxmce-impact-list dt {
+    font-size: 11.5px !important;
+    font-weight: 500 !important;
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+    color: #94a3b8 !important;
+    flex-shrink: 0 !important;
+    margin: 0 !important;
+}
+
+body.page-material-edit-v6 .nxmce-impact-list dd {
+    font-size: 11.5px !important;
+    font-weight: 600 !important;
+    color: #e2e8f0 !important;
+    text-align: right !important;
+    margin: 0 !important;
+}
+
+body.page-material-edit-v6 .nxmce-governance-matrix {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    margin-bottom: 10px !important;
+}
+
+body.page-material-edit-v6 .nxmce-governance-matrix > div {
+    padding: 8px 10px !important;
+    border-radius: 8px !important;
+    background: rgba(15, 23, 42, 0.5) !important;
+    border: 1px solid rgba(148, 163, 184, 0.12) !important;
+}
+
+body.page-material-edit-v6 .nxmce-governance-matrix small {
+    font-size: 10px !important;
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+    color: #94a3b8 !important;
+}
+
+body.page-material-edit-v6 .nxmce-governance-rule {
+    background: transparent !important;
+    border: 0 !important;
+    border-top: 1px solid rgba(148, 163, 184, 0.1) !important;
+    border-radius: 0 !important;
+    padding: 10px 0 0 !important;
+    margin-top: 6px !important;
+}
+
+body.page-material-edit-v6 .nxmce-tech-metrics {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    margin-bottom: 10px !important;
+}
+
+body.page-material-edit-v6 .nxmce-tech-metrics > div {
+    padding: 8px 10px !important;
+    border-radius: 8px !important;
+    background: rgba(15, 23, 42, 0.5) !important;
+    border: 1px solid rgba(148, 163, 184, 0.12) !important;
+    align-items: center !important;
+    text-align: center !important;
+}
+
+body.page-material-edit-v6 .nxmce-tech-metrics small {
+    font-size: 10px !important;
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+    color: #94a3b8 !important;
+}
+
+body.page-material-edit-v6 .nxmce-evidence-summary-rows li {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 10px !important;
+    padding: 7px 0 !important;
+    background: transparent !important;
+    border: 0 !important;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.08) !important;
+    border-radius: 0 !important;
+}
+
+body.page-material-edit-v6 .nxmce-evidence-summary-rows li:last-child {
+    border-bottom: 0 !important;
+}
+
+body.page-material-edit-v6 .nxmce-evidence-summary-rows li span {
+    font-size: 11.5px !important;
+    color: #94a3b8 !important;
+}
+
+body.page-material-edit-v6 .nxmce-evidence-summary-rows li strong {
+    font-size: 11.5px !important;
+}
